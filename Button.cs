@@ -11,14 +11,15 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 
-namespace SiegewithCleanCode
+namespace CardGame
 {
 
     public class Button : GameComponent
     {
         protected ButtonProperties buttonProperties;
         protected Dictionary<ButtonProperties.State, Color> buttonColor;
-        protected Action performAction;
+        protected Action action;
+
 
         public Button(ContentManager content, Vector2 position) //default
         {
@@ -34,9 +35,9 @@ namespace SiegewithCleanCode
 
         protected void setGeneralProperties(Vector2 position)
         {
-            properties.width = ((int)properties.sprite.getTextureParamaters().X);
-            properties.height = ((int)properties.sprite.getTextureParamaters().Y);
-            properties.ACTUALPOSITION = position;
+            properties.Width = ((int)properties.sprite.getTextureParamaters().X);
+            properties.Height = ((int)properties.sprite.getTextureParamaters().Y);
+            properties.POS = position;
         }
         protected virtual void setButtonStateColors()
         {
@@ -59,12 +60,17 @@ namespace SiegewithCleanCode
 
         public void setAction(Action action)
         {
-            performAction = action;
+            this.action = action;
         }
-        public void setAction()
+        public virtual void setAction()
         {
-            performAction = () => { };
+            action = () => { };
         }
+        public virtual void performAction()
+        {
+            action();
+        }
+
         public void setButtonText(string title)
         {
             buttonProperties.message = title;
@@ -73,7 +79,8 @@ namespace SiegewithCleanCode
 
         public override void drawSprite(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(getTexture(), getPosition(), getColor());
+            
+            base.drawSprite(spriteBatch);
             if(buttonProperties.message != null)
             spriteBatch.DrawString(Game1.spritefont, buttonProperties.message, new Vector2(centerText(getPosition().X), centerText(getPosition().Y)), Color.Gold, 0, new Vector2(0, 0), properties.scale, SpriteEffects.None, 0);
         }
@@ -128,14 +135,14 @@ namespace SiegewithCleanCode
 
         }
         
-        private void resetButton()
+        protected virtual void resetButton()
         {
             buttonProperties.state = ButtonProperties.State.Waiting;
         }
 
         protected virtual ButtonProperties.State waitToActivate()
         {
-            if(performAction != null)
+            if(action != null)
             {
                 return ButtonProperties.State.Waiting;
             }
@@ -157,6 +164,10 @@ namespace SiegewithCleanCode
             {
                 return ButtonProperties.State.ReleaseAndSend;
             }
+            if(!isWithinBox(mouseState.X, mouseState.Y))
+            {
+                return ButtonProperties.State.Waiting;
+            }
             return ButtonProperties.State.Press;
         }
 
@@ -165,6 +176,10 @@ namespace SiegewithCleanCode
             if (mouseState.LeftButton == ButtonState.Pressed)
             {
                 return ButtonProperties.State.Press;
+            }
+            if (!isWithinBox(mouseState.X, mouseState.Y))
+            {
+                return ButtonProperties.State.Waiting;
             }
             return ButtonProperties.State.Hover;
         }
@@ -176,11 +191,22 @@ namespace SiegewithCleanCode
     public class SwitcherButton : Button
     {
         private int controller { get; set; }
-        private bool conditionSatisfied;
+        private Action<SwitcherButton> switcherAction;
 
-        public SwitcherButton(ContentManager content, Vector2 position, string title, int desiredController) : base(content, position, title)
+        public SwitcherButton(ContentManager content, Vector2 position, int desiredController) : base(content, position)
         {
             setControllerToSwitch(desiredController);
+            //settitle or something
+        }
+        
+        public void setSwitcherAction(Action<SwitcherButton> action)
+        {
+            setAction();
+            switcherAction = action;
+        }
+        public override void performAction()
+        {
+            switcherAction(this);
         }
         public void setControllerToSwitch(int desiredController)
         {

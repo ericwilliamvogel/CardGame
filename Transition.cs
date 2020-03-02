@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using SiegewithCleanCode;
+using CardGame;
 
 
 public class Transition : DrawAndUpdate
@@ -23,7 +23,7 @@ public class Transition : DrawAndUpdate
     public Transition(ContentManager content)
     {
 
-        blackScreen = new Sprite(content, "BlackScreen");
+        blackScreen = new Sprite(content, "blackscreen");
     }
 
     public override void Update()
@@ -83,7 +83,7 @@ public class Transition : DrawAndUpdate
     {
         if (start == true)
         {
-            fader += .01f;
+            fader += .03f;
             if (fader >= 1f)
             {
                 start = false;

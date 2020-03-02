@@ -10,7 +10,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-namespace SiegewithCleanCode
+
+namespace CardGame
 {
     // 02/29/2020 changed ABSTRACT to VIRTUAL in attempt to make classes a little cleaner, yet to test
     public abstract class DrawAndUpdate 
@@ -32,9 +33,9 @@ namespace SiegewithCleanCode
 
         protected bool isWithinBox(int x, int y)
         {
-            if (x > properties.ACTUALPOSITION.X && x < properties.ACTUALPOSITION.X + properties.getWidth())
+            if (x > properties.POS.X && x < properties.POS.X + properties.Width)
             {
-                if (y > properties.ACTUALPOSITION.Y && y < properties.ACTUALPOSITION.Y + properties.getHeight())
+                if (y > properties.POS.Y && y < properties.POS.Y + properties.Height)
                 {
                     return true;
                 }
@@ -51,6 +52,7 @@ namespace SiegewithCleanCode
         public void setTexture(ContentManager content)
         {
             properties.sprite = new Sprite(content, contentName);
+
         }
         public void setContentName(string image)
         {
@@ -61,7 +63,9 @@ namespace SiegewithCleanCode
         public virtual void mouseStateLogic(MouseState mouseState, ContentManager content) { }
         public virtual void drawSprite(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(properties.sprite.getLoadedTexture(), properties.ACTUALPOSITION, properties.color);
+            //spriteBatch.Draw(properties.sprite.getLoadedTexture(), properties.POS, properties.color);
+            if(getTexture() != null)
+            spriteBatch.Draw(getTexture(), getPosition(), null, null, null, getRotation(), getScale(), getColor(), SpriteEffects.None, 0);
         }
 
         public Texture2D getTexture()
@@ -70,15 +74,28 @@ namespace SiegewithCleanCode
         }
         public Vector2 getPosition()
         {
-            return properties.ACTUALPOSITION;
+            return properties.POS;
         }
-        public Rectangle getParams()
+        public int getWidth()
         {
-            return properties.getParams();
+            return properties.Width;
         }
+        public int getHeight()
+        {
+            return properties.Height;
+        }
+
         public Color getColor()
         {
             return properties.color;
+        }
+        public Vector2 getScale()
+        {
+            return Properties.globalScale;
+        }
+        public float getRotation()
+        {
+            return properties.rotation;
         }
     }
     public class GameComponent : ComponentSkeleton
@@ -98,7 +115,7 @@ namespace SiegewithCleanCode
             switcherButtons = new List<SwitcherButton>();
         }
 
-        protected bool switchStatus;
+        /*protected bool switchStatus;
         public bool getSwitchStatus()
         {
             return switchStatus;
@@ -107,6 +124,7 @@ namespace SiegewithCleanCode
         public void setSwitchStatusToOff()
         {
             switchStatus = false;
+        }*/
         
 
         public virtual void updateGameComponent(ContentManager content) { }

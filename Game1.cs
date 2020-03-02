@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace SiegewithCleanCode
+namespace CardGame
 {
     /// <summary>
     /// This is the main type for your game.
@@ -53,6 +53,7 @@ namespace SiegewithCleanCode
         protected override void Initialize()
         {
             componentManager.initializeGameComponent(this.Content);
+            componentManager.assignExitLogic(this);
             // TODO: Add your initialization logic here
             base.Initialize();
         }
@@ -63,8 +64,14 @@ namespace SiegewithCleanCode
         /// </summary>
         protected override void LoadContent()
         {
-
-            spritefont = Content.Load<SpriteFont>("File");
+            try
+            {
+                spritefont = Content.Load<SpriteFont>("File");
+            }
+            catch (Exception e)
+            {
+                Console.Write(e);
+            }
 
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -100,7 +107,6 @@ namespace SiegewithCleanCode
 
             componentManager.updateGameComponent(this.Content);
             componentManager.mouseStateLogic(mouseState, this.Content);
-            componentManager.optionToCloseWindow(this);
             base.Update(gameTime);
         }
 

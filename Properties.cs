@@ -3,27 +3,32 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace SiegewithCleanCode
+namespace CardGame
 {
     public class Properties
     {
-        public Sprite sprite { get; set; }
-        public Vector2 ACTUALPOSITION { get; set; }
-        //public static Vector2 WEIGHTEDPOSITION { get; set; } //maybe move this to a child later
-        public float scale { get; set; }
-        public static float globalScale { get; set; }
-        public SpriteEffects spriteEffects = SpriteEffects.None;
-        public int width { get; set; }
-        public int height { get; set; }
-        public Color color { get; set; }
+        private Vector2 position;
+        private int width;
+        private int height;
 
-        public Vector2 getDrawingPosition()
+
+
+
+        public Sprite sprite { get; set; }
+        public Vector2 POS { get; set; }
+        public static Vector2 WEIGHTEDPOSITION { get; set; } //maybe move this to a child later
+        public static Vector2 globalScale { get; set; }
+        public SpriteEffects spriteEffects = SpriteEffects.None;
+        public int Width { get { return Resolution.toResolution(width); } set { width = value; } }
+        public int Height { get { return Resolution.toResolution(height); } set { height = value; } }
+        public Color color { get; set; }
+        public Vector2 scale { get; set; }
+        public float rotation { get; set; }
+
+        public Properties()
         {
-            return new Vector2(ACTUALPOSITION.X + WEIGHTEDPOSITION.X, Game1.windowH - ACTUALPOSITION.Y + WEIGHTEDPOSITION.Y - height);
+            scale = new Vector2(1f, 1f);
         }
-        public Rectangle getParams()
-        {
-            return new Rectangle((int)ACTUALPOSITION.X, (int)ACTUALPOSITION.Y, width, height);
-        }
+
     }
 }

@@ -11,42 +11,59 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace SiegewithCleanCode
+namespace CardGame
 {
+    public class Background : GameComponent
+    {
+        
+    }
     public class Menu : PrimaryComponent
     {
         private List<Button> buttons;
-        private LoadingScreenImage loadScreenImage;
-
+        private GameComponent loadScreenImage;
 
         public void setButtons(ContentManager content)
         {
-            int buttonPositionX = Game1.windowW / 2 + 300;
+            Button tempButton = new Button(content, new Vector2(0,0));
+            int counter = 0;
+            int buttonPositionX = Resolution.realScreenWidth()/2 - tempButton.getWidth()/2;
+            int buttonPositionY = counter*tempButton.getHeight() + tempButton.getHeight() / 3;
+
+
             buttons = new List<Button>();
 
-            buttons.Add(new Button(content, new Vector2(buttonPositionX - 300, 200), "Exit Game"));
-            switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, 900), "Start", 4));
+
+
+            switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, buttonPositionY), 1));
+            counter++;
+            buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
+            switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, buttonPositionY), 2));
+            counter++;
+            buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
+            buttons.Add(new Button(content, new Vector2(buttonPositionX, buttonPositionY)));
+            buttons[0].setAction();
+            buttons[0].setButtonText("Exit");
+            
         }
 
         public override void unloadGameComponent()
         {
-            buttons = null;
-            switcherButtons.Remove(switcherButtons[0]);
+            //buttons = null;
+            //switcherButtons.Remove(switcherButtons[0]);
 
         }
         public void closeWindowLogic(Game1 game)
         {
-            if (buttons[0].isPressed())
-            {
-                game.Exit();
-                buttons[0].setClickToFalse();
-            }
+            buttons[0].setAction(() => { game.Exit();  });
         }
         public override void initializeGameComponent(ContentManager content)
         {
-            loadScreenImage = new LoadingScreenImage(content);
+            loadScreenImage = new GameComponent();
+            loadScreenImage.setContentName("simplemenu");
+            loadScreenImage.setTexture(content);
+
+            if(buttons == null)
             setButtons(content);
-            switcherButtons[0].satisfyCondition();
 
         }
 
@@ -69,16 +86,12 @@ namespace SiegewithCleanCode
 
         public override void drawSprite(SpriteBatch spriteBatch)
         {
-            loadScreenImage.Draw(spriteBatch);
+            loadScreenImage.drawSprite(spriteBatch);
+
             foreach (Button button in buttons)
             {
                 button.drawSprite(spriteBatch);
             }
-        }
-
-        public void handleButtons()
-        {
-            setSwitchStatusToOff();
         }
     }
 
