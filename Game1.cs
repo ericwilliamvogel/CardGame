@@ -29,12 +29,10 @@ namespace CardGame
             windowParams = new Vector2((int)windowW, (int)windowH);
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-
-            graphics.PreferredBackBufferHeight = windowH = 1080;
-            graphics.PreferredBackBufferWidth = windowW = 1920;
-            graphics.IsFullScreen = true;
-            graphics.HardwareModeSwitch = false;
-
+            componentManager.adjustSettingsOnStartup(graphics);
+            
+            windowH = graphics.PreferredBackBufferHeight = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].Y;
+            windowW = graphics.PreferredBackBufferWidth = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].X;
             this.IsMouseVisible = true;
             //battlefield = new Battlefield(this.Content);
         }
@@ -52,7 +50,9 @@ namespace CardGame
         /// </summary>
         protected override void Initialize()
         {
+
             componentManager.initializeGameComponent(this.Content);
+
             componentManager.assignExitLogic(this);
             // TODO: Add your initialization logic here
             base.Initialize();
@@ -101,6 +101,10 @@ namespace CardGame
                 Exit();
             }
 
+            if(componentManager.controller == 0)
+            {
+                componentManager.giveSettingsMenuPermToModifyGraphics(graphics);
+            }
             mouseState = Mouse.GetState();
 
             // TODO: Add your update logic here

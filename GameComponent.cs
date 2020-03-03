@@ -33,14 +33,29 @@ namespace CardGame
 
         protected bool isWithinBox(int x, int y)
         {
-            if (x > properties.POS.X && x < properties.POS.X + properties.Width)
+            int width;
+            int height;
+            if (GraphicsSettings.isFullScreen)
             {
-                if (y > properties.POS.Y && y < properties.POS.Y + properties.Height)
+                //width = GraphicsSettings.toLocalResolution(properties.width);
+                //height = GraphicsSettings.toLocalResolution(properties.height);
+            }
+            else
+            {
+                width = getWidth();
+                height = getHeight();
+
+            }
+
+            width = getWidth();
+            height = getHeight();
+            if (x > getPosition().X && x < getPosition().X + width)
+            {
+                if (y > getPosition().Y && y < getPosition().Y + height)
                 {
                     return true;
                 }
             }
-
             return false;
         }
 
@@ -52,7 +67,8 @@ namespace CardGame
         public void setTexture(ContentManager content)
         {
             properties.sprite = new Sprite(content, contentName);
-
+            properties.Width = ((int)properties.sprite.getTextureParamaters().X);
+            properties.Height = ((int)properties.sprite.getTextureParamaters().Y);
         }
         public void setContentName(string image)
         {
@@ -91,6 +107,8 @@ namespace CardGame
         }
         public Vector2 getScale()
         {
+            Vector2 testScale = new Vector2(1, 1);
+            //return testScale;
             return Properties.globalScale;
         }
         public float getRotation()

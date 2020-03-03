@@ -35,8 +35,7 @@ namespace CardGame
 
         protected void setGeneralProperties(Vector2 position)
         {
-            properties.Width = ((int)properties.sprite.getTextureParamaters().X);
-            properties.Height = ((int)properties.sprite.getTextureParamaters().Y);
+
             properties.POS = position;
         }
         protected virtual void setButtonStateColors()

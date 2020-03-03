@@ -10,6 +10,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace CardGame
 {
@@ -17,27 +19,27 @@ namespace CardGame
     {
         
     }
+    
     public class Menu : PrimaryComponent
     {
-        private List<Button> buttons;
-        private GameComponent loadScreenImage;
+        protected List<Button> buttons;
+        protected GameComponent loadScreenImage;
 
-        public void setButtons(ContentManager content)
+        public virtual void setButtons(ContentManager content)
         {
             Button tempButton = new Button(content, new Vector2(0,0));
             int counter = 0;
-            int buttonPositionX = Resolution.realScreenWidth()/2 - tempButton.getWidth()/2;
-            int buttonPositionY = counter*tempButton.getHeight() + tempButton.getHeight() / 3;
-
+            int buttonPositionX = GraphicsSettings.realScreenWidth()/2 - tempButton.getWidth()/2;
+            int buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
 
             buttons = new List<Button>();
 
-
-
             switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, buttonPositionY), 1));
+            switcherButtons[0].setButtonText("RELOAD SCREEN");
             counter++;
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
-            switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, buttonPositionY), 2));
+            switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, buttonPositionY), 0));
+            switcherButtons[1].setButtonText("TO SETTINGS");
             counter++;
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
             buttons.Add(new Button(content, new Vector2(buttonPositionX, buttonPositionY)));
@@ -54,6 +56,7 @@ namespace CardGame
         }
         public void closeWindowLogic(Game1 game)
         {
+            if(buttons != null)
             buttons[0].setAction(() => { game.Exit();  });
         }
         public override void initializeGameComponent(ContentManager content)

@@ -18,6 +18,38 @@ namespace CardGame
     {
         private PrimaryComponent[] primaryComponent;
 
+        public void adjustSettingsOnStartup(GraphicsDeviceManager graphics)
+        {
+            GraphicsSettings.currentResolution = settings.settings["Resolution"];
+            GraphicsSettings.correctResolutionForMonitor();
+            graphics.PreferredBackBufferHeight = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].Y;
+            graphics.PreferredBackBufferWidth = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].X;
+            Properties.globalScale = GraphicsSettings.trueGameScale(GraphicsSettings.resolutions[GraphicsSettings.currentResolution]);
+            loadFullScreen(graphics);
+
+
+            graphics.HardwareModeSwitch = false;
+            graphics.ApplyChanges();
+        }
+        public void giveSettingsMenuPermToModifyGraphics(GraphicsDeviceManager graphics)
+        {
+            settings.getPermissionToModifyGraphics(graphics);
+        
+        }
+        private void loadFullScreen(GraphicsDeviceManager graphics)
+        {
+            if (settings.settings["FullScreen"] == 0)
+            {
+                graphics.IsFullScreen = false;
+                GraphicsSettings.isFullScreen = false;
+            }
+            if (settings.settings["FullScreen"] == 1)
+            {
+                graphics.IsFullScreen = true;
+                GraphicsSettings.isFullScreen = true;
+            }
+        }
+
         public enum PrimaryComponentType
         {
             LoadScreen,
@@ -28,13 +60,14 @@ namespace CardGame
             Story
         }
 
-        private int controller = 1;
+        public int controller = 1;
         private Transition fadeScreen;
         private int currentComponent;
         public static int LEVEL = 0;
         private int controllerSwitchToBeCompleted;
         private Menu menu = new Menu();
-        private Menu othermenu = new Menu();
+        private SettingsMenu settings;
+
         private StorySlides storySlides;
         private Action<SwitcherButton> action;
 
@@ -53,11 +86,14 @@ namespace CardGame
 
         public ComponentManager(ContentManager content)
         {
+            settings = new SettingsMenu();
+            //menu.initializeGameComponent(content);
             primaryComponent = new PrimaryComponent[2];
-            primaryComponent[0] = othermenu;
+            primaryComponent[0] = settings;
             primaryComponent[1] = menu;
             action = switchComponent;
-            Properties.globalScale = Resolution.trueGameScale(Resolution.resolutions[1]);
+
+            
         }
 
 
@@ -84,9 +120,7 @@ namespace CardGame
 
             primaryComponent[currentComponent].unloadGameComponent();
 
-            primaryComponent[toBeSelected].initializeGameComponent(content);
-
-            initSwitcherButtons(toBeSelected);
+            initializePrimaryComponent(content, toBeSelected);
 
             controller = toBeSelected;
 
@@ -95,8 +129,14 @@ namespace CardGame
         public override void initializeGameComponent(ContentManager content)
         {
             fadeScreen = new Transition(content);
-            primaryComponent[controller].initializeGameComponent(content);
-            initSwitcherButtons(controller);
+            initializePrimaryComponent(content, controller);
+        }
+
+        private void initializePrimaryComponent(ContentManager content, int selector)
+        {
+            primaryComponent[selector].initializeGameComponent(content);
+            initSwitcherButtons(selector);
+
 
         }
 
@@ -106,14 +146,7 @@ namespace CardGame
 
         }
 
-        public void optionToCloseWindow(Game1 game)
-        {
-            if (controller == 2)
-            {
-                //menu.closeWindowLogic(game);
-            }
-
-        }
+        
         public override void updateGameComponent(ContentManager content)
         {
             primaryComponent[controller].updateGameComponent(content);
