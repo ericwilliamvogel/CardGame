@@ -63,29 +63,31 @@ namespace CardGame
 
         public override void setButtons(ContentManager content)
         {
+            string imgSrc = "menuButton";
+            string smallImgSrc = "regularbutton";
             buttons = new List<Button>();
-            Button tempButton = new Button(content, new Vector2(0, 0));
+            Button tempButton = new Button(content, new Vector2(0, 0), imgSrc);
             int counter = 0;
             int buttonPositionX = GraphicsSettings.realScreenWidth() / 2 - tempButton.getWidth() / 2;
             int buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
 
 
-            switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, buttonPositionY), 1));
+            switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, buttonPositionY), imgSrc, 1));
             switcherButtons[0].setButtonText("TO MAIN");
             counter++;
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
-            buttons.Add(new Button(content, new Vector2(buttonPositionX, buttonPositionY)));
+            buttons.Add(new Button(content, new Vector2(buttonPositionX, buttonPositionY),imgSrc));
             buttons[0].setButtonText("FullScreen TOGGLE");
 
             counter++;
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
-            buttons.Add(new Button(content, new Vector2(buttonPositionX, buttonPositionY)));
+            buttons.Add(new Button(content, new Vector2(buttonPositionX, buttonPositionY), imgSrc));
             setResolutionText();
 
 
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
-            buttons.Add(new Button(content, new Vector2(buttonPositionX + 500, buttonPositionY)));
-            buttons[2].setButtonText("RESOLUTION");
+            buttons.Add(new Button(content, new Vector2(buttonPositionX + tempButton.getWidth(), buttonPositionY),smallImgSrc));
+            buttons[2].setButtonText("Apply");
 
         }
         public void getPermissionToModifyGraphics(GraphicsDeviceManager graphics)

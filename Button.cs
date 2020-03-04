@@ -23,7 +23,7 @@ namespace CardGame
 
         public Button(ContentManager content, Vector2 position) //default
         {
-            setSprite(content, "button");
+            setSprite(content, "regularButton");
             buttonProperties = new ButtonProperties();
             setButtonStateColors();
             setGeneralProperties(position);
@@ -197,7 +197,13 @@ namespace CardGame
             setControllerToSwitch(desiredController);
             //settitle or something
         }
-        
+
+        public SwitcherButton(ContentManager content, Vector2 position, string imgSrc, int desiredController) : base(content, position, imgSrc)
+        {
+            setControllerToSwitch(desiredController);
+            //settitle or something
+        }
+
         public void setSwitcherAction(Action<SwitcherButton> action)
         {
             setAction();

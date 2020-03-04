@@ -27,22 +27,23 @@ namespace CardGame
 
         public virtual void setButtons(ContentManager content)
         {
-            Button tempButton = new Button(content, new Vector2(0,0));
+            string imgSrc = "menuButton";
+            Button tempButton = new Button(content, new Vector2(0,0), imgSrc);
             int counter = 0;
             int buttonPositionX = GraphicsSettings.realScreenWidth()/2 - tempButton.getWidth()/2;
             int buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
 
             buttons = new List<Button>();
 
-            switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, buttonPositionY), 1));
-            switcherButtons[0].setButtonText("RELOAD SCREEN");
+            switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, buttonPositionY), imgSrc, 2));
+            switcherButtons[0].setButtonText("GAME");
             counter++;
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
-            switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, buttonPositionY), 0));
+            switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, buttonPositionY), imgSrc, 0));
             switcherButtons[1].setButtonText("TO SETTINGS");
             counter++;
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
-            buttons.Add(new Button(content, new Vector2(buttonPositionX, buttonPositionY)));
+            buttons.Add(new Button(content, new Vector2(buttonPositionX, buttonPositionY), imgSrc));
             buttons[0].setAction();
             buttons[0].setButtonText("Exit");
             

@@ -24,17 +24,19 @@ namespace CardGame
         public MouseState mouseState;
         public Game1()
         {
+
             mouseState = new MouseState();
             componentManager = new ComponentManager(this.Content);
             windowParams = new Vector2((int)windowW, (int)windowH);
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             componentManager.adjustSettingsOnStartup(graphics);
-            
-            windowH = graphics.PreferredBackBufferHeight = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].Y;
-            windowW = graphics.PreferredBackBufferWidth = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].X;
+
+            //windowH = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].Y;
+            //windowW = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].X;
             this.IsMouseVisible = true;
             //battlefield = new Battlefield(this.Content);
+            //throw new Exception(windowH.ToString());
         }
 
         public void Close()

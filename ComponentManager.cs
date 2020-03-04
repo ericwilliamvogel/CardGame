@@ -22,8 +22,8 @@ namespace CardGame
         {
             GraphicsSettings.currentResolution = settings.settings["Resolution"];
             GraphicsSettings.correctResolutionForMonitor();
-            graphics.PreferredBackBufferHeight = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].Y;
-            graphics.PreferredBackBufferWidth = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].X;
+            Game1.windowH = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].Y;
+            Game1.windowW = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].X;
             Properties.globalScale = GraphicsSettings.trueGameScale(GraphicsSettings.resolutions[GraphicsSettings.currentResolution]);
             loadFullScreen(graphics);
 
@@ -60,11 +60,12 @@ namespace CardGame
             Story
         }
 
-        public int controller = 1;
+        public int controller = 2;
         private Transition fadeScreen;
         private int currentComponent;
         public static int LEVEL = 0;
         private int controllerSwitchToBeCompleted;
+        private Board board = new Board();
         private Menu menu = new Menu();
         private SettingsMenu settings;
 
@@ -87,10 +88,10 @@ namespace CardGame
         public ComponentManager(ContentManager content)
         {
             settings = new SettingsMenu();
-            //menu.initializeGameComponent(content);
-            primaryComponent = new PrimaryComponent[2];
+            primaryComponent = new PrimaryComponent[3];
             primaryComponent[0] = settings;
             primaryComponent[1] = menu;
+            primaryComponent[2] = board;
             action = switchComponent;
 
             

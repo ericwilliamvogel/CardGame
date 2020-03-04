@@ -35,20 +35,9 @@ namespace CardGame
         {
             int width;
             int height;
-            if (GraphicsSettings.isFullScreen)
-            {
-                //width = GraphicsSettings.toLocalResolution(properties.width);
-                //height = GraphicsSettings.toLocalResolution(properties.height);
-            }
-            else
-            {
-                width = getWidth();
-                height = getHeight();
-
-            }
-
             width = getWidth();
             height = getHeight();
+
             if (x > getPosition().X && x < getPosition().X + width)
             {
                 if (y > getPosition().Y && y < getPosition().Y + height)
@@ -79,11 +68,15 @@ namespace CardGame
         public virtual void mouseStateLogic(MouseState mouseState, ContentManager content) { }
         public virtual void drawSprite(SpriteBatch spriteBatch)
         {
-            //spriteBatch.Draw(properties.sprite.getLoadedTexture(), properties.POS, properties.color);
+            
             if(getTexture() != null)
             spriteBatch.Draw(getTexture(), getPosition(), null, null, null, getRotation(), getScale(), getColor(), SpriteEffects.None, 0);
         }
 
+        public void setPos(int x, int y)
+        {
+            properties.POS = new Vector2(x, y);
+        }
         public Texture2D getTexture()
         {
             return properties.sprite.getLoadedTexture();
@@ -133,17 +126,11 @@ namespace CardGame
             switcherButtons = new List<SwitcherButton>();
         }
 
-        /*protected bool switchStatus;
-        public bool getSwitchStatus()
+        public override void unloadGameComponent()
         {
-            return switchStatus;
+            switcherButtons = null; 
+            base.unloadGameComponent();
         }
-
-        public void setSwitchStatusToOff()
-        {
-            switchStatus = false;
-        }*/
-        
 
         public virtual void updateGameComponent(ContentManager content) { }
         public virtual void initializeGameComponent(ContentManager content) { }
