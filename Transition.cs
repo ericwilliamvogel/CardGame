@@ -83,7 +83,7 @@ public class Transition : DrawAndUpdate
     {
         if (start == true)
         {
-            fader += .03f;
+            fader += .08f;
             if (fader >= 1f)
             {
                 start = false;
@@ -113,7 +113,7 @@ public class Transition : DrawAndUpdate
         if (finish == true && process == false)
         {
 
-            fader -= .01f;
+            fader -= .08f;
             if (fader <= 0f)
             {
                 finish = false;

@@ -81,7 +81,7 @@ namespace CardGame
             
             base.drawSprite(spriteBatch);
             if(buttonProperties.message != null)
-            spriteBatch.DrawString(Game1.spritefont, buttonProperties.message, new Vector2(centerText(getPosition().X), centerText(getPosition().Y)), Color.Gold, 0, new Vector2(0, 0), properties.scale, SpriteEffects.None, 0);
+            spriteBatch.DrawString(Game1.spritefont, buttonProperties.message, new Vector2(centerText(getPosition().X), centerText(getPosition().Y)), Color.Gold, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
         }
 
         protected float centerText(float value)

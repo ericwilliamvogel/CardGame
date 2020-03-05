@@ -17,6 +17,7 @@ namespace CardGame
     {
         private SpriteComponent spriteComponent;
 
+        public Sprite() { spriteComponent = new SpriteComponent(); }
         public Sprite(ContentManager content, string contentName)
         {
             spriteComponent = new SpriteComponent();
@@ -49,6 +50,10 @@ namespace CardGame
         public Texture2D getLoadedTexture()
         {
             return spriteComponent.loadedTexture;
+        }
+        public void setTexture(Texture2D newTexture)
+        {
+            spriteComponent.loadedTexture = newTexture;
         }
 
         public Vector2 getTextureParamaters()

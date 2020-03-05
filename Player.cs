@@ -13,8 +13,8 @@ namespace CardGame
             Beginning
         }
 
-        Deck deck;
-        Hand hand;
+        public Deck deck;
+        public Hand hand;
         private bool control;
         public Player enemy;
         public int handSize = 7;
@@ -36,8 +36,8 @@ namespace CardGame
         }
         public void Draw()
         {
-            Card card = deck.returnTopCardAndRemoveFromDeck();
-            hand.addCard(card);
+            //Card card = deck.returnTopCardAndRemoveFromDeck();
+            //hand.addCard(card);
         }
         public void ShuffleDeck()
         {
@@ -56,7 +56,7 @@ namespace CardGame
 
         }
     }
-    public class AIPlayer
+    public class AIPlayer : Player
     {
 
     }

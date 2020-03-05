@@ -66,29 +66,38 @@ namespace CardGame
             string imgSrc = "menuButton";
             string smallImgSrc = "regularbutton";
             buttons = new List<Button>();
+            Vector2 noVal = new Vector2(0, 0);
             Button tempButton = new Button(content, new Vector2(0, 0), imgSrc);
+
+            switcherButtons.Add(new SwitcherButton(content, noVal, imgSrc, 1));
+            
+            buttons.Add(new Button(content, noVal,imgSrc));
+            
+            buttons.Add(new Button(content, noVal, imgSrc));
+            
+            buttons.Add(new Button(content, noVal,smallImgSrc));
+            setButtonPositions();
+        }
+        public void setButtonPositions()
+        {
+            Button tempButton = buttons[0];
             int counter = 0;
             int buttonPositionX = GraphicsSettings.realScreenWidth() / 2 - tempButton.getWidth() / 2;
             int buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
-
-
-            switcherButtons.Add(new SwitcherButton(content, new Vector2(buttonPositionX, buttonPositionY), imgSrc, 1));
+            switcherButtons[0].setPos(new Vector2(buttonPositionX, buttonPositionY));
             switcherButtons[0].setButtonText("TO MAIN");
             counter++;
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
-            buttons.Add(new Button(content, new Vector2(buttonPositionX, buttonPositionY),imgSrc));
             buttons[0].setButtonText("FullScreen TOGGLE");
-
+            buttons[0].setPos(new Vector2(buttonPositionX, buttonPositionY));
             counter++;
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
-            buttons.Add(new Button(content, new Vector2(buttonPositionX, buttonPositionY), imgSrc));
             setResolutionText();
-
+            buttons[1].setPos(new Vector2(buttonPositionX, buttonPositionY));
 
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
-            buttons.Add(new Button(content, new Vector2(buttonPositionX + tempButton.getWidth(), buttonPositionY),smallImgSrc));
             buttons[2].setButtonText("Apply");
-
+            buttons[2].setPos(new Vector2(buttonPositionX + tempButton.getWidth(), buttonPositionY));
         }
         public void getPermissionToModifyGraphics(GraphicsDeviceManager graphics)
         {
@@ -108,25 +117,26 @@ namespace CardGame
 
             });
         }
-
+        int localReso = GraphicsSettings.currentResolution;
         private void setResolutionText()
         {
-            buttons[1].setButtonText(GraphicsSettings.resolutions[GraphicsSettings.currentResolution].X.ToString() + "  " +
-                GraphicsSettings.resolutions[GraphicsSettings.currentResolution].Y.ToString());
+            buttons[1].setButtonText(GraphicsSettings.resolutions[localReso].X.ToString() + "  " +
+                GraphicsSettings.resolutions[localReso].Y.ToString());
         }
 
         private void cycleThroughResolutions()
         {
-            GraphicsSettings.currentResolution++;
-            if (GraphicsSettings.currentResolution > GraphicsSettings.maxResolutions)
+            localReso++;
+            if (localReso > GraphicsSettings.maxResolutions)
             {
-                GraphicsSettings.currentResolution = GraphicsSettings.highestRes;
+                localReso  = GraphicsSettings.highestRes;
             }
-            settings["Resolution"] = GraphicsSettings.currentResolution;
+            settings["Resolution"] = localReso;
         }
 
         private void toggleFullScreen(GraphicsDeviceManager graphics)
         {
+
             if (graphics.IsFullScreen)
             {
 
@@ -141,25 +151,26 @@ namespace CardGame
                 settings["FullScreen"] = 1;
                 GraphicsSettings.isFullScreen = true;
             }
-            updateAllResolutionValues(graphics);
-
+            //updateAllResolutionValues(graphics);
+            //graphics.ApplyChanges();
+           
         }
         private void updateAllResolutionValues(GraphicsDeviceManager graphics)
         {
-            if(!graphics.IsFullScreen)
+            /*if(!graphics.IsFullScreen)
             {
                 GraphicsSettings.currentResolution = GraphicsSettings.highestRes;
             }
             else
             {
                 GraphicsSettings.currentResolution = settings["Resolution"];
-            }
-
-            GraphicsSettings.correctResolutionForMonitor();
+            }*/
+            //Properties.globalScale = GraphicsSettings.trueGameScale(GraphicsSettings.resolutions[GraphicsSettings.currentResolution]);
+            //GraphicsSettings.correctResolutionForMonitor();
             graphics.PreferredBackBufferHeight = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].Y;
             graphics.PreferredBackBufferWidth = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].X;
             Properties.globalScale = GraphicsSettings.trueGameScale(GraphicsSettings.resolutions[GraphicsSettings.currentResolution]);
-
+            setButtonPositions();
         }
 
     }

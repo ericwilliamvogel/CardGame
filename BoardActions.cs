@@ -6,25 +6,39 @@ using System.Threading.Tasks;
 
 namespace CardGame
 {
-    public static class BoardActions
+    public class BoardActions
     {
-        public static bool active;
-        //public static int controller; //goes into higher function to switch when complete
-        public static List<Action> actions;
-        public static void assignAnimation(Action action)
+        private bool active;
+        
+        public List<Action> actions;
+        public BoardActions()
         {
-            Action newAction = action;
-            //Action setController = () => { controller++; };
-            //Action here = newAction + setController;
-            actions.Add(newAction);
+            actions = new List<Action>();
         }
-        public static void nextAction()
+        public void nextAction()
         {
             actions.Remove(actions[0]);
+            if(!thereAreActionsLeft())
+            {
+                active = false;
+            }
         }
-        public static void updateAnimations()
+        public void AddAction(Action action)
         {
-            if (actions != null)
+            actions.Add(action);
+            active = true;
+        }
+        private bool thereAreActionsLeft()
+        {
+            if(actions.Count > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+        public void updateAnimations()
+        {
+            if (thereAreActionsLeft())
                 actions[0]();
         }
     }

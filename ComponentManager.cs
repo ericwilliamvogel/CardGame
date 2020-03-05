@@ -22,8 +22,9 @@ namespace CardGame
         {
             GraphicsSettings.currentResolution = settings.settings["Resolution"];
             GraphicsSettings.correctResolutionForMonitor();
-            Game1.windowH = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].Y;
-            Game1.windowW = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].X;
+            Game1.windowH = graphics.PreferredBackBufferHeight =(int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].Y;
+            Game1.windowW = graphics.PreferredBackBufferWidth = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].X;
+
             Properties.globalScale = GraphicsSettings.trueGameScale(GraphicsSettings.resolutions[GraphicsSettings.currentResolution]);
             loadFullScreen(graphics);
 

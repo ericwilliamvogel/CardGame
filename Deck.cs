@@ -15,32 +15,34 @@ namespace CardGame
             cardsInHand.Add(card);
         }
     }
-    public class Deck
+    public class Deck : CardContainer
     {
-        List<Card> cardsInDeck = new List<Card>();
 
-        public void loadCardsInDeck(Dictionary<string, Texture2D> imageDictionary)
+        public void loadCardsInDeck(Dictionary<int, Texture2D> imageDictionary)
         {
-            /*List<Card> cardsInDeck;
-            foreach(Card card in cardsInDeck)
+            
+            foreach(Card card in cardsInContainer)
             {
-
-            }*/
+                card.suppTextures.portrait.setTexture(imageDictionary[card.identifier]);
+                card.setColorForRace();
+            }
         }
 
         public void Shuffle()
         {
-            int split = cardsInDeck.Count / 2;
+            int split = cardsInContainer.Count / 2;
             Card[] oneHalf = new Card[split];
-            cardsInDeck.CopyTo(0, oneHalf, 0, split);
-            cardsInDeck.RemoveRange(0, split);
+            cardsInContainer.CopyTo(0, oneHalf, 0, split);
+            cardsInContainer.RemoveRange(0, split);
 
-            Card[] otherHalf = new Card[cardsInDeck.Count];
-            cardsInDeck.CopyTo(otherHalf);
-            cardsInDeck.Clear();
+            Card[] otherHalf = new Card[cardsInContainer.Count];
+            cardsInContainer.CopyTo(otherHalf);
+            cardsInContainer.Clear();
 
-            cardsInDeck = rearrangeCards(oneHalf, otherHalf);
+            cardsInContainer = rearrangeCards(oneHalf, otherHalf);
         }
+
+
         private List<Card> rearrangeCards(Card[] oneHalf, Card[] otherHalf)
         {
             oneHalf.Reverse();
@@ -86,13 +88,6 @@ namespace CardGame
             }
         }
 
-
-        public Card returnTopCardAndRemoveFromDeck()
-        {
-            Card card = cardsInDeck[0];
-            cardsInDeck.Remove(card);
-            return card;
-        }
     }
     public class PlayerCollection
     {

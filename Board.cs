@@ -11,16 +11,14 @@ using Microsoft.Xna.Framework.Input;
 namespace CardGame
 {
 
-    
-    public enum GameState //LATER
-    {
-        DrawHand,
-        Play,
-        Pause,
-        Pass
+
+
+    public class HandSpace : GameComponent {
+        public HandSpace()
+        {
+            setContentName("handArea");
+        }
     }
-
-
     public class Board : PrimaryComponent
     {
         List<PortraitWidget> portraitWidgets = new List<PortraitWidget>();
@@ -28,13 +26,23 @@ namespace CardGame
         List<Row> rows = new List<Row>();
         List<StackPlaceholder> deckHolder = new List<StackPlaceholder>();
         List<StackPlaceholder> oblivionHolder = new List<StackPlaceholder>();
+        List<HandSpace> handSpace = new List<HandSpace>();
+
+        GamePlay gameLoop;
+
+        Side friendlySide;
+        Side enemySide;
+
+        int sideCounter = 0;
         public override void initializeGameComponent(ContentManager content)
         {
+            gameLoop = new GamePlay();
             oblivionHolder = new List<StackPlaceholder>();
             deckHolder = new List<StackPlaceholder>();
             rows = new List<Row>();
             portraitWidgets = new List<PortraitWidget>();
             background = new GameComponent();
+            handSpace = new List<HandSpace>();
             background.setSprite(content, "board");
             setRowTextures(content);
             setRowPositions();
@@ -42,11 +50,109 @@ namespace CardGame
             setHolderPositions();
             setPortraitWidgetTextures(content);
             setPortraitWidgetPositions();
+            setHandSpaceTextures(content);
+            setHandSpacePositions();
+        
             switcherButtons = new List<SwitcherButton>();
             switcherButtons.Add(new SwitcherButton(content, new Vector2(0, 0), "exitImage", 1));
             int switcherButtonPosX = Game1.windowW - switcherButtons[0].getWidth();
             switcherButtons[0].setPos(switcherButtonPosX, 0);
+
+            //
+            //
+            //
+            CardImageStorage library = new CardImageStorage();
+            library.loadCardSupplementalTextures(content);
+
+            Card card1;
+            CardBuilder cardBuilder = new CardBuilder();
+            CardConstructor cardConstructor = new CardConstructor();
+
+            Deck deck = new Deck();
+            Deck TEST = new Deck();
+            int deckLimitForTesting = 10;
+            int identifierCounter = 0;
+            for (int i = 0; i < deckLimitForTesting; i++)
+            {
+                Card card = cardBuilder.cardConstruct(cardConstructor, identifierCounter);
+                card.setSupplementalTextures(library);
+                Card car2 = cardBuilder.cardConstruct(cardConstructor, identifierCounter);
+                car2.setSupplementalTextures(library);
+                TEST.cardsInContainer.Add(car2);
+                deck.cardsInContainer.Add(card);
+                identifierCounter++;
+                if(identifierCounter > 2)
+                {
+                    identifierCounter = 0;
                 }
+            }
+
+            library = cardConstructor.tempStorage;
+            //library.cardTextureDictionary = new Dictionary<int, Texture2D>();
+            library.loadCardSupplementalTextures(content);
+            library.loadAllDictionaryTextures(content);
+
+            //
+
+            //
+            Player player1 = new Player();
+            Player player2 = new Player();
+
+            friendlySide = new Side(player1);
+            enemySide = new Side(player2);
+            deck.loadCardsInDeck(library.cardTextureDictionary);
+            TEST.loadCardsInDeck(library.cardTextureDictionary);
+            friendlySide.Deck = deck;
+            enemySide.Deck = TEST;
+            setSide(enemySide);
+            setSide(friendlySide);
+
+
+
+
+
+            //gameLoop.initializeGameComponent(content);
+            gameLoop.StartGame(friendlySide, enemySide);
+        }
+        int multiplier = 0;
+        private void setSide(Side side)
+        {
+
+            //HAND INVISIBLE OBJECT SOON~!
+            side.Oblivion.POS = oblivionHolder[sideCounter].getPosition();
+            side.Deck.POS = deckHolder[sideCounter].getPosition();
+            side.FieldUnit.POS = rows[multiplier + 2].getPosition();
+            side.Armies.POS = rows[multiplier + 1].getPosition();
+            side.Generals.POS = rows[multiplier].getPosition();
+
+            side.Hand.POS = handSpace[sideCounter].getPosition();
+            sideCounter++;
+            multiplier += 3;
+            if(sideCounter > 1)
+            {
+                sideCounter = 0;
+                multiplier = 0;
+            }
+            //throw new Exception(side.Deck.POS.ToString());
+        }
+
+        private void setHandSpaceTextures(ContentManager content)
+        {
+            handSpace.Add(new HandSpace());
+            handSpace.Add(new HandSpace());
+            foreach(HandSpace hand in handSpace)
+            {
+                hand.setTexture(content);
+            }
+        }
+        private void setHandSpacePositions()
+        {
+            int xPos = 200;
+            int yPos = Game1.windowH - handSpace[0].getHeight();
+            handSpace[0].setPos(xPos, 0);
+            handSpace[0].properties.spriteEffects = SpriteEffects.FlipVertically;
+            handSpace[1].setPos(xPos, yPos);
+        }
         private void setPortraitWidgetPositions()
         {
             int yPos = 100;
@@ -136,14 +242,35 @@ namespace CardGame
             {
                 widget.drawSprite(spriteBatch);
             }
-            //base.drawSprite(spriteBatch);
+            foreach(HandSpace hand in handSpace)
+            {
+                hand.drawSprite(spriteBatch);
+            }
+            gameLoop.drawSprite(spriteBatch);
         }
+        bool pressed;
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
             foreach(Row row in rows)
             {
                 row.mouseStateLogic(mouseState, content);
             }
+            gameLoop.mouseStateLogic(mouseState, content);
+            
+            if(mouseState.LeftButton == ButtonState.Pressed && pressed == false)
+            {
+                gameLoop.DrawCard(friendlySide);
+                gameLoop.DrawCard(enemySide);
+                pressed = true;
+            }
+            if(mouseState.LeftButton == ButtonState.Released)
+            {
+                pressed = false;
+            }
+        }
+        public override void updateGameComponent(ContentManager content)
+        {
+            gameLoop.Update(friendlySide, enemySide);
         }
     }
     

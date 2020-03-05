@@ -14,7 +14,7 @@ namespace CardGame
         //GraphicsSettings.toResolution(position)
 
 
-        public Sprite sprite { get; set; }
+        public Sprite sprite;
         public Vector2 POS { get { return position; } set { position = value; } }
         public static Vector2 WEIGHTEDPOSITION { get; set; } //maybe move this to a child later
         public static Vector2 globalScale { get; set; }
@@ -27,7 +27,8 @@ namespace CardGame
 
         public Properties()
         {
-            scale = new Vector2(1f, 1f);
+            sprite = new Sprite();
+            //scale = new Vector2(0f, 0f);
         }
 
     }

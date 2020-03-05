@@ -33,10 +33,8 @@ namespace CardGame
 
         protected bool isWithinBox(int x, int y)
         {
-            int width;
-            int height;
-            width = getWidth();
-            height = getHeight();
+            int width = getWidth();
+            int height = getHeight();
 
             if (x > getPosition().X && x < getPosition().X + width)
             {
@@ -47,7 +45,14 @@ namespace CardGame
             }
             return false;
         }
-
+        protected bool isWithinBox(MouseState state)
+        {
+            if(isWithinBox(state.X, state.Y))
+            {
+                return true;
+            }
+            return false;
+        }
         public void setSprite(ContentManager content, string image)
         {
             setContentName(image);
@@ -59,6 +64,12 @@ namespace CardGame
             properties.Width = ((int)properties.sprite.getTextureParamaters().X);
             properties.Height = ((int)properties.sprite.getTextureParamaters().Y);
         }
+        public void setTexture(Texture2D newTexture)
+        {
+
+            properties.sprite.setTexture(newTexture);
+        }
+
         public void setContentName(string image)
         {
             contentName = image;
@@ -70,12 +81,16 @@ namespace CardGame
         {
             
             if(getTexture() != null)
-            spriteBatch.Draw(getTexture(), getPosition(), null, null, null, getRotation(), getScale(), getColor(), SpriteEffects.None, 0);
+            spriteBatch.Draw(getTexture(), getPosition(), null, null, null, getRotation(), getScale(), getColor(), properties.spriteEffects, 0);
         }
 
-        public void setPos(int x, int y)
+        public virtual void setPos(int x, int y)
         {
             properties.POS = new Vector2(x, y);
+        }
+        public virtual void setPos(Vector2 input)
+        {
+            properties.POS = input;
         }
         public Texture2D getTexture()
         {
@@ -100,13 +115,52 @@ namespace CardGame
         }
         public Vector2 getScale()
         {
-            Vector2 testScale = new Vector2(1, 1);
-            //return testScale;
-            return Properties.globalScale;
+            float x = Properties.globalScale.X + properties.scale.X;
+            float y = Properties.globalScale.Y + properties.scale.Y;
+            Vector2 newScale = new Vector2(x, y);
+            return newScale;
+            //return Properties.globalScale;
+        }
+        public virtual void setScale(float setting)
+        {
+            properties.scale = new Vector2(setting, setting);
+        }
+        public virtual void incrementScale(float increment)
+        {
+            properties.scale = new Vector2(properties.scale.X + increment, properties.scale.Y + increment);
         }
         public float getRotation()
         {
             return properties.rotation;
+        }
+    }
+    public class CardContainer
+    {
+        public List<Card> cardsInContainer = new List<Card>();
+        private Vector2 position;
+        public Vector2 POS { set { position = value;  } get { return position; } }
+        public Vector2 getPosition() { return POS; }
+
+        public void moveCard(CardContainer container, Card card)
+        {
+            if(cardsInContainer.Contains(card))
+            {
+                cardsInContainer.Remove(card);
+                container.cardsInContainer.Add(card);
+            }
+            else
+            {
+                Console.WriteLine("Card not found in this container");
+            }
+        }
+
+        public bool isEmpty()
+        {
+            if (cardsInContainer.Count < 1)
+            {
+                return true;
+            }
+            return false;
         }
     }
     public class GameComponent : ComponentSkeleton
@@ -116,8 +170,27 @@ namespace CardGame
         public virtual void initializeGameComponent() { }
 
     }
+    public class CardSupplement : GameComponent
+    {
+        public Vector2 relativePosition;
+        public Vector2 offSet; 
 
-    public abstract class PrimaryComponent : ComponentSkeleton
+        public void setOffset(float x, float y)
+        {
+            offSet.X = x;
+            offSet.Y = y;
+        }
+        public void setRelativePosition(GameComponent component)
+        {
+            relativePosition = component.getPosition();
+        }
+        public override void drawSprite(SpriteBatch spriteBatch)
+        {
+            properties.POS = relativePosition + offSet;
+            base.drawSprite(spriteBatch);
+        }
+    }
+    public class PrimaryComponent : ComponentSkeleton
     {
         public List<SwitcherButton> switcherButtons;
 
