@@ -61,15 +61,20 @@ namespace CardGame
         public void setTexture(ContentManager content)
         {
             properties.sprite = new Sprite(content, contentName);
-            properties.Width = ((int)properties.sprite.getTextureParamaters().X);
-            properties.Height = ((int)properties.sprite.getTextureParamaters().Y);
+            setSpriteParams();
         }
         public void setTexture(Texture2D newTexture)
         {
 
             properties.sprite.setTexture(newTexture);
+            setSpriteParams();
         }
 
+        private void setSpriteParams()
+        {
+            properties.Width = ((int)properties.sprite.getTextureParamaters().X);
+            properties.Height = ((int)properties.sprite.getTextureParamaters().Y);
+        }
         public void setContentName(string image)
         {
             contentName = image;
@@ -121,6 +126,10 @@ namespace CardGame
             return newScale;
             //return Properties.globalScale;
         }
+        public float getLocalScale()
+        {
+            return ToAbsolute(properties.scale.X);
+        }
         public virtual void setScale(float setting)
         {
             properties.scale = new Vector2(setting, setting);
@@ -132,6 +141,16 @@ namespace CardGame
         public float getRotation()
         {
             return properties.rotation;
+        }
+
+        public static float ToAbsolute(float x)
+        {
+            if (x < 0)
+            {
+                return -x;
+            }
+            else
+                return x;
         }
     }
     public class CardContainer

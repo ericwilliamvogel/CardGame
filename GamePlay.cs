@@ -160,13 +160,13 @@ namespace CardGame
             }
             //Vector2 initialPosition = startingContainer.getPosition();
             int timeUntilArrival = 10;
-            int speedX = ToAbsolute((int)(newPosition.X - card.getPosition().X)) / timeUntilArrival;
+            int speedX = (int)ToAbsolute((newPosition.X - card.getPosition().X)) / timeUntilArrival;
 
             if (speedX < 1)
             {
                 speedX = 1;
             }
-            int speedY = ToAbsolute((int)(newPosition.Y - card.getPosition().Y)) / timeUntilArrival;
+            int speedY = (int)ToAbsolute((newPosition.Y - card.getPosition().Y)) / timeUntilArrival;
             if (speedY < 1)
             {
                 speedY = 1;
@@ -210,24 +210,16 @@ namespace CardGame
                 //**************************
                 //startingContainer.moveCard(endingContainer, card);
                 startingContainer.moveCard(endingContainer, startingContainer.cardsInContainer[0]);
-                boardActions.nextAction();
                 updateBoard();
+                boardActions.nextAction();
+
 
                 //throw new Exception("");
             }
         
         }
 
-        
-        private int ToAbsolute(int x)
-        {
-            if (x < 0)
-            {
-                return -x;
-            }
-            else
-                return x;
-        }
+
 
         private void DeckLogic(Side side)//both sides
         {
@@ -295,8 +287,9 @@ namespace CardGame
             int spacing = 20;
             foreach (Card card in friendlySide.Hand.cardsInContainer)
             {
-                Vector2 newPosition = new Vector2(friendlySide.Hand.POS.X + spacing + counter * card.getWidth(), friendlySide.Hand.POS.Y);
                 scaleToHand(card);
+                Vector2 newPosition = new Vector2(friendlySide.Hand.POS.X + spacing + counter * card.getWidth() *card.getScale().X , friendlySide.Hand.POS.Y);
+
                 card.playState = Card.PlayState.Revealed;
                 card.setPos(newPosition);
                 counter++;
@@ -305,7 +298,7 @@ namespace CardGame
             counter = 0;
             foreach (Card card in enemySide.Hand.cardsInContainer)
             {
-                Vector2 newPosition = new Vector2(enemySide.Hand.POS.X + spacing + counter * card.getWidth(), enemySide.Hand.POS.Y);
+                Vector2 newPosition = new Vector2(enemySide.Hand.POS.X + spacing + counter * card.getWidth() * card.getScale().X, enemySide.Hand.POS.Y);
                 scaleToHand(card);
                 card.playState = Card.PlayState.Hidden;
                 card.setPos(newPosition);
@@ -388,10 +381,20 @@ namespace CardGame
             {
                 card.updateGameComponent();
             }
-            if(enemySide.Hand.cardsInContainer.Count > 10)
+
+            foreach (Card card in friendlySide.Hand.cardsInContainer)
+            {
+                card.updateGameComponent();
+            }
+            foreach (Card card in enemySide.Hand.cardsInContainer)
+            {
+                card.updateGameComponent();
+            }
+            if (enemySide.Hand.cardsInContainer.Count > 10)
             {
                 throw new Exception("");
             }
+            updateBoard();
         }
 
     }

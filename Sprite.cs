@@ -54,6 +54,8 @@ namespace CardGame
         public void setTexture(Texture2D newTexture)
         {
             spriteComponent.loadedTexture = newTexture;
+            spriteComponent.textureParamaters = new Vector2(spriteComponent.loadedTexture.Width,
+                    spriteComponent.loadedTexture.Height);
         }
 
         public Vector2 getTextureParamaters()

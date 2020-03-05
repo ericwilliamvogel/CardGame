@@ -181,6 +181,8 @@ namespace CardGame
             suppTextures.cardFilling.setOffset(20*w, 20*w);
             suppTextures.cardImageBorder.setOffset(65*w, 95*w);
             suppTextures.cardBack.setOffset(0, 0);
+            properties.width = suppTextures.cardBack.getWidth();
+            properties.height = suppTextures.cardBack.getHeight();
         }
         public void setSupplementalTextures(CardImageStorage storage)
         {
@@ -188,6 +190,8 @@ namespace CardGame
             suppTextures.cardImageBorder.setTexture(storage.suppTextures.cardImageBorder.getTexture());
             suppTextures.cardFilling.setTexture(storage.suppTextures.cardFilling.getTexture());
             suppTextures.cardBack.setTexture(storage.suppTextures.cardBack.getTexture());
+            properties.width = suppTextures.cardBack.getWidth();
+            properties.height = suppTextures.cardBack.getHeight();
         }
         public void setColorForRace()
         {
