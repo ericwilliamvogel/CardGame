@@ -76,8 +76,28 @@ namespace CardGame
             initSupplements();
         }
 
-        
+        bool firstSwitch;
 
+        public void setHovered()
+        {
+            selectState = SelectState.Hovered;
+        }
+        public void setRegular()
+        {
+            selectState = SelectState.Regular;
+        }
+        public void setSelected()
+        {
+            selectState = SelectState.Selected;
+        }
+        public bool isSelected()
+        {
+            if(selectState == SelectState.Selected)
+            {
+                return true;
+            }
+            return false;
+        }
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
             switch (selectState)
@@ -96,37 +116,10 @@ namespace CardGame
                     }
                     break;
                 case SelectState.Selected:
-                    //pass a delegate depending on where the card is on board???
-                    /*foreach card card in row
-                     * if(card.state == STate.selected)
-                     * {
-                     *  //in board
-                     *  FromRowLogic(Card card)
-                     *  {
-                     *      //give action
-                     *  }
-                     *  orrrr
-                     *  FromHandLogic(Card card)
-                     *  {
-                     *      card.toMouse;
-                     *      if(mouse is within Row[0])
-                     *      {
-                     *      if(card.type == general)
-                     *      {
-                     *      play}
-                     *      else
-                     *      {
-                     *      popup
-                     *      }
-                     *      }
-                     *      
-                     *  }
-                     *  if(mouesState.right click)
-                     *  {
-                     *  card.setBackTOLocastion;
-                     *  card .state= Regular;
-                        }
-                        */
+                    if(mouseState.MiddleButton == ButtonState.Pressed)
+                    {
+                        selectState = SelectState.Regular;
+                    }
                     break;
             }
         }
@@ -172,7 +165,12 @@ namespace CardGame
             initSupplements();
             base.setScale(setting);
         }
-        private void initSupplements()
+        public void setCardBackColor(Color color)
+        {
+            suppTextures.cardBack.properties.color = color;
+        }
+
+        public void initSupplements()
         {
             float w = Properties.globalScale.X + properties.scale.X;
             //
@@ -181,8 +179,8 @@ namespace CardGame
             suppTextures.cardFilling.setOffset(20*w, 20*w);
             suppTextures.cardImageBorder.setOffset(65*w, 95*w);
             suppTextures.cardBack.setOffset(0, 0);
-            properties.width = suppTextures.cardBack.getWidth();
-            properties.height = suppTextures.cardBack.getHeight();
+            properties.width = suppTextures.cardBack.properties.width;
+            properties.height = suppTextures.cardBack.properties.height;
         }
         public void setSupplementalTextures(CardImageStorage storage)
         {
@@ -262,14 +260,14 @@ namespace CardGame
     {
         public FieldUnit(int identifier) : base(identifier)
         {
-            type = CardType.Field;
+            type = CardType.FieldUnit;
         }
     }
     public enum CardType
     {
         General,
         Army,
-        Field
+        FieldUnit
     }
 
 

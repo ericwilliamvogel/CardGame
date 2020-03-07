@@ -35,7 +35,7 @@ namespace CardGame
             }
             else if(identifier == 1)
             {
-                constructor.setFieldUnit(identifier);
+                constructor.setGeneral(identifier);
                 constructor.setPower(1);
                 constructor.setRace(Card.Race.Human);
                 constructor.setDefense(1);
@@ -44,7 +44,7 @@ namespace CardGame
             }
             else
             {
-                constructor.setFieldUnit(identifier);
+                constructor.setArmy(identifier);
                 constructor.setPower(1);
                 constructor.setRace(Card.Race.Orc);
                 constructor.setDefense(1);

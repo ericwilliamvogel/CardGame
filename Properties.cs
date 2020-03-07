@@ -19,12 +19,17 @@ namespace CardGame
         public static Vector2 WEIGHTEDPOSITION { get; set; } //maybe move this to a child later
         public static Vector2 globalScale { get; set; }
         public SpriteEffects spriteEffects = SpriteEffects.None;
-        public int Width { get { return GraphicsSettings.toResolution(width); } set { width = value; } }
-        public int Height { get { return GraphicsSettings.toResolution(height); } set { height = value; } }
+        public int Width { get { return toScale(width); } set { width = value; } }
+        public int Height { get { return toScale(height); } set { height = value; } }
         public Color color { get; set; }
         public Vector2 scale { get; set; }
         public float rotation { get; set; }
 
+        private int toScale(int input)
+        {
+            float multiplier = globalScale.X + scale.X;
+            return (int)(input * multiplier);
+        }
         public Properties()
         {
             sprite = new Sprite();

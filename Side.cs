@@ -13,17 +13,20 @@ namespace CardGame
             Deck = player.deck;
             Player = player;
             Deck = new Deck();
-            Generals = new FunctionalRow(CardType.General);
-            Armies = new FunctionalRow(CardType.Army);
-            FieldUnit = new FunctionalRow(CardType.Field);
+            Rows = new FunctionalRow[MaxRows];
+            Rows[General] = new FunctionalRow(CardType.General);
+            Rows[Armies] = new FunctionalRow(CardType.Army);
+            Rows[FieldUnit] = new FunctionalRow(CardType.FieldUnit);
             Hand = new CardContainer();
             Oblivion = new CardContainer();
         }
         public Deck Deck;
         public Player Player;
-        public FunctionalRow Generals;
-        public FunctionalRow Armies;
-        public FunctionalRow FieldUnit;
+        public FunctionalRow[] Rows;
+        public static int General = 0;
+        public static int Armies = 1;
+        public static int FieldUnit = 2;
+        public static int MaxRows = 3;
         public CardContainer Hand;
         public CardContainer Oblivion;
     }

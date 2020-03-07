@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,9 @@ namespace CardGame
         {
             this.type = type;
         }
-        CardType type;
+        public CardType type;
+
+        
     }
     public class GamePlay : PrimaryComponent
     {
@@ -125,14 +128,17 @@ namespace CardGame
         public void scaleToView(Card card)
         {
             card.setScale(CardScale.View);
+            card.initSupplements();
         }
         public void scaleToBoard(Card card)
         {
             card.setScale(CardScale.Board);
+            card.initSupplements();
         }
         public void scaleToHand(Card card)
         {
             card.setScale(CardScale.Hand);
+            card.initSupplements();
         }
 
         public Action moveToAction;
@@ -147,6 +153,18 @@ namespace CardGame
             boardActions.AddAction(moveToAction);
         }
 
+        public void addDrawAction(CardContainer startingContainer, CardContainer endingContainer)
+        {
+            moveToAction = () => {
+                drawCardLogic(startingContainer, endingContainer);
+            };
+            boardActions.AddAction(moveToAction);
+        }
+        public void drawCardLogic(CardContainer startingContainer, CardContainer endingContainer)
+        {
+            Card card = startingContainer.cardsInContainer[0];
+            movementLogic(startingContainer, endingContainer, card);
+        }
         public void movementLogic(CardContainer startingContainer, CardContainer endingContainer, Card card)
         {
             Vector2 newPosition = endingContainer.getPosition();
@@ -207,14 +225,17 @@ namespace CardGame
 
             if(xAxisFinished && yAxisFinished)
             {
-                //**************************
-                //startingContainer.moveCard(endingContainer, card);
-                startingContainer.moveCard(endingContainer, startingContainer.cardsInContainer[0]);
+                try
+                {
+                    startingContainer.moveCard(endingContainer, card);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+
                 updateBoard();
                 boardActions.nextAction();
-
-
-                //throw new Exception("");
             }
         
         }
@@ -231,17 +252,7 @@ namespace CardGame
         }
         public void DrawCard(Side side)
         {
-            Card card = side.Deck.cardsInContainer[0];
-            moveTo(side.Deck, side.Hand, card);
-            if(side == friendlySide)
-            {
-                card.playState = Card.PlayState.Revealed;
-            }
-            if(side == enemySide)
-            {
-                card.playState = Card.PlayState.Hidden;
-            }
-
+            addDrawAction(side.Deck, side.Hand);
         }
         private void PlayCard(Side side, FunctionalRow row, Card card)
         {
@@ -266,62 +277,74 @@ namespace CardGame
             updateBoardPositions();
 
         }
-        public void StartGame(Side friendlySide, Side enemySide)
+
+        public void StartGame(Board board)
         {
-            this.friendlySide = friendlySide;
-            this.enemySide = enemySide;
+            this.friendlySide = board.friendlySide;
+            this.enemySide = board.enemySide;
             updateBoard();
             updateDeckPositions(friendlySide);
             updateDeckPositions(enemySide);
+            assignCardPositionsOnHandExtension(board);
         }
+
         private void updateDeckPositions(Side side)
         {
             foreach(Card card in side.Deck.cardsInContainer)
             {
-                card.setPos(side.Deck.POS);
+                card.setPos(side.Deck.getPosition());
             }
         }
-        private void updateHandPositions()
+        
+        private void setHandPositions(Side side)
         {
             int counter = 0;
             int spacing = 20;
-            foreach (Card card in friendlySide.Hand.cardsInContainer)
+            side.Hand.resetCardPositionsInHorizontalContainer();
+            foreach (Card card in side.Hand.cardsInContainer)
             {
-                scaleToHand(card);
-                Vector2 newPosition = new Vector2(friendlySide.Hand.POS.X + spacing + counter * card.getWidth() *card.getScale().X , friendlySide.Hand.POS.Y);
-
-                card.playState = Card.PlayState.Revealed;
-                card.setPos(newPosition);
-                counter++;
+                if (card != SELECTEDCARD)
+                {
+                    scaleToHand(card);
+                    Vector2 newPosition = new Vector2(side.Hand.getPosition().X + GraphicsSettings.toResolution(spacing) + counter * (card.getWidth() - side.Hand.horizontalSpacing), side.Hand.getPosition().Y);
+                    card.setPos(newPosition);
+                    counter++;
+                }
             }
+        }
 
-            counter = 0;
-            foreach (Card card in enemySide.Hand.cardsInContainer)
+        private void updateHandPositions()
+        {
+            setHandPositions(friendlySide);
+            setContainerPlayState(friendlySide.Hand, Card.PlayState.Revealed);
+            setHandPositions(enemySide);
+            setContainerPlayState(enemySide.Hand, Card.PlayState.Hidden);
+        }
+        private void setContainerPlayState(CardContainer container, Card.PlayState playState)
+        {
+            foreach (Card card in container.cardsInContainer)
             {
-                Vector2 newPosition = new Vector2(enemySide.Hand.POS.X + spacing + counter * card.getWidth() * card.getScale().X, enemySide.Hand.POS.Y);
-                scaleToHand(card);
-                card.playState = Card.PlayState.Hidden;
-                card.setPos(newPosition);
-                counter++;
+                card.playState = playState;
             }
         }
         private void updateBoardPositions()
         {
-            setBoardPosition(friendlySide.Generals);
-            setBoardPosition(enemySide.Generals);
-            setBoardPosition(friendlySide.Armies);
-            setBoardPosition(enemySide.Armies);
-            setBoardPosition(friendlySide.FieldUnit);
-            setBoardPosition(enemySide.FieldUnit);
+            for(int i = 0; i < Side.MaxRows; i++)
+            {
+                setBoardPosition(friendlySide.Rows[i]);
+                setBoardPosition(enemySide.Rows[i]);
+            }
+
         }
         private void setBoardPosition(FunctionalRow row)
         {
             int counter = 0;
-            int spacing = 20;
+            int spacing = row.getWidth()/2;
+            row.resetCardPositionsInHorizontalContainer();
             foreach (Card card in row.cardsInContainer)
             {
-                Vector2 newPosition = new Vector2(row.POS.X + spacing + counter * card.getWidth(), friendlySide.Hand.POS.Y);
                 scaleToBoard(card);
+                Vector2 newPosition = new Vector2(row.getPosition().X - row.Count() * card.getWidth()/2 + spacing + counter * (card.getWidth()- row.horizontalSpacing), row.getPosition().Y);
                 card.setPos(newPosition);
                 counter++;
             }
@@ -329,12 +352,17 @@ namespace CardGame
 
         public override void drawSprite(SpriteBatch spriteBatch)
         {
-            drawDeck(friendlySide, spriteBatch);
-            drawDeck(enemySide, spriteBatch);
-            drawOblivion(friendlySide, spriteBatch);
-            drawOblivion(enemySide, spriteBatch);
+            drawStack(friendlySide.Deck, spriteBatch);
+            drawStack(enemySide.Deck, spriteBatch);
+            drawStack(friendlySide.Oblivion, spriteBatch);
+            drawStack(enemySide.Oblivion, spriteBatch);
+
+            drawRows(friendlySide, spriteBatch);
+            drawRows(enemySide, spriteBatch);
             drawHand(friendlySide, spriteBatch);
+
             drawHand(enemySide, spriteBatch);
+
         }
         private void drawHand(Side side, SpriteBatch spriteBatch)
         {
@@ -343,31 +371,41 @@ namespace CardGame
                 card.drawSprite(spriteBatch);
             }
         }
-        private void drawDeck(Side side, SpriteBatch spriteBatch)
+        private void drawRows(Side side, SpriteBatch spriteBatch)
         {
-            if (!side.Deck.isEmpty())
+            foreach(FunctionalRow row in side.Rows)
             {
-                
-                side.Deck.cardsInContainer[0].drawSprite(spriteBatch);
+                foreach (Card card in row.cardsInContainer)
+                {
+                    card.drawSprite(spriteBatch);
+                }
+            }
+
+        }
+        private void drawStack(CardContainer container, SpriteBatch spriteBatch)
+        {
+            if(!container.isEmpty())
+            {
+                if(!container.hasAtLeastTwoCards())
+                {
+                    container.cardsInContainer[1].setCardBackColor(Color.Green);
+                    container.cardsInContainer[1].drawSprite(spriteBatch);
+
+                }
+                container.cardsInContainer[0].setCardBackColor(Color.White);
+                container.cardsInContainer[0].drawSprite(spriteBatch);
             }
         }
-        private void drawOblivion(Side side, SpriteBatch spriteBatch)
-        {
-            if (!side.Oblivion.isEmpty())
-            {
-                
-                side.Oblivion.cardsInContainer[0].drawSprite(spriteBatch);
-            }
-        }
+
         Side friendlySide;
         Side enemySide;
-        public void Update(Side friendlySide, Side enemySide)
+        public void Update(Board board)
         {
             //throw new Exception(friendlySide.Deck.cardsInContainer[0].getPosition().ToString());
             
             
-            this.friendlySide = friendlySide;
-            this.enemySide = enemySide;
+            this.friendlySide = board.friendlySide;
+            this.enemySide = board.enemySide;
             //updateBoard();
             DeckLogic(friendlySide);
             DeckLogic(enemySide);
@@ -390,12 +428,131 @@ namespace CardGame
             {
                 card.updateGameComponent();
             }
-            if (enemySide.Hand.cardsInContainer.Count > 10)
+
+            foreach(FunctionalRow row in friendlySide.Rows)
+            {
+                foreach(Card card in row.cardsInContainer)
+                {
+                    card.updateGameComponent();
+                }
+            }
+            /*if (enemySide.Hand.cardsInContainer.Count > 10)
             {
                 throw new Exception("");
-            }
-            updateBoard();
+            }*/
+            //updateBoard();
         }
 
+        public override void mouseStateLogic(MouseState mouseState, ContentManager content)
+        {
+            if(SELECTEDCARD==null)
+            friendlySide.Hand.modifyCardInteractivity(mouseState);
+
+            setCardToMouse(mouseState);
+            playSelectedCard(mouseState);
+            base.mouseStateLogic(mouseState, content);
+        }
+
+        public void assignCardPositionsOnHandExtension(Board board)
+        {
+            Action action = () =>
+            {
+                updateBoard();
+            };
+            board.handSpace[1].action = action;
+        }
+        Card SELECTEDCARD;
+        private bool isWithinProperRow(MouseState mouseState)
+        {
+            if(SELECTEDCARD!=null)
+            {
+                foreach(FunctionalRow row in friendlySide.Rows)
+                {
+                    if(row.isWithinBox(mouseState) && mouseState.LeftButton == ButtonState.Released && row.type == SELECTEDCARD.type)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        private void playSelectedCard(MouseState mouseState)
+        {
+            if(isWithinProperRow(mouseState) && !cardView)
+            {
+                foreach (Card card in friendlySide.Hand.cardsInContainer)
+                {
+                    if (card == SELECTEDCARD)
+                    {
+
+                        foreach(FunctionalRow row in friendlySide.Rows)
+                        {
+                            if(row.type == card.type)
+                            {
+                                PlayCard(friendlySide, row, card);
+                                card.setRegular();
+                                SELECTEDCARD = null;
+                            }
+                        }
+
+
+                    }
+                }
+            }
+
+        }
+        bool clickedInCardBox = false;
+        bool cardView = false;
+        private void setCardToMouse(MouseState mouseState)
+        {
+            foreach (Card card in friendlySide.Hand.cardsInContainer)
+            {
+                if (card.isSelected())
+                {
+                    if (!cardView)
+                    {
+                        SELECTEDCARD = card;
+                        if (mouseState.LeftButton == ButtonState.Pressed)
+                        {
+                            card.setPos(mouseState.X - card.getWidth() / 2, mouseState.Y - card.getHeight() / 2);
+                            clickedInCardBox = true;
+                        }
+                        if (mouseState.LeftButton == ButtonState.Released && !isWithinProperRow(mouseState) && !friendlySide.Hand.isWithinModifiedPosition(mouseState, card))
+                        {
+                            clickedInCardBox = false;
+                            card.setRegular();
+                            SELECTEDCARD = null;
+                            //updateBoard();
+                        }
+                        if (mouseState.LeftButton == ButtonState.Released && clickedInCardBox && friendlySide.Hand.isWithinModifiedPosition(mouseState, card))
+                        {
+                            clickedInCardBox = false;
+                            cardView = true;
+                            SELECTEDCARD = null;
+                        }
+                    }
+                    else
+                    {
+                        viewFullSizeCard(mouseState, card);
+                    }
+                }
+
+            }
+        }
+        private void viewFullSizeCard(MouseState mouseState, Card card)
+        {
+            if (cardView)
+            {
+                scaleToView(card);
+                card.setPos(Game1.windowW / 2 - card.getWidth() / 2, Game1.windowH / 2 - card.getHeight() / 2);
+                if(mouseState.RightButton == ButtonState.Pressed)
+                {
+                    cardView = false;
+                    card.setRegular();
+                    SELECTEDCARD = null;
+                    updateBoard();
+                }
+            }
+        }
     }
 }
