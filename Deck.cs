@@ -7,14 +7,6 @@ using System.Threading.Tasks;
 
 namespace CardGame
 {
-    public class Hand
-    {
-        List<Card> cardsInHand = new List<Card>();
-        public void addCard(Card card)
-        {
-            cardsInHand.Add(card);
-        }
-    }
     public class Deck : CardContainer
     {
 
@@ -23,7 +15,7 @@ namespace CardGame
             
             foreach(Card card in cardsInContainer)
             {
-                card.suppTextures.portrait.setTexture(imageDictionary[card.identifier]);
+                card.suppTextures.portrait.setTexture(imageDictionary[card.cardProps.identifier]);
                 card.setColorForRace();
             }
         }

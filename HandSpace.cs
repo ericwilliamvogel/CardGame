@@ -36,6 +36,7 @@ namespace CardGame
         public Action action;
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
+            action();
             switch (state)
             {
 
@@ -44,7 +45,7 @@ namespace CardGame
                     if (isWithinBox(mouseState))
                     {
                         state = State.Extended;
-                        //action();
+                        
                     }
                     break;
                 case State.Extended:
@@ -52,7 +53,7 @@ namespace CardGame
                     if (!isWithinBox(mouseState))
                     {
                         state = State.Retracted;
-                        //action();
+                        
                     }
                     break;
 

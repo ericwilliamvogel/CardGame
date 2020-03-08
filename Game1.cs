@@ -22,8 +22,10 @@ namespace CardGame
         public static Vector2 windowParams;
         private ComponentManager componentManager;
         public MouseState mouseState;
+
         public Game1()
         {
+            //BasicEffect basicEffect;
 
             mouseState = new MouseState();
             componentManager = new ComponentManager(this.Content);
@@ -113,6 +115,7 @@ namespace CardGame
 
             componentManager.updateGameComponent(this.Content);
             componentManager.mouseStateLogic(mouseState, this.Content);
+
             base.Update(gameTime);
         }
 

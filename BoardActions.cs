@@ -15,6 +15,14 @@ namespace CardGame
         {
             actions = new List<Action>();
         }
+        public bool isActive()
+        {
+            if(active)
+            {
+                return true;
+            }
+            return false;
+        }
         public void nextAction()
         {
             actions.Remove(actions[0]);

@@ -79,7 +79,7 @@ namespace CardGame
         }
         public void setName(string name)
         {
-            card.name = name;
+            card.cardProps.name = name;
         }
         public void setPower(int power)
         {
@@ -91,9 +91,9 @@ namespace CardGame
         }
         public void setDefense(int defense)
         {
-            if (card.type == CardType.General)
+            if (card.cardProps.type == CardType.General)
             {
-                Console.WriteLine(card.name + ": system attempted to give general defense");
+                Console.WriteLine(card.cardProps.name + ": system attempted to give general defense");
             }
             else
             {
@@ -106,11 +106,11 @@ namespace CardGame
         }
         public void addEffect(Effect effect)
         {
-            card.effects.Add(effect);
+            card.cardProps.effects.Add(effect);
         }
         public void addAbility(Ability ability)
         {
-            card.abilities.Add(ability);
+            card.cardProps.abilities.Add(ability);
         }
 
         public void setArmy(int identifier)

@@ -153,7 +153,7 @@ namespace CardGame
         {
             primaryComponent[controller].updateGameComponent(content);
             Controls(content);
-            fadeScreen.Update();
+            fadeScreen.updateGameComponent();
             updateSwitcherButtons();
         }
 
@@ -168,7 +168,7 @@ namespace CardGame
             primaryComponent[controller].drawSprite(spriteBatch);
             drawSwitcherButtons(spriteBatch);
             if (fadeScreen.blackScreen.getLoadedTexture() != null)
-                fadeScreen.Draw(spriteBatch);
+                fadeScreen.drawSprite(spriteBatch);
 
 
         }

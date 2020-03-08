@@ -15,20 +15,29 @@ namespace CardGame
     public class Card : GameComponent
     {
         public bool makingAction;
+
         public Vector2 storedPosition;
 
 
         //
         //
         public CardSupplementalTextures suppTextures;
-        public int identifier;
-        public string name;
-        public CardType type;
-        public List<Effect> effects = new List<Effect>();
-        public List<Ability> abilities = new List<Ability>();
-        public int power = 0;
-        public int defense = 1;
+        public class CardProperties
+        {
+            public int identifier;
+            public string name;
+            public List<Effect> effects = new List<Effect>();
+            public List<Ability> abilities = new List<Ability>();
+            public int cost = 0;
+            public int power = 0;
+            public int defense = 1;
+            public CardType type;
+        }
 
+
+
+
+        public CardProperties cardProps;
         public SelectState selectState;
         public PlayState playState;
         public Rarity rarity;
@@ -60,19 +69,30 @@ namespace CardGame
 
         public void setPower(int power)
         {
-            this.power = power;
+            this.cardProps.power = power;
         }
         public void setDefense(int defense)
         {
-            this.defense = defense;
+            this.cardProps.defense = defense;
         }
 
         public Card(int identifier)
         {
-            this.name = name;
-            this.identifier = identifier;
+            cardProps = new CardProperties();
+            this.cardProps.identifier = identifier;
             suppTextures = new CardSupplementalTextures();
             setContentName("cardBack");
+            initSupplements();
+        }
+        public Card(Card card)
+        {
+            this.suppTextures = card.suppTextures;
+            this.properties.POS = card.getPosition();
+            this.setScale(card.properties.scale.X);
+            this.cardProps = card.cardProps;
+            this.properties.Width = card.properties.width;
+            this.properties.Height = card.properties.height;
+            //this.setTexture(card.getTexture());
             initSupplements();
         }
 
@@ -137,11 +157,24 @@ namespace CardGame
                     suppTextures.cardFilling.drawSprite(spriteBatch);
                     suppTextures.cardImageBorder.drawSprite(spriteBatch);
                     suppTextures.portrait.drawSprite(spriteBatch);
+                    if(selectState == SelectState.Hovered)
+                    {
+                        drawHighlight(spriteBatch);
 
-
+                    }
+                    spriteBatch.DrawString(Game1.spritefont, cardProps.name, new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + 40 * getScale().X), Color.Black, 0, new Vector2(0, 0), 3f * getScale(), SpriteEffects.None, 0);
+                    spriteBatch.DrawString(Game1.spritefont, cardProps.cost.ToString(), new Vector2(getPosition().X + getWidth() - 70 * getScale().X, getPosition().Y + 30 * getScale().X), Color.Red, 0, new Vector2(0, 0), 4f * getScale(), SpriteEffects.None, 0);
                     break;
             }
 
+        }
+        public void drawHighlight(SpriteBatch spriteBatch)
+        {
+            ShadowComponent highlight = new ShadowComponent(suppTextures.cardFilling);
+            highlight.properties.color = Color.Black * .4f;
+            //highlight.updateScaleAndPosition(suppTextures.cardFilling);
+
+            highlight.drawSprite(spriteBatch);
         }
         public override void updateGameComponent()
         {
@@ -174,10 +207,10 @@ namespace CardGame
         {
             float w = Properties.globalScale.X + properties.scale.X;
             //
-            suppTextures.portrait.setOffset(75*w, 105*w);
+            suppTextures.portrait.setOffset(20*w, 105*w);
             suppTextures.cardBorder.setOffset(0, 0);
             suppTextures.cardFilling.setOffset(20*w, 20*w);
-            suppTextures.cardImageBorder.setOffset(65*w, 95*w);
+            suppTextures.cardImageBorder.setOffset(0*w, 95*w);
             suppTextures.cardBack.setOffset(0, 0);
             properties.width = suppTextures.cardBack.properties.width;
             properties.height = suppTextures.cardBack.properties.height;
@@ -216,6 +249,7 @@ namespace CardGame
         {
             suppTextures.setAllPositionsRelativeTo(this);
         }
+
         public virtual void takeDamage()
         {
 
@@ -246,21 +280,21 @@ namespace CardGame
     {
         public General(int identifier) : base(identifier)
         {
-            type = CardType.General;
+            cardProps.type = CardType.General;
         }
     }
     public class Army : Card
     {
         public Army(int identifier) : base(identifier)
         {
-            type = CardType.Army;
+            cardProps.type = CardType.Army;
         }
     }
     public class FieldUnit : Card
     {
         public FieldUnit(int identifier) : base(identifier)
         {
-            type = CardType.FieldUnit;
+            cardProps.type = CardType.FieldUnit;
         }
     }
     public enum CardType

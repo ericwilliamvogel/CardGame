@@ -13,13 +13,6 @@ using Microsoft.Xna.Framework.Input;
 
 namespace CardGame
 {
-    // 02/29/2020 changed ABSTRACT to VIRTUAL in attempt to make classes a little cleaner, yet to test
-    public abstract class DrawAndUpdate 
-    {
-        public abstract void Draw(SpriteBatch spriteBatch);
-        public abstract void Update();
-    }
-
     public class ComponentSkeleton
     {
         public ComponentSkeleton()
@@ -153,175 +146,30 @@ namespace CardGame
                 return x;
         }
     }
-    public class CardContainer : GameComponent
+
+    public class ShadowComponent : GameComponent
     {
-        public List<Card> cardsInContainer = new List<Card>();
+        public ShadowComponent(GameComponent input)
+        {
+            setTexture(input.getTexture());
+            setPos(input.getPosition());
+            setScale(input.properties.scale.X);
 
-        public int horizontalSpacing = 0;
-
-
-
-        public void modifyCardInteractivity(MouseState mouseState)
-        {
-            foreach (Card card in cardsInContainer)
-            {
-                cardStateHandler(mouseState, card);
-            }
         }
-        public bool isWithinModifiedPosition(MouseState mouseState, Card card)
+        
+        public void updateScaleAndPosition(GameComponent input)
         {
-            if (mouseState.X > getPositionOfCardInContainer(card).X && mouseState.X < getPositionOfCardInContainer(card).X + (cardsInContainer.IndexOf(card)) * (card.getWidth() - horizontalSpacing))
-            {
-                if (mouseState.Y > getPositionOfCardInContainer(card).Y && mouseState.Y < getPositionOfCardInContainer(card).Y + card.getHeight())
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public int notZero(int i)
-        {
-            if(i < 1)
-            {
-                return 1;
-            }
-            return i;
-        }
-        public Vector2 getPositionOfCardInContainer(Card card)
-        {
-            int spacing = 20;
-            int initialPosX = (int)getPosition().X + GraphicsSettings.toResolution(spacing);
-            int initialPosY = (int)getPosition().Y + GraphicsSettings.toResolution(spacing);
-            int multiplier = cardsInContainer.IndexOf(card);
-            //throw new Exception(multiplier.ToString());
-            int finalPosX = initialPosX + multiplier * card.getWidth() ;
-            int finalPosY = initialPosY;
-
-            Vector2 returnValue = new Vector2(finalPosX, finalPosY);
-
-            return returnValue;
-        }
-        public int getWidthOfCardInContainer(Card card)
-        {
-            int spacing = 20;
-            int multiplier = cardsInContainer.IndexOf(card);
-            int initialPosX = (int)getPosition().X + GraphicsSettings.toResolution(spacing);
-            int finalPosX = initialPosX + multiplier * card.getWidth() + (card.getWidth() - horizontalSpacing);
-            return finalPosX;
-        }
-        private void cardStateHandler(MouseState mouseState, Card card)
-        {
-            switch(card.selectState)
-            {
-                case Card.SelectState.Regular:
-                    if(isWithinModifiedPosition(mouseState, card))
-                    {
-                        card.setHovered();
-                    }
-
-                    break;
-                case Card.SelectState.Hovered:
-                    if (!isWithinModifiedPosition(mouseState, card))
-                    {
-                        card.setRegular();
-                    }
-                    if(mouseState.LeftButton == ButtonState.Pressed)
-                    {
-                        card.setSelected();
-                    }
-                        break;
-                case Card.SelectState.Selected:
-                    if (mouseState.MiddleButton == ButtonState.Pressed)
-                    {
-                        card.setRegular();
-                    }
-                    break;
-            }
-        }
-        public CardContainer()
-        {
-            properties = new Properties();
-        }
-
-        public void setValuesToImage(GameComponent image)
-        {
-            properties.Width = image.properties.width;
-            properties.Height = image.properties.height;
-            setPos(image.getPosition());
-        }
-        public void moveCard(CardContainer container, Card card)
-        {
-            if(cardsInContainer.Contains(card))
-            {
-                cardsInContainer.Remove(card);
-                container.cardsInContainer.Add(card);
-            }
-            else
-            {
-                Console.WriteLine("Card not found in this container");
-            }
-        }
-
-        public bool isEmpty()
-        {
-            if (cardsInContainer.Count < 1) //this will bite me in the butt later~!
-            {
-                return true;
-            }
-            return false;
-        }
-        public bool hasAtLeastTwoCards()
-        {
-            if (cardsInContainer.Count < 2) //this will bite me in the butt later~!
-            {
-                return true;
-            }
-            return false;
-        }
-        public int Count()
-        {
-            return cardsInContainer.Count;
-        }
-        public void resetCardPositionsInHorizontalContainer()
-        {
-            if(!isEmpty())
-            {
-                if (Count() * cardsInContainer[0].getWidth() > getWidth())
-                {
-                    horizontalSpacing = cardsInContainer[0].getWidth() - getWidth() * 1 / Count();
-                }
-            }
-
+            setPos(input.getPosition());
+            setScale(input.properties.scale.X);
         }
     }
     public class GameComponent : ComponentSkeleton
     {
-        
         public virtual void updateGameComponent() { }
         public virtual void initializeGameComponent() { }
 
     }
-    public class CardSupplement : GameComponent
-    {
-        public Vector2 relativePosition;
-        public Vector2 offSet; 
 
-        public void setOffset(float x, float y)
-        {
-            offSet.X = x;
-            offSet.Y = y;
-        }
-        public void setRelativePosition(GameComponent component)
-        {
-            relativePosition = component.getPosition();
-        }
-        public override void drawSprite(SpriteBatch spriteBatch)
-        {
-            properties.POS = relativePosition + offSet;
-            base.drawSprite(spriteBatch);
-        }
-    }
     public class PrimaryComponent : ComponentSkeleton
     {
         public List<SwitcherButton> switcherButtons;

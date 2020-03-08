@@ -11,112 +11,114 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using CardGame;
 
-
-public class Transition : DrawAndUpdate
+namespace CardGame
 {
-    public Sprite blackScreen;
-    private bool start;
-    private bool finish;
-    private float fader = 0f;
-    private bool process = false;
-
-    public Transition(ContentManager content)
+    public class Transition : GameComponent
     {
+        public Sprite blackScreen;
+        private bool start;
+        private bool finish;
+        private float fader = 0f;
+        private bool process = false;
 
-        blackScreen = new Sprite(content, "blackscreen");
-    }
-
-    public override void Update()
-    {
-
-        runTransition();
-
-    }
-
-    public override void Draw(SpriteBatch spriteBatch)
-    {
-        spriteBatch.Draw(blackScreen.getLoadedTexture(), new Vector2(0, 0), Color.White * fader);
-
-    }
-
-    public bool fadingOut()
-    {
-        if (start == true && fader < 1f)
+        public Transition(ContentManager content)
         {
-            return true;
+
+            blackScreen = new Sprite(content, "blackscreen");
         }
 
-        return false;
-    }
-
-    public bool fadingIn()
-    {
-        if (finish == true && fader < 1f)
+        public override void updateGameComponent()
         {
-            return true;
+
+            runTransition();
+
         }
 
-        return false;
-    }
-
-    public bool transitionComplete()
-    {
-        if (finish == false && start == false && fader <= 0f)
+        public override void drawSprite(SpriteBatch spriteBatch)
         {
-            return true;
+            spriteBatch.Draw(blackScreen.getLoadedTexture(), new Vector2(0, 0), Color.White * fader);
+
         }
-        return false;
-    }
 
-    public void startTransition()
-    {
-        start = true;
-    }
-
-    public void runTransition()
-    {
-        runStart();
-        runFinish();
-    }
-
-    private void runStart()
-    {
-        if (start == true)
+        public bool fadingOut()
         {
-            fader += .08f;
-            if (fader >= 1f)
+            if (start == true && fader < 1f)
             {
-                start = false;
-                finish = true;
-                process = true;
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool fadingIn()
+        {
+            if (finish == true && fader < 1f)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool transitionComplete()
+        {
+            if (finish == false && start == false && fader <= 0f)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public void startTransition()
+        {
+            start = true;
+        }
+
+        public void runTransition()
+        {
+            runStart();
+            runFinish();
+        }
+
+        private void runStart()
+        {
+            if (start == true)
+            {
+                fader += .08f;
+                if (fader >= 1f)
+                {
+                    start = false;
+                    finish = true;
+                    process = true;
+                }
             }
         }
-    }
 
 
-    public void processContentAndResume()
-    {
-        process = false;
-    }
-
-    public bool transitionPauseForContent()
-    {
-        if (process == true)
+        public void processContentAndResume()
         {
-            return true;
+            process = false;
         }
 
-        return false;
-    }
-    private void runFinish()
-    {
-        if (finish == true && process == false)
+        public bool transitionPauseForContent()
         {
-
-            fader -= .08f;
-            if (fader <= 0f)
+            if (process == true)
             {
-                finish = false;
+                return true;
+            }
+
+            return false;
+        }
+        private void runFinish()
+        {
+            if (finish == true && process == false)
+            {
+
+                fader -= .08f;
+                if (fader <= 0f)
+                {
+                    finish = false;
+                }
             }
         }
     }

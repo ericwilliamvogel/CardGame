@@ -17,7 +17,7 @@ namespace CardGame
             Rows[General] = new FunctionalRow(CardType.General);
             Rows[Armies] = new FunctionalRow(CardType.Army);
             Rows[FieldUnit] = new FunctionalRow(CardType.FieldUnit);
-            Hand = new CardContainer();
+            Hand = new Hand();
             Oblivion = new CardContainer();
         }
         public Deck Deck;
@@ -27,7 +27,7 @@ namespace CardGame
         public static int Armies = 1;
         public static int FieldUnit = 2;
         public static int MaxRows = 3;
-        public CardContainer Hand;
+        public Hand Hand;
         public CardContainer Oblivion;
     }
 }
