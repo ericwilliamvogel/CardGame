@@ -30,8 +30,10 @@ namespace CardGame
 
         int sideCounter = 0;
         BoardTextures textures;
+        Button button;
         public override void initializeGameComponent(ContentManager content)
         {
+
             gameLoop = new BoardFunctionality();
             oblivionHolder = new List<StackPlaceholder>();
             deckHolder = new List<StackPlaceholder>();
@@ -42,7 +44,12 @@ namespace CardGame
             background.setSprite(content, "board");
             textures = new BoardTextures(this);
             textures.initTextures(content);
-        
+
+            button = new Button(content, new Vector2(Game1.windowW - 100, Game1.windowH / 2 + 100), "secondButtonTexture");
+            button.setPos(new Vector2(Game1.windowW - 100 - button.getWidth(), Game1.windowH / 2 + 100));
+            button.setAction(() => { gameLoop.PassTurn(); });
+
+
             switcherButtons = new List<SwitcherButton>();
             switcherButtons.Add(new SwitcherButton(content, new Vector2(0, 0), "exitImage", 1));
             int switcherButtonPosX = Game1.windowW - switcherButtons[0].getWidth();
@@ -86,7 +93,7 @@ namespace CardGame
 
             //
             Player player1 = new Player();
-            Player player2 = new Player();
+            Player player2 = new AIPlayer();
 
             friendlySide = new Side(player1);
             enemySide = new Side(player2);
@@ -151,6 +158,7 @@ namespace CardGame
             {
                 //hand.drawSprite(spriteBatch);
             }
+            button.drawSprite(spriteBatch);
             gameLoop.drawSprite(spriteBatch);
         }
         bool pressed;
@@ -176,6 +184,7 @@ namespace CardGame
             {
                 pressed = false;
             }
+            button.mouseStateLogic(mouseState, content);
         }
         public override void updateGameComponent(ContentManager content)
         {

@@ -160,7 +160,7 @@ namespace CardGame
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
             primaryComponent[controller].mouseStateLogic(mouseState, content);
-            updateSwitcherMouseLogic(mouseState);
+            updateSwitcherMouseLogic(mouseState, content);
         }
 
         public override void drawSprite(SpriteBatch spriteBatch)
@@ -198,11 +198,11 @@ namespace CardGame
             }
         }
 
-        private void updateSwitcherMouseLogic(MouseState mouseState)
+        private void updateSwitcherMouseLogic(MouseState mouseState, ContentManager content)
         {
             foreach (SwitcherButton switcher in primaryComponent[controller].switcherButtons)
             {
-                switcher.Update(mouseState);
+                switcher.mouseStateLogic(mouseState, content);
             }
         }
 

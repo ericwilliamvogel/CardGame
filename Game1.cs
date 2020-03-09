@@ -22,7 +22,7 @@ namespace CardGame
         public static Vector2 windowParams;
         private ComponentManager componentManager;
         public MouseState mouseState;
-
+        public static Texture2D abilityTexture;
         public Game1()
         {
             //BasicEffect basicEffect;
@@ -68,6 +68,7 @@ namespace CardGame
         /// </summary>
         protected override void LoadContent()
         {
+            abilityTexture = Content.Load<Texture2D>("abilityTexture");
             try
             {
                 spritefont = Content.Load<SpriteFont>("File");

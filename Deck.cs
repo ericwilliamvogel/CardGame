@@ -15,7 +15,7 @@ namespace CardGame
             
             foreach(Card card in cardsInContainer)
             {
-                card.suppTextures.portrait.setTexture(imageDictionary[card.cardProps.identifier]);
+                card.suppTextures.supplements[card.suppTextures.portrait].setTexture(imageDictionary[card.cardProps.identifier]);
                 card.setColorForRace();
             }
         }

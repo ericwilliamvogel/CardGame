@@ -84,7 +84,7 @@ namespace CardGame
         {
             foreach (Button button in buttons)
             {
-                button.Update(mouseState);
+                button.mouseStateLogic(mouseState, content);
             }
         }
 

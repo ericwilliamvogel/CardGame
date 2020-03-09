@@ -30,6 +30,10 @@ namespace CardGame
             {
                 boardFunc.SELECTEDCARD.drawSprite(spriteBatch);
             }
+            if(boardFunc.ENEMYSELECTEDCARD!=null && boardFunc.showEnemyCard)
+            {
+                boardFunc.ENEMYSELECTEDCARD.drawSprite(spriteBatch);
+            }
         }
         private void drawHand(Side side, SpriteBatch spriteBatch)
         {

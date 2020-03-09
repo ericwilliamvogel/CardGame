@@ -40,6 +40,7 @@ namespace CardGame
                 if (card != SELECTEDCARD && !card.makingAction)
                 {
                     scaleToHand(card);
+                    card.resetCardSelector();
                     Vector2 newPosition = new Vector2(side.Hand.getPosition().X + GraphicsSettings.toResolution(spacing) + counter * (card.getWidth() - side.Hand.horizontalSpacing), side.Hand.getPosition().Y);
                     card.setPos(newPosition);
 
@@ -82,7 +83,7 @@ namespace CardGame
                 if (card != SELECTEDCARD && !card.makingAction)
                 {
                     scaleToBoard(card);
-
+                    card.resetCardSelector();
                     row.setCorrectCenterSpacing(card);
                     Vector2 newPosition = new Vector2(row.getPosition().X - row.initialSpacing + spacing + counter * (card.getWidth() - row.horizontalSpacing), row.getPosition().Y);
                     card.setPos(newPosition);

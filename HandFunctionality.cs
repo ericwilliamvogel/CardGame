@@ -91,7 +91,7 @@ namespace CardGame
             {
                 clickedInCardBox = false;
                 boardFunc.cardView = true;
-
+                card.resetCardSelector();
             }
         }
 

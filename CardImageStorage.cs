@@ -43,10 +43,15 @@ namespace CardGame
         }
         public void loadCardSupplementalTextures(ContentManager content)
         {
-            suppTextures.cardBack.setTexture(content);
-            suppTextures.cardBorder.setTexture(content);
-            suppTextures.cardImageBorder.setTexture(content);
-            suppTextures.cardFilling.setTexture(content);
+            foreach(CardSupplement instance in suppTextures.supplements)
+            {
+                if(instance != suppTextures.supplements[suppTextures.portrait])
+                instance.setTexture(content);
+            }
+            //suppTextures.cardBack.setTexture(content);
+            //suppTextures.cardBorder.setTexture(content);
+            //suppTextures.cardImageBorder.setTexture(content);
+            //suppTextures.cardFilling.setTexture(content);
         }
         public void loadAllDictionaryTextures(ContentManager content)
         {

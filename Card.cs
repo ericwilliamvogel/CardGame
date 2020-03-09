@@ -32,6 +32,7 @@ namespace CardGame
             public int power = 0;
             public int defense = 1;
             public CardType type;
+            public bool exhausted;
         }
 
 
@@ -149,19 +150,20 @@ namespace CardGame
             switch (playState)
             {
                 case PlayState.Hidden:
-                    suppTextures.cardBack.drawSprite(spriteBatch);
+                    suppTextures.supplements[suppTextures.cardBack].drawSprite(spriteBatch);
                     break;
                 case PlayState.Revealed:
 
-                    suppTextures.cardBorder.drawSprite(spriteBatch);
-                    suppTextures.cardFilling.drawSprite(spriteBatch);
-                    suppTextures.cardImageBorder.drawSprite(spriteBatch);
-                    suppTextures.portrait.drawSprite(spriteBatch);
+                    suppTextures.supplements[suppTextures.cardBorder].drawSprite(spriteBatch);
+                    suppTextures.supplements[suppTextures.cardFilling].drawSprite(spriteBatch);
+                    suppTextures.supplements[suppTextures.cardImageBorder].drawSprite(spriteBatch);
+                    suppTextures.supplements[suppTextures.portrait].drawSprite(spriteBatch);
                     if(selectState == SelectState.Hovered)
                     {
                         drawHighlight(spriteBatch);
 
                     }
+                    drawCardSelectionBorder(spriteBatch);
                     spriteBatch.DrawString(Game1.spritefont, cardProps.name, new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + 40 * getScale().X), Color.Black, 0, new Vector2(0, 0), 3f * getScale(), SpriteEffects.None, 0);
                     spriteBatch.DrawString(Game1.spritefont, cardProps.cost.ToString(), new Vector2(getPosition().X + getWidth() - 70 * getScale().X, getPosition().Y + 30 * getScale().X), Color.Red, 0, new Vector2(0, 0), 4f * getScale(), SpriteEffects.None, 0);
                     break;
@@ -170,7 +172,7 @@ namespace CardGame
         }
         public void drawHighlight(SpriteBatch spriteBatch)
         {
-            ShadowComponent highlight = new ShadowComponent(suppTextures.cardFilling);
+            ShadowComponent highlight = new ShadowComponent(suppTextures.supplements[suppTextures.cardFilling]);
             highlight.properties.color = Color.Black * .4f;
             //highlight.updateScaleAndPosition(suppTextures.cardFilling);
 
@@ -200,33 +202,96 @@ namespace CardGame
         }
         public void setCardBackColor(Color color)
         {
-            suppTextures.cardBack.properties.color = color;
+            suppTextures.supplements[suppTextures.cardBack].properties.color = color;
         }
 
+        public void resetCardSelector()
+        {
+            selectorX = 0;
+            selectorY = 0;
+            velocityX = 2;
+            velocityY = -1;
+        }
         public void initSupplements()
         {
             float w = Properties.globalScale.X + properties.scale.X;
             //
-            suppTextures.portrait.setOffset(20*w, 105*w);
-            suppTextures.cardBorder.setOffset(0, 0);
-            suppTextures.cardFilling.setOffset(20*w, 20*w);
-            suppTextures.cardImageBorder.setOffset(0*w, 95*w);
-            suppTextures.cardBack.setOffset(0, 0);
-            properties.width = suppTextures.cardBack.properties.width;
-            properties.height = suppTextures.cardBack.properties.height;
+
+            suppTextures.supplements[suppTextures.portrait].setOffset(20 * w, 105 * w);
+            suppTextures.supplements[suppTextures.cardBorder].setOffset(0 * w, 0 * w);
+            suppTextures.supplements[suppTextures.cardFilling].setOffset(20 * w, 20 * w);
+            suppTextures.supplements[suppTextures.cardImageBorder].setOffset(0 * w, 95 * w);
+            suppTextures.supplements[suppTextures.cardBack].setOffset(0 * w, 0 * w);
+            suppTextures.supplements[suppTextures.abilityDisplay].setOffset(getWidth() * w, 0);
+
+
+
+            properties.width = suppTextures.supplements[suppTextures.cardBack].properties.width;
+            properties.height = suppTextures.supplements[suppTextures.cardBack].properties.height;
+        }
+        private int selectorX, selectorY;
+        int velocityX = 2;
+        int velocityY = -1;
+        public void drawCardSelectionBorder(SpriteBatch spriteBatch)
+        {
+
+            if(isSelected())
+            {
+                int speed = (int)(50 * getScale().X);
+                int width = suppTextures.supplements[suppTextures.selectionIndicator].getWidth();
+                int height = suppTextures.supplements[suppTextures.selectionIndicator].getHeight();
+                selectorX += velocityX;
+                selectorY += velocityY;
+                if(selectorY < 0)
+                {
+                    velocityX = speed;
+                    velocityY = 0;
+
+                }
+                if(selectorX > getWidth() + width)
+                {
+                    velocityY = speed;
+                    velocityX = 0;
+
+                }
+
+                if (selectorY > getHeight() + height)
+                {
+                    velocityY = 0;
+                    velocityX = -speed;
+                    if (selectorX < 0)
+                    {
+                        velocityY = -speed;
+                        velocityX = 0;
+
+                    }
+                }
+
+
+                suppTextures.supplements[suppTextures.selectionIndicator].setOffset(selectorX - width, selectorY - height);
+                suppTextures.supplements[suppTextures.selectionIndicator].properties.color = Color.Yellow;
+                suppTextures.supplements[suppTextures.selectionIndicator].drawSprite(spriteBatch);
+            }
+
         }
         public void setSupplementalTextures(CardImageStorage storage)
         {
-            suppTextures.cardBorder.setTexture(storage.suppTextures.cardBorder.getTexture());
-            suppTextures.cardImageBorder.setTexture(storage.suppTextures.cardImageBorder.getTexture());
-            suppTextures.cardFilling.setTexture(storage.suppTextures.cardFilling.getTexture());
-            suppTextures.cardBack.setTexture(storage.suppTextures.cardBack.getTexture());
-            properties.width = suppTextures.cardBack.getWidth();
-            properties.height = suppTextures.cardBack.getHeight();
+            for(int i = 0; i < suppTextures.TOTAL; i++)
+            {
+                if(i != suppTextures.portrait)
+                suppTextures.supplements[i].setTexture(storage.suppTextures.supplements[i].getTexture());
+            }
+
+            //suppTextures.cardBorder.setTexture(storage.suppTextures.cardBorder.getTexture());
+            //suppTextures.cardImageBorder.setTexture(storage.suppTextures.cardImageBorder.getTexture());
+            //suppTextures.cardFilling.setTexture(storage.suppTextures.cardFilling.getTexture());
+            //suppTextures.cardBack.setTexture(storage.suppTextures.cardBack.getTexture());
+            properties.width = suppTextures.supplements[suppTextures.cardBack].getWidth();
+            properties.height = suppTextures.supplements[suppTextures.cardBack].getHeight();
         }
         public void setColorForRace()
         {
-            suppTextures.cardFilling.properties.color = retrieveRaceColor();
+            suppTextures.supplements[suppTextures.cardFilling].properties.color = retrieveRaceColor();
         }
         private Color retrieveRaceColor()
         {

@@ -45,7 +45,7 @@ namespace CardGame
         {
             int xPos = 200;
             int yPos = Game1.windowH - board.handSpace[0].getHeight() / 4;
-            board.handSpace[enemy].setPos(xPos, 0);
+            board.handSpace[enemy].setPos(xPos, GraphicsSettings.toResolution(-120));
             board.handSpace[enemy].properties.spriteEffects = SpriteEffects.FlipVertically;
             board.handSpace[friendly].setPos(xPos, yPos);
             board.handSpace[friendly].initializeGameComponent();

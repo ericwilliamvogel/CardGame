@@ -10,6 +10,11 @@ namespace CardGame
     public class ActionConstructor
     {
         public Action moveToAction;
+
+        public void addNewAction(Action action, BoardFunctionality boardFunc)
+        {
+            boardFunc.boardActions.AddAction(action);
+        }
         public void moveTo(CardContainer startingContainer, CardContainer endingContainer, Card card, BoardFunctionality boardFunc)
         {
             //Vector2 toMoveTo = container.getPosition();
@@ -21,6 +26,22 @@ namespace CardGame
             boardFunc.boardActions.AddAction(moveToAction);
         }
 
+        public void addWaitAction(Action action, int time, BoardFunctionality boardFunc)
+        {
+            int x = 0;
+            moveToAction = () =>
+            {
+                x++;
+                if (x > time)
+                {
+                    boardFunc.boardActions.AddAction(action);
+                    x = 0;
+                    boardFunc.boardActions.nextAction();
+                }
+            };
+            boardFunc.boardActions.AddAction(moveToAction);
+
+        }
         public void addDrawAction(CardContainer startingContainer, CardContainer endingContainer, BoardFunctionality boardFunc)
         {
             moveToAction = () => {
@@ -47,7 +68,7 @@ namespace CardGame
             {
                 throw new Exception(endingContainer.getPosition().ToString());
             }
-            int timeUntilArrival = 2;
+            int timeUntilArrival = 1;
             int speedX = (int)GameComponent.ToAbsolute((newPosition.X - card.getPosition().X)) / timeUntilArrival;
 
             if (speedX < 1)

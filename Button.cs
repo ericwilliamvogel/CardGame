@@ -90,7 +90,7 @@ namespace CardGame
         }
 
 
-        public void Update(MouseState mouseState)
+        public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
             try
             {

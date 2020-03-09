@@ -14,7 +14,7 @@ namespace CardGame
         }
 
         public Deck deck;
-        public Hand hand;
+
         private bool control;
         public Player enemy;
         public int handSize = 7;
@@ -22,7 +22,7 @@ namespace CardGame
         {
 
         }
-        public Player(Deck deck)
+        public Player(Side side)
         {
             this.deck = deck;
         }
@@ -51,13 +51,69 @@ namespace CardGame
         {
             control = false;
         }
-        public virtual void PassTurn()
+        public virtual void ResetPlayer()
+        {
+            hasPlayedArmyThisTurn = false;
+        }
+        public virtual void decide(BoardFunctionality boardFunc)
         {
 
         }
+        protected bool hasPlayedArmyThisTurn;
     }
     public class AIPlayer : Player
     {
 
+        int currentArmyCount;
+        public override void decide(BoardFunctionality boardFunc)
+        {
+            foreach(Card card in boardFunc.enemySide.Hand.cardsInContainer)
+            {
+                boardFunc.PlayCard(boardFunc.enemySide, boardFunc.enemySide.Rows[Side.FieldUnit], card);
+                //playArmies(card, boardFunc);
+            }
+            //playCardIfThereAreEnoughArmies(boardFunc);
+            //throw new
+            boardFunc.PassTurn();
+        }
+        private void playArmies(Card card, BoardFunctionality boardFunc)
+        {
+            if(card.cardProps.type == CardType.Army && !hasPlayedArmyThisTurn)
+            {
+                boardFunc.PlayCard(boardFunc.enemySide, boardFunc.enemySide.Rows[Side.Armies], card);
+            }
+        }
+        private void playCardIfThereAreEnoughArmies(BoardFunctionality boardFunc)
+        {
+            int counter = 1;
+            foreach(Card newCard in boardFunc.enemySide.Rows[Side.Armies].cardsInContainer)
+            {
+                if(!newCard.cardProps.exhausted)
+                {
+                    counter++;
+                }
+
+            }
+            foreach(Card newCard in boardFunc.enemySide.Hand.cardsInContainer)
+            {
+                if(newCard.cardProps.cost <= counter)
+                {
+                    boardFunc.PlayCard(boardFunc.enemySide, boardFunc.enemySide.Rows[Side.FieldUnit], newCard);
+                }
+            }
+
+        }
+        
+        private FunctionalRow getCorrectRow(Card card, BoardFunctionality boardFunc)
+        {
+            foreach(FunctionalRow row in boardFunc.enemySide.Rows)
+            {
+                if(row.type == card.cardProps.type)
+                {
+                    return row;
+                }
+            }
+            return null;
+        }
     }
 }

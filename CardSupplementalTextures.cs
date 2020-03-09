@@ -10,49 +10,55 @@ namespace CardGame
 {
     public class CardSupplementalTextures
     {
-        public CardSupplement cardBack;
-        public CardSupplement cardBorder;
-        public CardSupplement cardImageBorder;
-        public CardSupplement cardFilling;
-        public CardSupplement portrait;
+        public int cardBack = 0;
+        public int cardBorder = 1;
+        public int cardImageBorder = 2;
+        public int cardFilling = 3;
+        public int portrait = 4;
+        public int selectionIndicator = 5;
+        public int abilityDisplay = 6;
 
+
+        public int TOTAL = 7;
+        public List<CardSupplement> supplements;
         public CardSupplementalTextures()
         {
-            cardBack = new CardSupplement();
-            cardBorder = new CardSupplement();
-            cardImageBorder = new CardSupplement();
-            cardFilling = new CardSupplement();
-            portrait = new CardSupplement();
-            cardBack.setContentName("cardBack");
-            cardBorder.setContentName("cardBorder");
-            cardImageBorder.setContentName("cardImageBorder");
-            cardFilling.setContentName("cardFilling");
+            supplements = new List<CardSupplement>();
+            for(int i = 0; i < TOTAL; i++)
+            {
+                supplements.Add(new CardSupplement());
+            }
+
+
+            supplements[abilityDisplay].setContentName("abilityTexture");
+            supplements[selectionIndicator].setContentName("selectedSymbol");
+            supplements[cardBack].setContentName("cardBack");
+            supplements[cardBorder].setContentName("cardBorder");
+            supplements[cardImageBorder].setContentName("cardImageBorder");
+            supplements[cardFilling].setContentName("cardFilling");
         }
 
         public void setAllPositionsRelativeTo(GameComponent component)
         {
-            cardBack.setRelativePosition(component);
-            cardImageBorder.setRelativePosition(component);
-            cardFilling.setRelativePosition(component);
-            cardBorder.setRelativePosition(component);
-            portrait.setRelativePosition(component);
+            foreach(CardSupplement supp in supplements)
+            {
+                supp.setRelativePosition(component);
+            }
         }
 
         public void scaleAllTo(float x)
         {
-            cardBack.setScale(x);
-            cardImageBorder.setScale(x);
-            cardFilling.setScale(x);
-            cardBorder.setScale(x);
-            portrait.setScale(x);
+            foreach (CardSupplement supp in supplements)
+            {
+                supp.setScale(x);
+            }
         }
         public void moveAllTo(Vector2 newPosition)
         {
-            cardBack.setPos(newPosition);
-            cardImageBorder.setPos(newPosition);
-            cardFilling.setPos(newPosition);
-            cardBorder.setPos(newPosition);
-            portrait.setPos(newPosition);
+            foreach (CardSupplement supp in supplements)
+            {
+                supp.setPos(newPosition);
+            }
         }
     }
 }
