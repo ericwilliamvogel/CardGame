@@ -141,6 +141,14 @@ namespace CardGame
         public override void drawSprite(SpriteBatch spriteBatch)
         {
             cardDrawer.drawSprite(spriteBatch, this);
+            if(abilityButtons != null)
+            {
+                foreach (Button button in abilityButtons)
+                {
+                    button.drawSprite(spriteBatch);
+                }
+            }
+
         }
 
 
@@ -240,7 +248,15 @@ namespace CardGame
                 handFunction.setCardToMouse(mouseState, this);
                 handFunction.playSelectedCard(mouseState, this);
                 rowFunction.rowLogic(mouseState, this);
-                base.mouseStateLogic(mouseState, content);
+                if (abilityButtons != null)
+                {
+                    foreach (Button button in abilityButtons)
+                    {
+                        button.mouseStateLogic(mouseState, content);
+                    }
+                }
+
+                    base.mouseStateLogic(mouseState, content);
             }
             else if(controllingPlayer == enemySide && !boardActions.isActive())
             {
@@ -261,6 +277,7 @@ namespace CardGame
         public Card ENEMYSELECTEDCARD;
 
         public bool cardView = false;
+        public bool createButtonsOnView;
         public void viewFullSizeCard(MouseState mouseState, Card card)
         {
             if (cardView)
@@ -279,12 +296,18 @@ namespace CardGame
                 {
 
                 }
+                if(createButtonsOnView == false)
+                {
+                    showButtonsOnView(card);
+                }
 
                 if (mouseState.RightButton == ButtonState.Pressed)
                 {
                     resetSelectedCard();
                     card.setRegular();
                     boardPosLogic.updateBoard(this);
+                    abilityButtons = new List<Button>();
+                    createButtonsOnView = false;
                     /*cardView = false;
                     card.setRegular();
                     SELECTEDCARD = null;
@@ -293,19 +316,45 @@ namespace CardGame
                 }
             }
         }
+        List<Button> abilityButtons = new List<Button>();
+        private void showButtonsOnView(Card card)
+        {
+            foreach (Ability ability in card.cardProps.abilities)
+            {
+                Vector2 throwAwayLocation = new Vector2(0, 0);
+                abilityButtons.Add(new Button(null, throwAwayLocation));
+            }
+            int counter = 0;
+            foreach (Button button in abilityButtons)
+            {
+                button.setTexture(card.suppTextures.supplements[card.suppTextures.abilityDisplay].getTexture());
+                button.setPos(new Vector2(card.getPosition().X + card.getWidth(), card.getPosition().Y + button.getHeight() * counter));
+
+
+                ///
+
+                //
+                button.setAction(() => { /*ability[counter].target*/ });
+                //
+                //
+                //
+
+                counter++;
+
+            }
+            createButtonsOnView = true;
+        }
         public void viewCardAndAbilities(MouseState mouseState, Card card)
         {
             boardPosLogic.scaleToView(card);
             card.setPos(Game1.windowW / 2 - card.getWidth(), Game1.windowH / 2 - card.getHeight() / 2);
             //card.displayAbilities
-            foreach(Ability ability in card.cardProps.abilities)
-            {
 
-            }
             if (mouseState.RightButton == ButtonState.Pressed)
             {
                 resetSelectedCard();
                 boardPosLogic.updateBoard(this);
+                abilityButtons = null;
             }
         }
         public void resetSelectedCard()
@@ -437,129 +486,5 @@ namespace CardGame
 
         }
     }
-    public abstract class RowLogic
-    {
-        protected bool clickedInCardBox = false;
-        public abstract void fieldLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc);
-        public void setCardToView(MouseState mouseState, FunctionalRow row, BoardFunctionality boardFunc, bool friendly)
-        {
-            foreach (Card card in row.cardsInContainer)
-            {
-                if (card.isSelected())
-                {
-                    if(friendly)
-                    boardFunc.SELECTEDCARD = card;
-                    if (!friendly)
-                    boardFunc.ENEMYSELECTEDCARD = card;
 
-                    if (!boardFunc.cardView)
-                    {
-                        viewLogic(mouseState, row, card, boardFunc);
-                        fieldLogic(mouseState, row, card, boardFunc);
-                    }
-                    else
-                    {
-                        boardFunc.viewFullSizeCard(mouseState, card);
-                    }
-                }
-            }
-        }
-        public virtual void clickAndHold()
-        {
-
-        }
-        public virtual void viewLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc)
-        {
-            if (mouseState.LeftButton == ButtonState.Pressed && row.isWithinModifiedPosition(mouseState, card))
-            {
-                //card.setPos(mouseState.X - card.getWidth() / 2, mouseState.Y - card.getHeight() / 2);
-                clickedInCardBox = true;
-            }
-            if (mouseState.LeftButton == ButtonState.Released && clickedInCardBox && row.isWithinModifiedPosition(mouseState, card))
-            {
-                clickedInCardBox = false;
-                boardFunc.cardView = true;
-
-            }
-
-
-        }
-
-    }
-    public class ArmyLogic : RowLogic
-    {
-        public override void fieldLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc)
-        {
-
-        }
-    }
-    public class GeneralLogic : RowLogic
-    {
-        public override void fieldLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc)
-        {
-
-        }
-    }
-    public class FieldUnitLogic : RowLogic
-    {
-        public override void fieldLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc)
-        {
-            if (mouseState.LeftButton == ButtonState.Pressed && clickedInCardBox && !row.isWithinModifiedPosition(mouseState, card))
-            {
-                //card.setPos(mouseState.X - card.getWidth() / 2, mouseState.Y - card.getHeight() / 2);
-            }
-            if ((mouseState.LeftButton == ButtonState.Released && clickedInCardBox && !row.isWithinModifiedPosition(mouseState, card)))
-            {
-                foreach (FunctionalRow enemyRow in boardFunc.enemySide.Rows)
-                {
-                    if (enemyRow.playState == Card.PlayState.Revealed)
-                    {
-                        foreach (Card enemyCard in enemyRow.cardsInContainer)
-                        {
-                            if (enemyRow.isWithinModifiedPosition(mouseState, enemyCard))
-                            {
-                                //maybe just draw the 2 images from both cards next to eachother with the results, then perform action
-                                //throw new Exception();
-                                boardFunc.Fight(card, enemyCard);
-                                clickedInCardBox = false;
-                                //boardFunc.SELECTEDCARD = null;
-                            }
-                            else
-                            {
-
-                            }
-                        }
-                    }
-                }
-            }
-            if (mouseState.LeftButton == ButtonState.Released && clickedInCardBox && !row.isWithinModifiedPosition(mouseState, card))
-            {
-                clickedInCardBox = false;
-                card.setRegular();
-                card.resetCardSelector();
-                boardFunc.SELECTEDCARD = null;
-                boardFunc.boardPosLogic.updateBoard(boardFunc);
-            }
-
-            if (mouseState.LeftButton == ButtonState.Pressed && clickedInCardBox && !row.isWithinModifiedPosition(mouseState, card))
-            {
-                foreach (FunctionalRow enemyRow in boardFunc.enemySide.Rows)
-                {
-                    if (enemyRow.playState == Card.PlayState.Revealed)
-                    {
-                        foreach (Card enemyCard in enemyRow.cardsInContainer)
-                        {
-                            if (enemyRow.isWithinModifiedPosition(mouseState, enemyCard))
-                            {
-                                enemyCard.setSelected();
-                            }
-                            else
-                                enemyCard.setRegular();
-                        }
-                    }
-                }
-            }
-
-        }
-    }
 }

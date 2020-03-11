@@ -36,8 +36,8 @@ namespace CardGame
         }
 
 
-
-
+        //public List<Button> abilityButtons = new List<Button>();
+       // public bool showAbilities;
         public CardProperties cardProps;
         public SelectState selectState;
         public PlayState playState;
@@ -158,14 +158,32 @@ namespace CardGame
                     suppTextures.supplements[suppTextures.cardFilling].drawSprite(spriteBatch);
                     suppTextures.supplements[suppTextures.cardImageBorder].drawSprite(spriteBatch);
                     suppTextures.supplements[suppTextures.portrait].drawSprite(spriteBatch);
-                    if(selectState == SelectState.Hovered)
+                    if (selectState == SelectState.Hovered)
                     {
                         drawHighlight(spriteBatch);
 
                     }
+                    if (selectState == SelectState.Selected)
+                    {
+                        drawHighlight(spriteBatch);
+                        drawHighlight(spriteBatch);
+                    }
                     drawCardSelectionBorder(spriteBatch);
                     spriteBatch.DrawString(Game1.spritefont, cardProps.name, new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + 40 * getScale().X), Color.Black, 0, new Vector2(0, 0), 3f * getScale(), SpriteEffects.None, 0);
                     spriteBatch.DrawString(Game1.spritefont, cardProps.cost.ToString(), new Vector2(getPosition().X + getWidth() - 70 * getScale().X, getPosition().Y + 30 * getScale().X), Color.Red, 0, new Vector2(0, 0), 4f * getScale(), SpriteEffects.None, 0);
+
+                    /*for(int i = 0; i < 3; i++)
+                    {
+                        suppTextures.supplements[suppTextures.abilityDisplay].drawSprite(spriteBatch);
+                        spriteBatch.Draw(suppTextures.supplements[suppTextures.abilityDisplay].getTexture(), new Vector2(suppTextures.supplements[suppTextures.abilityDisplay].getPosition().X, suppTextures.supplements[suppTextures.abilityDisplay].getPosition().Y + suppTextures.supplements[suppTextures.abilityDisplay].getHeight() * i), null, null, null, getRotation(), getScale(), getColor(), properties.spriteEffects, 0);
+                    }*/
+                    /*int i = 0;
+                    foreach(Ability ability in cardProps.abilities)
+                    {
+                        spriteBatch.Draw(suppTextures.supplements[suppTextures.abilityDisplay].getTexture(), new Vector2(suppTextures.supplements[suppTextures.abilityDisplay].getPosition().X, suppTextures.supplements[suppTextures.abilityDisplay].getPosition().Y + suppTextures.supplements[suppTextures.abilityDisplay].getHeight() * i), null, null, null, getRotation(), getScale(), getColor(), properties.spriteEffects, 0);
+                        //suppTextures.supplements[suppTextures.abilityDisplay].drawSprite(spriteBatch);
+                        i++;
+                    }*/
                     break;
             }
 
@@ -222,7 +240,7 @@ namespace CardGame
             suppTextures.supplements[suppTextures.cardFilling].setOffset(20 * w, 20 * w);
             suppTextures.supplements[suppTextures.cardImageBorder].setOffset(0 * w, 95 * w);
             suppTextures.supplements[suppTextures.cardBack].setOffset(0 * w, 0 * w);
-            suppTextures.supplements[suppTextures.abilityDisplay].setOffset(getWidth() * w, 0);
+            suppTextures.supplements[suppTextures.abilityDisplay].setOffset(properties.width * w, 0);
 
 
 
@@ -281,7 +299,12 @@ namespace CardGame
                 if(i != suppTextures.portrait)
                 suppTextures.supplements[i].setTexture(storage.suppTextures.supplements[i].getTexture());
             }
-
+            /*for(int i = 0; i < abilityButtons.Count; i++)
+            {
+                Vector2 nullablePosition = new Vector2(0, 0);
+                abilityButtons[i] = new Button(null, nullablePosition);
+                abilityButtons[i].setTexture(storage.suppTextures.supplements[suppTextures.abilityDisplay].getTexture());
+            }*/
             //suppTextures.cardBorder.setTexture(storage.suppTextures.cardBorder.getTexture());
             //suppTextures.cardImageBorder.setTexture(storage.suppTextures.cardImageBorder.getTexture());
             //suppTextures.cardFilling.setTexture(storage.suppTextures.cardFilling.getTexture());

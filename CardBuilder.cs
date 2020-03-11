@@ -27,11 +27,14 @@ namespace CardGame
             if (identifier == 0)
             {
                 constructor.setFieldUnit(identifier);
-                constructor.setPower(2);
+                constructor.setPower(3);
                 constructor.setRace(Card.Race.Elf);
                 constructor.setDefense(3);
                 constructor.setRarity(Card.Rarity.Bronze);
                 constructor.setName("Elf");
+                constructor.addAbility(new Ability()); /**/
+                constructor.addAbility(new Ability()); /**/
+                constructor.addAbility(new Ability()); /**/
             }
             else if(identifier == 1)
             {

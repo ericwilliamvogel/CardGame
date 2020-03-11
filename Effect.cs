@@ -10,10 +10,11 @@ namespace CardGame
     public class Ability
     {
         protected Card INITIALCARD;
-        public Ability(Card card)
+        public Ability()
         {
-            INITIALCARD = card;
+            //INITIALCARD = card;
         }
+        
         public virtual void activateAbility(MouseState mouseState, BoardFunctionality boardFunc)
         {
 
@@ -21,7 +22,7 @@ namespace CardGame
     }
     public class Attack : Ability
     {
-        public Attack(Card card) : base(card)
+        public Attack()
         {
 
         }
@@ -39,14 +40,6 @@ namespace CardGame
                     }
                 }
             }
-        }
-
-        private void fightCards(Card cardOne, Card cardTwo, BoardFunctionality boardFunc)
-        {
-            boardFunc.boardPosLogic.scaleToView(cardOne);
-            int spacing = GraphicsSettings.toResolution(100);
-            cardOne.setPos(spacing, (int)cardOne.getPosition().Y);
-            cardTwo.setPos(Game1.windowW - spacing, (int)cardTwo.getPosition().Y);
         }
     }
 
