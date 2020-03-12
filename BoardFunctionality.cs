@@ -21,19 +21,7 @@ namespace CardGame
         ActionConstructor actionConstructor = new ActionConstructor();
         HandFunctionality handFunction = new HandFunctionality();
         RowFunctionality rowFunction = new RowFunctionality();
-        public enum GameState //LATER
-        {
-            DrawHand,
-            Play,
-            Pause,
-            Pass
-        }
 
-        GameState state;
-        public BoardFunctionality()
-        {
-            state = GameState.DrawHand;
-        }
         public void assignAction()
         {
 
@@ -47,25 +35,6 @@ namespace CardGame
         }
 
         Side controllingPlayer;
-        /*public void handleGameStates()
-        {
-            switch (state)
-            {
-                case GameState.DrawHand:
-                    controllingPlayer.hasControl();
-                    break;
-                case GameState.Play:
-                    controllingPlayer.hasControl();
-                    break;
-                case GameState.Pause:
-                    controllingPlayer.loseControl();
-                    break;
-                case GameState.Pass:
-                    newTurnSwitchPlayer();
-                    break;
-            }
-        }*/
-
 
         public void DrawCard(Side side)
         {
@@ -74,7 +43,6 @@ namespace CardGame
         public void PlayCard(Side side, FunctionalRow row, Card card)
         {
             actionConstructor.moveTo(side.Hand, row, card, this);
-           //card.playState = Card.PlayState.Revealed;
         }
         public void DiscardCard(Side side, Card card)
         {
@@ -91,11 +59,36 @@ namespace CardGame
         {
             side.Player.ResetPlayer();
             DrawCard(side);
-
-            /*
-             * foreach effect in startturn effect -> trigger
-             * 
-             */
+            resetSide(side);
+        }
+        private void resetSide(Side side)
+        {
+            foreach (FunctionalRow row in side.Rows)
+            {
+                foreach (Card card in row.cardsInContainer)
+                {
+                    card.cardProps.exhausted = false;
+                }
+            }
+            foreach (FunctionalRow row in side.Rows)
+            {
+                foreach (Card card in row.cardsInContainer)
+                {
+                    if(card.cardProps.doubleExhausted == true)
+                    {
+                        card.cardProps.exhausted = true;
+                        card.cardProps.doubleExhausted = false;
+                    }
+                }
+            }
+            foreach(FunctionalRow row in side.Rows)
+            {
+                foreach(Card card in row.cardsInContainer)
+                {
+                    card.cardProps.defense = card.cardProps.initialDefense;
+                    card.cardProps.power = card.cardProps.initialPower;
+                }
+            }
         }
         private void resetAllExhaustedCardsOnSide(Side side)
         {
@@ -127,6 +120,9 @@ namespace CardGame
         {
             this.friendlySide = board.friendlySide;
             this.enemySide = board.enemySide;
+
+            controllingPlayer = friendlySide;
+            StartTurn(controllingPlayer);
             DrawHand(friendlySide);
             DrawHand(enemySide);
 
@@ -160,9 +156,6 @@ namespace CardGame
 
         public void Update(Board board)
         {
-            //throw new Exception(friendlySide.Deck.cardsInContainer[0].getPosition().ToString());
-
-
             this.friendlySide = board.friendlySide;
             this.enemySide = board.enemySide;
 
@@ -247,7 +240,11 @@ namespace CardGame
                 }
                 handFunction.setCardToMouse(mouseState, this);
                 handFunction.playSelectedCard(mouseState, this);
+
+
+                if (state != State.Selection)
                 rowFunction.rowLogic(mouseState, this);
+
                 if (abilityButtons != null)
                 {
                     foreach (Button button in abilityButtons)
@@ -262,7 +259,10 @@ namespace CardGame
             {
                 enemySide.Player.decide(this);
             }
-
+            if (state == State.Selection && selection != null)
+            {
+                selection(mouseState);
+            }
         }
 
         public void assignCardPositionsOnHandExtension(Board board)
@@ -276,11 +276,11 @@ namespace CardGame
         public Card SELECTEDCARD;
         public Card ENEMYSELECTEDCARD;
 
-        public bool cardView = false;
+        //public bool cardView = false;
         public bool createButtonsOnView;
         public void viewFullSizeCard(MouseState mouseState, Card card)
         {
-            if (cardView)
+            if (state == State.CardView)
             {
                 boardPosLogic.scaleToView(card);
                 card.setPos(Game1.windowW / 2 - card.getWidth() / 2, Game1.windowH / 2 - card.getHeight() / 2);
@@ -296,9 +296,43 @@ namespace CardGame
                 {
 
                 }
-                if(createButtonsOnView == false)
+
+
+                if (mouseState.RightButton == ButtonState.Pressed)
                 {
-                    showButtonsOnView(card);
+                    resetSelectedCard();
+                    card.setRegular();
+                    boardPosLogic.updateBoard(this);
+                    state = State.Regular;
+                    /*cardView = false;
+                    card.setRegular();
+                    SELECTEDCARD = null;
+                    boardPosLogic.updateBoard(this);*/
+                    //boardPosLogic.scaleToHand(card);
+                }
+            }
+        }
+        public void viewCardWithAbilities(MouseState mouseState, Card card)
+        {
+            if (state == State.CardView)
+            {
+                boardPosLogic.scaleToView(card);
+                card.setPos(Game1.windowW / 2 - card.getWidth() / 2, Game1.windowH / 2 - card.getHeight() / 2);
+                SELECTEDCARD = null;
+                SELECTEDCARD = new Card(card);
+                if (SELECTEDCARD != null)
+                {
+                    boardPosLogic.scaleToView(SELECTEDCARD);
+                    SELECTEDCARD.setPos(Game1.windowW / 2 - card.getWidth() / 2, Game1.windowH / 2 - card.getHeight() / 2);
+                    SELECTEDCARD.updateGameComponent();
+                }
+                if (ENEMYSELECTEDCARD != null)
+                {
+
+                }
+                if (createButtonsOnView == false)
+                {
+                    showButtonsOnView(mouseState, card);
                 }
 
                 if (mouseState.RightButton == ButtonState.Pressed)
@@ -306,8 +340,9 @@ namespace CardGame
                     resetSelectedCard();
                     card.setRegular();
                     boardPosLogic.updateBoard(this);
-                    abilityButtons = new List<Button>();
                     createButtonsOnView = false;
+                    abilityButtons = new List<Button>();
+                    state = State.Regular;
                     /*cardView = false;
                     card.setRegular();
                     SELECTEDCARD = null;
@@ -317,64 +352,181 @@ namespace CardGame
             }
         }
         List<Button> abilityButtons = new List<Button>();
-        private void showButtonsOnView(Card card)
+        public enum State
         {
-            foreach (Ability ability in card.cardProps.abilities)
+            Regular,
+            CardView,
+            Selection
+        }
+        public State state = State.Regular;
+        private void showButtonsOnView(MouseState mouseState, Card card)
+        {
+            createButtonsOnView = true;
+            int counter = 0;
+            for (int i = 0; i < card.cardProps.abilities.Count; i++)
             {
                 Vector2 throwAwayLocation = new Vector2(0, 0);
                 abilityButtons.Add(new Button(null, throwAwayLocation));
+                abilityButtons[i].setTexture(card.suppTextures.supplements[card.suppTextures.abilityDisplay].getTexture());
+                abilityButtons[i].setPos(new Vector2(card.getPosition().X + card.getWidth(), card.getPosition().Y + abilityButtons[i].getHeight() * i));
+                abilityButtons[i].setButtonText(card.cardProps.abilities[i].description);
+                abilityButtons[i].wantedScale = 4f;
+                card.cardProps.abilities[i].clickedInAbilityBox = false;
+                //THE REASONING BEHIND THIS IS THAT THE I ITERATOR WILL END OUTSIDE OF THE ARRAY, AND EACH TIME THE BUTTONS ARE PRESSED THEY
+                //WILL TRIGGER THE FUNCTION AT ITS MAXIMUM
+
+                //IS THERE A BETTER WAY TO DO THIS?
+                //PROBABLY
+                //BUT ITS OK
+                Action<MouseState> action = (MouseState newMouseState) => { };
+                if (i == 0)
+                {
+                    action = (MouseState newMouseState) => {
+                        card.cardProps.abilities[0].setTarget(newMouseState, this);
+                        card.cardProps.abilities[0].activateAbilityOnSelection(newMouseState, this);
+                        resetCardSelection(newMouseState);
+                    };
+                }
+                if (i == 1)
+                {
+                    action = (MouseState newMouseState) => {
+                        card.cardProps.abilities[1].setTarget(newMouseState, this);
+                        card.cardProps.abilities[1].activateAbilityOnSelection(newMouseState, this);
+                        resetCardSelection(newMouseState);
+                    };
+                }
+                if (i == 2)
+                {
+                    action = (MouseState newMouseState) => {
+                        card.cardProps.abilities[2].setTarget(newMouseState, this);
+                        card.cardProps.abilities[2].activateAbilityOnSelection(newMouseState, this);
+                        resetCardSelection(newMouseState);
+                    };
+                }
+                if (i == 3)
+                {
+                    action = (MouseState newMouseState) => {
+                        card.cardProps.abilities[3].setTarget(newMouseState, this);
+                        card.cardProps.abilities[3].activateAbilityOnSelection(newMouseState, this);
+                        resetCardSelection(newMouseState);
+                    };
+                }
+                else
+                {
+                    Console.WriteLine("too many abilities in card");
+                }
+                //THIS ACTUALLY WORKED PERFECTLY IM SO MAD
+
+                abilityButtons[i].setAction(() => {
+                    state = State.Selection;
+
+                    createButtonsOnView = false;
+                    //int receivedint = i;
+                    selection = action;
+                    resetSelectedCard();
+                    card.setRegular();
+                    boardPosLogic.updateBoard(this);
+                    abilityButtons = new List<Button>();
+
+                });
+                counter = i;
             }
-            int counter = 0;
-            foreach (Button button in abilityButtons)
-            {
-                button.setTexture(card.suppTextures.supplements[card.suppTextures.abilityDisplay].getTexture());
-                button.setPos(new Vector2(card.getPosition().X + card.getWidth(), card.getPosition().Y + button.getHeight() * counter));
+            //throw new Exception(counter.ToString());
 
-
-                ///
-
-                //
-                button.setAction(() => { /*ability[counter].target*/ });
-                //
-                //
-                //
-
-                counter++;
-
-            }
-            createButtonsOnView = true;
         }
-        public void viewCardAndAbilities(MouseState mouseState, Card card)
+        public Action<MouseState> selection;
+        public void resetCardSelection(MouseState mouseState)
         {
-            boardPosLogic.scaleToView(card);
-            card.setPos(Game1.windowW / 2 - card.getWidth(), Game1.windowH / 2 - card.getHeight() / 2);
-            //card.displayAbilities
-
-            if (mouseState.RightButton == ButtonState.Pressed)
+            if(mouseState.RightButton == ButtonState.Pressed)
             {
+                state = State.Regular;
+                selection = null;
                 resetSelectedCard();
                 boardPosLogic.updateBoard(this);
-                abilityButtons = null;
+                abilityButtons = new List<Button>();
+                createButtonsOnView = false;
+                if(selection!=null)
+                {
+                    throw new Exception("what is going on");
+
+                }
             }
         }
         public void resetSelectedCard()
         {
-            cardView = false;
+
             if (SELECTEDCARD != null)
             {
                 SELECTEDCARD.setRegular();
                 SELECTEDCARD.resetCardSelector();
             }
-            /*if (ENEMYSELECTEDCARD != null)
-            {
-                ENEMYSELECTEDCARD.setRegular();
-                ENEMYSELECTEDCARD.resetCardSelector();
-            }
-            ENEMYSELECTEDCARD = null;*/
-            SELECTEDCARD = null;
-            //
-        }
 
+            SELECTEDCARD = null;
+
+        }
+        public void Exhaust(Card fromCard, Card targetCard)
+        {
+            boardPosLogic.scaleToHand(fromCard);
+            boardPosLogic.scaleToHand(targetCard);
+            fromCard.setRegular();
+            targetCard.setRegular();
+            int xpos = 50 + GraphicsSettings.toResolution(600);
+            int ypos = Game1.windowH / 2 - fromCard.getWidth() * 2;
+            fromCard.setPos(xpos - fromCard.getWidth(), ypos);
+            targetCard.setPos(xpos, ypos);
+            showEnemyCard = true;
+
+            Action newAction = () =>
+            {
+                targetCard.cardProps.doubleExhausted = true;
+                finalizeCardInteraction(fromCard, targetCard);
+
+                //exhausts both units anyway
+
+                boardActions.nextAction();
+            };
+            actionConstructor.addWaitAction(newAction, 60, this);
+        }
+        public void BoardDamage(Card fromCard, Ability ability)
+        {
+            boardPosLogic.scaleToHand(fromCard);
+            fromCard.setRegular();
+            int xpos = 50 + GraphicsSettings.toResolution(600);
+            int ypos = Game1.windowH / 2 - fromCard.getWidth() * 2;
+            fromCard.setPos(xpos - fromCard.getWidth(), ypos);
+            showEnemyCard = true;
+
+
+            Action newAction = () =>
+            {
+                dealBoardDamageAndDisposeOfDead(fromCard, ability);
+
+                boardActions.nextAction();
+            };
+            actionConstructor.addWaitAction(newAction, 60, this);
+        }
+        public void DirectDamage(Card fromCard, Ability ability, Card targetCard)
+        {
+
+            boardPosLogic.scaleToHand(fromCard);
+            boardPosLogic.scaleToHand(targetCard);
+            fromCard.setRegular();
+            targetCard.setRegular();
+            int xpos = 50 + GraphicsSettings.toResolution(600);
+            int ypos = Game1.windowH / 2 - fromCard.getWidth() * 2;
+            fromCard.setPos(xpos - fromCard.getWidth(), ypos);
+            targetCard.setPos(xpos, ypos);
+            showEnemyCard = true;
+
+
+            Action newAction = () =>
+            {
+                dealDirectDamageAndDisposeOfDead(fromCard, ability, targetCard);
+
+                boardActions.nextAction();
+            };
+            actionConstructor.addWaitAction(newAction, 60, this);
+        }
         public void Fight(Card card, Card otherCard)
         {
             boardPosLogic.scaleToHand(card);
@@ -390,7 +542,7 @@ namespace CardGame
             Action newAction = () =>
             {
                 deductAttributesAndDecideWinner(card, otherCard);
-                showEnemyCard = false;
+
                 boardActions.nextAction();
             };
             actionConstructor.addWaitAction(newAction, 60, this);
@@ -403,12 +555,33 @@ namespace CardGame
             //throw new Exception();
             int firstcardpower = card.cardProps.power;
             int secondcardpower = otherCard.cardProps.power;
-            int firstcarddefense = card.cardProps.defense;
-            int secondcarddefense = otherCard.cardProps.defense;
+            //int firstcarddefense = card.cardProps.defense;
+            //int secondcarddefense = otherCard.cardProps.defense;
 
             card.cardProps.defense -= secondcardpower;
             otherCard.cardProps.defense -= firstcardpower;
 
+            finalizeCardInteraction(card, otherCard);
+
+        }
+        public void dealDirectDamageAndDisposeOfDead(Card fromCard, Ability ability, Card targetCard)
+        {
+            int damage = ability.power;
+            targetCard.cardProps.defense -= damage;
+            finalizeCardInteraction(fromCard, targetCard);
+
+        }
+        public void dealBoardDamageAndDisposeOfDead(Card fromCard, Ability ability)
+        {
+            int damage = ability.power;
+            foreach(Card card in enemySide.Rows[Side.FieldUnit].cardsInContainer)
+            {
+                card.cardProps.defense -= damage;
+            }
+            finalizeCardInteraction(fromCard, fromCard);
+        }
+        private void finalizeCardInteraction(Card card, Card otherCard)
+        {
             card.setRegular();
             otherCard.setRegular();
             card.cardProps.exhausted = true;
@@ -416,8 +589,11 @@ namespace CardGame
             boardPosLogic.scaleToBoard(card);
             boardPosLogic.scaleToBoard(otherCard);
             checkBothSidesForDead();
-            boardPosLogic.updateBoard(this);
+            showEnemyCard = false;
+            selection = null;
 
+            state = State.Regular;
+            boardPosLogic.updateBoard(this);
         }
         private void checkBothSidesForDead()
         {
@@ -446,45 +622,6 @@ namespace CardGame
             actionConstructor.moveTo(row, side.Oblivion, card, this);
         }
     }
-    public class RowFunctionality
-    {
-        GeneralLogic generalLogic;
-        FieldUnitLogic fieldUnitLogic;
-        ArmyLogic armyLogic;
-        public RowFunctionality()
-        {
-            generalLogic = new GeneralLogic();
-            fieldUnitLogic = new FieldUnitLogic();
-            armyLogic = new ArmyLogic();
-        }
-        public void rowLogic(MouseState mouseState, BoardFunctionality boardFunc)
-        {
-            rowLogicForSide(mouseState, boardFunc.friendlySide, boardFunc, true);
-            rowLogicForSide(mouseState, boardFunc.enemySide, boardFunc, false);
-        }
-
-        private void rowLogicForSide(MouseState mouseState, Side side, BoardFunctionality boardFunc, bool friendly)
-        {
-            foreach (FunctionalRow row in side.Rows)
-            {
-                switch (row.type)
-                {
-                    case CardType.Army:
-                        break;
-                    case CardType.FieldUnit:
-                        fieldUnitLogic.setCardToView(mouseState, row, boardFunc, friendly);
-                        break;
-                    case CardType.General:
-                        break;
-                }
-            }
-        }
-        public void fieldLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc)
-        {
-
-
-
-        }
-    }
+    
 
 }

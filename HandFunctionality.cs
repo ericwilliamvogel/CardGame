@@ -28,7 +28,7 @@ namespace CardGame
         }
         public void playSelectedCard(MouseState mouseState, BoardFunctionality boardFunc)
         {
-            if (isWithinProperRow(mouseState, boardFunc) && !boardFunc.cardView)
+            if (isWithinProperRow(mouseState, boardFunc) && boardFunc.state != BoardFunctionality.State.CardView)
             {
                 foreach (Card card in boardFunc.friendlySide.Hand.cardsInContainer)
                 {
@@ -60,7 +60,7 @@ namespace CardGame
             {
                 if (card.isSelected())
                 {
-                    if (!boardFunc.cardView)
+                    if (boardFunc.state != BoardFunctionality.State.CardView)
                     {
                         updateCardInteractivityInHand(mouseState, card, boardFunc);
                     }
@@ -90,7 +90,7 @@ namespace CardGame
             if (mouseState.LeftButton == ButtonState.Released && clickedInCardBox && boardFunc.friendlySide.Hand.isWithinModifiedPosition(mouseState, card))
             {
                 clickedInCardBox = false;
-                boardFunc.cardView = true;
+                boardFunc.state = BoardFunctionality.State.CardView;
                 card.resetCardSelector();
             }
         }

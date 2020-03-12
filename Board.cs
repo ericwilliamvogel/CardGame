@@ -71,17 +71,20 @@ namespace CardGame
             int identifierCounter = 0;
             for (int i = 0; i < deckLimitForTesting; i++)
             {
-                Card card = cardBuilder.cardConstruct(cardConstructor,0);
+                if (identifierCounter == 0)
+                {
+                    identifierCounter = 4;
+                }
+                else
+                    identifierCounter = 0;
+
+                Card card = cardBuilder.cardConstruct(cardConstructor,identifierCounter);
                 card.setSupplementalTextures(library);
-                Card car2 = cardBuilder.cardConstruct(cardConstructor,0);
+                Card car2 = cardBuilder.cardConstruct(cardConstructor,identifierCounter);
                 car2.setSupplementalTextures(library);
                 TEST.cardsInContainer.Add(car2);
                 deck.cardsInContainer.Add(card);
-                identifierCounter++;
-                if(identifierCounter > 2)
-                {
-                    identifierCounter = 0;
-                }
+
             }
 
             library = cardConstructor.tempStorage;

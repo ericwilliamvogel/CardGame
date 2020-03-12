@@ -94,36 +94,42 @@ namespace CardGame
 
         protected void cardStateHandler(MouseState mouseState, BoardFunctionality boardFunc, Card card)
         {
-            //setCorrectCenterSpacing(card);
-            switch (card.selectState)
+            if (!card.cardProps.exhausted)
             {
-                case Card.SelectState.Regular:
-                    if (isWithinModifiedPosition(mouseState, card))
-                    {
-                        card.setHovered();
-                        additionalAction(card);
-                    }
+                switch (card.selectState)
+                {
+                    case Card.SelectState.Regular:
+                        if (isWithinModifiedPosition(mouseState, card))
+                        {
+                            card.setHovered();
+                            additionalAction(card);
+                        }
 
-                    break;
-                case Card.SelectState.Hovered:
-                    if (!isWithinModifiedPosition(mouseState, card))
-                    {
-                        card.setRegular();
-                        resetAction(card);
-                    }
-                    
-                    if (mouseState.LeftButton == ButtonState.Pressed && noCardsOnBoardAreSelected(boardFunc))
-                    {
-                        card.setSelected();
-                        //resetAction(card);
-                    }
-                    break;
-                case Card.SelectState.Selected:
-                    if (mouseState.MiddleButton == ButtonState.Pressed)
-                    {
-                        card.setRegular();
-                    }
-                    break;
+                        break;
+                    case Card.SelectState.Hovered:
+                        if (!isWithinModifiedPosition(mouseState, card))
+                        {
+                            card.setRegular();
+                            resetAction(card);
+                        }
+
+                        if (mouseState.LeftButton == ButtonState.Pressed && noCardsOnBoardAreSelected(boardFunc))
+                        {
+                            card.setSelected();
+                            //resetAction(card);
+                        }
+                        break;
+                    case Card.SelectState.Selected:
+                        if (mouseState.MiddleButton == ButtonState.Pressed)
+                        {
+                            card.setRegular();
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                card.setHovered();
             }
         }
         private bool noCardsOnBoardAreSelected(BoardFunctionality game)

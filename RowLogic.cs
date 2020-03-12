@@ -7,6 +7,47 @@ using System.Threading.Tasks;
 
 namespace CardGame
 {
+    public class RowFunctionality
+    {
+        GeneralLogic generalLogic;
+        FieldUnitLogic fieldUnitLogic;
+        ArmyLogic armyLogic;
+        public RowFunctionality()
+        {
+            generalLogic = new GeneralLogic();
+            fieldUnitLogic = new FieldUnitLogic();
+            armyLogic = new ArmyLogic();
+        }
+        public void rowLogic(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            rowLogicForSide(mouseState, boardFunc.friendlySide, boardFunc, true);
+            rowLogicForSide(mouseState, boardFunc.enemySide, boardFunc, false);
+        }
+
+        private void rowLogicForSide(MouseState mouseState, Side side, BoardFunctionality boardFunc, bool friendly)
+        {
+            foreach (FunctionalRow row in side.Rows)
+            {
+                switch (row.type)
+                {
+                    case CardType.Army:
+                        break;
+                    case CardType.FieldUnit:
+                        fieldUnitLogic.setCardToView(mouseState, row, boardFunc, friendly);
+                        break;
+                    case CardType.General:
+                        generalLogic.setCardToView(mouseState, row, boardFunc, friendly);
+                        break;
+                }
+            }
+        }
+        public void fieldLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc)
+        {
+
+
+
+        }
+    }
     public abstract class RowLogic
     {
         protected SelectUnitAction selectAction;
@@ -22,21 +63,21 @@ namespace CardGame
         {
             foreach (Card card in row.cardsInContainer)
             {
-                if (card.isSelected())
+                if (card.isSelected() && !card.cardProps.exhausted)
                 {
                     if (friendly)
                         boardFunc.SELECTEDCARD = card;
                     if (!friendly)
                         boardFunc.ENEMYSELECTEDCARD = card;
 
-                    if (!boardFunc.cardView)
+                    if (boardFunc.state == BoardFunctionality.State.Regular)
                     {
                         viewLogic(mouseState, row, card, boardFunc);
                         fieldLogic(mouseState, row, card, boardFunc);
                     }
                     else
                     {
-                        boardFunc.viewFullSizeCard(mouseState, card);
+                        boardFunc.viewCardWithAbilities(mouseState, card);
                     }
                 }
             }
@@ -55,7 +96,7 @@ namespace CardGame
             if (mouseState.LeftButton == ButtonState.Released && clickedInCardBox && row.isWithinModifiedPosition(mouseState, card))
             {
                 clickedInCardBox = false;
-                boardFunc.cardView = true;
+                boardFunc.state = BoardFunctionality.State.CardView;
 
             }
 
@@ -88,84 +129,7 @@ namespace CardGame
 
         }
     }
-    public class SelectUnitAction
-    {
-
-        private Action action;
-        public void setAction(Action newAction)
-        {
-            action = newAction;
-        }
-        private Card targetedCard = null;
-        public Card targetCard()
-        {
-            return targetedCard;
-        }
-
-        //needs testing, may break if selecting a friendly source
-        public void SetTargetCard(MouseState mouseState, HorizontalContainer container, Card card, Side side)
-        {
-            if (mouseState.LeftButton == ButtonState.Pressed && !container.isWithinModifiedPosition(mouseState, card))
-            {
-                foreach (FunctionalRow row in side.Rows)
-                {
-                    if (row.playState == Card.PlayState.Revealed)
-                    {
-                        foreach (Card newCard in row.cardsInContainer)
-                        {
-                            if (row.isWithinModifiedPosition(mouseState, newCard))
-                            {
-                                newCard.setSelected();
-                            }
-                            else
-                                newCard.setRegular();
-                        }
-                    }
-                }
-            }
-        }
-        public Card TargetAnyCard(MouseState mouseState, HorizontalContainer container, Card card, BoardFunctionality boardFunc)
-        {
-            if(TargetCard(mouseState, container, card, boardFunc.friendlySide) != null)
-            {
-                return TargetCard(mouseState, container, card, boardFunc.friendlySide);
-            }
-            if (TargetCard(mouseState, container, card, boardFunc.enemySide) != null)
-            {
-                return TargetCard(mouseState, container, card, boardFunc.enemySide);
-            }
-            return null;
-        }
-        public Card TargetEnemyCard(MouseState mouseState, HorizontalContainer container, Card card, BoardFunctionality boardFunc)
-        {
-            return TargetCard(mouseState, container, card, boardFunc.enemySide);
-        }
-        public Card TargetFriendlyCard(MouseState mouseState, HorizontalContainer container, Card card, BoardFunctionality boardFunc)
-        {
-            return TargetCard(mouseState, container, card, boardFunc.friendlySide);
-        }
-        public Card TargetCard(MouseState mouseState, HorizontalContainer container, Card card, Side side)
-        {
-                if ((mouseState.LeftButton == ButtonState.Released && !container.isWithinModifiedPosition(mouseState, card)))
-                {
-                    foreach (FunctionalRow row in side.Rows)
-                    {
-                        if (row.playState == Card.PlayState.Revealed)
-                        {
-                            foreach (Card newCard in row.cardsInContainer)
-                            {
-                                if (row.isWithinModifiedPosition(mouseState, newCard))
-                                {
-                                    return newCard;
-                                }
-                            }
-                        }
-                    }
-                }
-            
-            return null;
-        }
-    }
+    
     public class FieldUnitLogic : RowLogic
     {
         public FieldUnitLogic()
@@ -176,9 +140,9 @@ namespace CardGame
             if (clickedInCardBox)
             {
                 selectAction.SetTargetCard(mouseState, row, card, boardFunc.enemySide);
-                if (selectAction.TargetEnemyCard(mouseState, row, card, boardFunc) != null)
+                if (selectAction.TargetEnemyCard(mouseState, boardFunc) != null && !row.isWithinModifiedPosition(mouseState, card))
                 {
-                    boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, row, card, boardFunc));
+                    boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState,boardFunc));
                 }
                 resetIfNoSelection(mouseState, row, card, boardFunc);
             }

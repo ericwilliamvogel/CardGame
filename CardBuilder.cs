@@ -32,20 +32,22 @@ namespace CardGame
                 constructor.setDefense(3);
                 constructor.setRarity(Card.Rarity.Bronze);
                 constructor.setName("Elf");
-                constructor.addAbility(new Ability()); /**/
-                constructor.addAbility(new Ability()); /**/
-                constructor.addAbility(new Ability()); /**/
+                constructor.addAbility(new Exhaust()); /**/
+
             }
             else if(identifier == 1)
             {
                 constructor.setGeneral(identifier);
-                constructor.setPower(1);
+                constructor.setPower(0);
                 constructor.setRace(Card.Race.Human);
-                constructor.setDefense(1);
+                constructor.setDefense(4);
                 constructor.setRarity(Card.Rarity.Bronze);
                 constructor.setName("Guy");
+                constructor.addAbility(new TargetDamage(2, 1));
+                constructor.addAbility(new TargetDamage(5, -2));
+                constructor.addAbility(new TargetDamage(12, -8));
             }
-            else
+            else if(identifier == 2)
             {
                 constructor.setArmy(identifier);
                 constructor.setPower(1);
@@ -53,6 +55,27 @@ namespace CardGame
                 constructor.setDefense(1);
                 constructor.setRarity(Card.Rarity.Bronze);
                 constructor.setName("Thing");
+            }
+            else if(identifier == 3)
+            {
+                constructor.setFieldUnit(identifier);
+                constructor.setPower(1);
+                constructor.setRace(Card.Race.Orc);
+                constructor.setDefense(2);
+                constructor.setRarity(Card.Rarity.Bronze);
+                constructor.setName("NEWGUY");
+            }
+            else if(identifier == 4)
+            {
+                constructor.setGeneral(identifier);
+                constructor.setPower(0);
+                constructor.setRace(Card.Race.Orc);
+                constructor.setDefense(2);
+                constructor.setRarity(Card.Rarity.Bronze);
+                constructor.setName("COOL GENERAL");
+                constructor.addAbility(new TargetDamage(1, 2));
+                constructor.addAbility(new BoardDamage(1, -1));
+                constructor.addAbility(new BoardDamage(12, -10));
             }
         }
         /*public void Assemble2(CardConstructor constructor)
@@ -94,14 +117,10 @@ namespace CardGame
         }
         public void setDefense(int defense)
         {
-            if (card.cardProps.type == CardType.General)
-            {
-                Console.WriteLine(card.cardProps.name + ": system attempted to give general defense");
-            }
-            else
-            {
+
                 card.setDefense(defense);
-            }
+            card.cardProps.initialDefense = defense;
+            
         }
         public void setRace(Card.Race race)
         {
@@ -128,6 +147,7 @@ namespace CardGame
         }
         public Card getCard()
         {
+            card.finalizeAbilities();
             return card;
         }
     }

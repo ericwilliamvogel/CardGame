@@ -29,15 +29,29 @@ namespace CardGame
             public List<Effect> effects = new List<Effect>();
             public List<Ability> abilities = new List<Ability>();
             public int cost = 0;
+            public int initialPower = 0;
+            public int initialDefense = 1;
             public int power = 0;
             public int defense = 1;
             public CardType type;
             public bool exhausted;
+            public bool doubleExhausted;
         }
 
 
         //public List<Button> abilityButtons = new List<Button>();
        // public bool showAbilities;
+        public HorizontalContainer getCurrentContainer(Side side)
+        {
+            foreach(FunctionalRow container in side.Rows)
+            {
+                if(container.type == cardProps.type)
+                {
+                    return container;
+                }
+            }
+            return null;
+        }
         public CardProperties cardProps;
         public SelectState selectState;
         public PlayState playState;
@@ -121,27 +135,34 @@ namespace CardGame
         }
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
-            switch (selectState)
+            if (!cardProps.exhausted)
             {
-                case SelectState.Regular:
-                    if(isWithinBox(mouseState))
-                    {
-                        selectState = SelectState.Hovered;
-                    }
-                    
-                    break;
-                case SelectState.Hovered:
-                    if(mouseState.LeftButton == ButtonState.Pressed)
-                    {
-                        selectState = SelectState.Selected;
-                    }
-                    break;
-                case SelectState.Selected:
-                    if(mouseState.MiddleButton == ButtonState.Pressed)
-                    {
-                        selectState = SelectState.Regular;
-                    }
-                    break;
+                switch (selectState)
+                {
+                    case SelectState.Regular:
+                        if (isWithinBox(mouseState))
+                        {
+                            selectState = SelectState.Hovered;
+                        }
+
+                        break;
+                    case SelectState.Hovered:
+                        if (mouseState.LeftButton == ButtonState.Pressed)
+                        {
+                            selectState = SelectState.Selected;
+                        }
+                        break;
+                    case SelectState.Selected:
+                        if (mouseState.MiddleButton == ButtonState.Pressed)
+                        {
+                            selectState = SelectState.Regular;
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                selectState = SelectState.Hovered;
             }
         }
 
@@ -171,6 +192,14 @@ namespace CardGame
                     drawCardSelectionBorder(spriteBatch);
                     spriteBatch.DrawString(Game1.spritefont, cardProps.name, new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + 40 * getScale().X), Color.Black, 0, new Vector2(0, 0), 3f * getScale(), SpriteEffects.None, 0);
                     spriteBatch.DrawString(Game1.spritefont, cardProps.cost.ToString(), new Vector2(getPosition().X + getWidth() - 70 * getScale().X, getPosition().Y + 30 * getScale().X), Color.Red, 0, new Vector2(0, 0), 4f * getScale(), SpriteEffects.None, 0);
+                    spriteBatch.DrawString(Game1.spritefont, cardProps.defense.ToString(), new Vector2(getPosition().X + getWidth() - 70 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 5f * getScale(), SpriteEffects.None, 0);
+                    if(cardProps.power != 0)
+                    spriteBatch.DrawString(Game1.spritefont, cardProps.power.ToString(), new Vector2(getPosition().X + 40 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 5f * getScale(), SpriteEffects.None, 0);
+
+                    for(int i = 0; i < cardProps.abilities.Count; i++)
+                    {
+                        spriteBatch.DrawString(Game1.spritefont, cardProps.abilities[i].name.ToString() + " "+cardProps.abilities[i].description.ToString(), new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + getHeight() * 2/3 + (80 * getScale().X) * i), Color.Black, 0, new Vector2(0, 0), 3f * getScale(), SpriteEffects.None, 0);
+                    }
 
                     /*for(int i = 0; i < 3; i++)
                     {
@@ -250,6 +279,15 @@ namespace CardGame
         private int selectorX, selectorY;
         int velocityX = 2;
         int velocityY = -1;
+
+        public void finalizeAbilities()
+        {
+            foreach(Ability ability in cardProps.abilities)
+            {
+                ability.setCard(this);
+            }
+        }
+
         public void drawCardSelectionBorder(SpriteBatch spriteBatch)
         {
 
