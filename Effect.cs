@@ -17,6 +17,24 @@ namespace CardGame
         public int power;
         protected int exchangeValue;
 
+        public void displayGeneralIncrements(int exchangeValue)
+        {
+            this.exchangeValue = exchangeValue;
+            string startingString = exchangeValue.ToString();
+            if (exchangeValue == 0)
+            {
+                name = startingString + ":";
+
+            }
+            else if (exchangeValue > 0)
+            {
+                name = "+" + startingString + ":";
+            }
+            else
+            {
+                name = "" + startingString + ":";
+            }
+        }
         public enum Type
         {
             Targeted,
@@ -50,6 +68,14 @@ namespace CardGame
             resetSide(boardFunc.enemySide);
             resetSide(boardFunc.friendlySide);
         }
+        public virtual void useAbility(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            if (INITIALCARD.cardProps.type == CardType.General)
+            {
+                INITIALCARD.cardProps.defense += exchangeValue;
+            }
+
+        }
         private void resetSide(Side side)
         {
             foreach (FunctionalRow row in side.Rows)
@@ -65,6 +91,7 @@ namespace CardGame
     {
         public Exhaust()
         {
+            name = "Exhaust:";
             description = "Exhaust enemy unit";
         }
         public Exhaust(int exchangeValue)
@@ -74,9 +101,9 @@ namespace CardGame
         public override Card returnSelectedCard(MouseState mouseState, BoardFunctionality boardFunc)
         {
 
-            if (selectAction.TargetEnemyCard(mouseState, boardFunc) != null)
+            if (selectAction.TargetEnemyCard(mouseState, boardFunc, true) != null)
             {
-                return selectAction.TargetEnemyCard(mouseState, boardFunc);
+                return selectAction.TargetEnemyCard(mouseState, boardFunc, true);
             }
             else
                 return null;
@@ -87,15 +114,26 @@ namespace CardGame
         {
             if (returnSelectedCard(mouseState, boardFunc) != null && INITIALCARD.cardProps.exhausted == false && clickedInAbilityBox == false)
             {
-                //INITIALCARD.finalizeAbilities();
-                boardFunc.resetCardSelection(mouseState);
-                INITIALCARD.cardProps.defense += exchangeValue;
-                boardFunc.Exhaust(INITIALCARD, returnSelectedCard(mouseState, boardFunc));
-                clickedInAbilityBox = true;
-                resetAllCards(boardFunc);
+                if (selectAction.TargetEnemyCard(mouseState, boardFunc, true).correctRow(boardFunc.enemySide).revealed)
+                {
+
+
+                    //INITIALCARD.finalizeAbilities();
+                    boardFunc.resetCardSelection(mouseState);
+                    useAbility(mouseState, boardFunc);
+
+                    clickedInAbilityBox = true;
+                    resetAllCards(boardFunc);
+                }
             }
             selectAction.resetIfNoSelection(mouseState, INITIALCARD.getCurrentContainer(boardFunc.friendlySide), INITIALCARD, boardFunc);
         }
+        public override void useAbility(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            boardFunc.Exhaust(INITIALCARD, returnSelectedCard(mouseState, boardFunc));
+            base.useAbility(mouseState, boardFunc);
+        }
+
     }
     public class BoardDamage : TargetDamage
     {
@@ -107,15 +145,56 @@ namespace CardGame
         {
             if (returnSelectedCard(mouseState, boardFunc) != null && INITIALCARD.cardProps.exhausted == false && clickedInAbilityBox == false)
             {
-                //INITIALCARD.finalizeAbilities();
-                boardFunc.resetCardSelection(mouseState);
-                INITIALCARD.cardProps.defense += exchangeValue;
-                boardFunc.BoardDamage(INITIALCARD, this);
-                clickedInAbilityBox = true;
-                resetAllCards(boardFunc);
+                if (selectAction.TargetEnemyCard(mouseState, boardFunc, true).correctRow(boardFunc.enemySide).revealed)
+                {
+
+
+                    //INITIALCARD.finalizeAbilities();
+                    boardFunc.resetCardSelection(mouseState);
+                    useAbility(mouseState, boardFunc);
+                    clickedInAbilityBox = true;
+                    resetAllCards(boardFunc);
+                }
             }
             selectAction.resetIfNoSelection(mouseState, INITIALCARD.getCurrentContainer(boardFunc.friendlySide), INITIALCARD, boardFunc);
         }
+        public override void useAbility(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            boardFunc.BoardDamage(INITIALCARD, this, returnSelectedCard(mouseState, boardFunc));
+            base.useAbility(mouseState, boardFunc);
+        }
+    }
+    public class Reveal : Ability
+    {
+        public Reveal()
+        {
+            name = "Exhaust:";
+            description = "Reveal board until turn end";
+        }
+        public Reveal(int exchangeValue) : this()
+        {
+            displayGeneralIncrements(exchangeValue);
+
+        }
+        public override void activateAbilityOnSelection(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            if (INITIALCARD.cardProps.exhausted == false && clickedInAbilityBox == false)
+            {
+                boardFunc.resetCardSelection(mouseState);
+                useAbility(mouseState, boardFunc);
+
+                clickedInAbilityBox = true;
+                resetAllCards(boardFunc);
+            }
+        }
+        public override void useAbility(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            boardFunc.RevealBoard(INITIALCARD, this);
+            base.useAbility(mouseState, boardFunc);
+        }
+
+
+
     }
     public class TargetDamage : Ability
     {
@@ -128,35 +207,32 @@ namespace CardGame
         }
         public TargetDamage(int damage, int exchangeValue) : this(damage)
         {
-            this.exchangeValue = exchangeValue;
-            string startingString = exchangeValue.ToString();
-            if(exchangeValue == 0)
-            {
-                name = startingString + ":";
-
-            }
-            else if (exchangeValue > 0)
-            {
-                name = "+" + startingString + ":";
-            }
-            else
-            {
-                name = "" + startingString + ":";
-            }
+            displayGeneralIncrements(exchangeValue);
 
         }
         public override void activateAbilityOnSelection(MouseState mouseState, BoardFunctionality boardFunc)
         {
             if(returnSelectedCard(mouseState,boardFunc) != null && INITIALCARD.cardProps.exhausted == false && clickedInAbilityBox == false)
             {
-                //INITIALCARD.finalizeAbilities();
-                boardFunc.resetCardSelection(mouseState);
-                INITIALCARD.cardProps.defense += exchangeValue;
-                boardFunc.DirectDamage(INITIALCARD, this, returnSelectedCard(mouseState, boardFunc));
-                clickedInAbilityBox = true;
-                resetAllCards(boardFunc);
+                if (selectAction.TargetEnemyCard(mouseState, boardFunc, true).correctRow(boardFunc.enemySide).revealed)
+                {
+
+
+                    //INITIALCARD.finalizeAbilities();
+                    boardFunc.resetCardSelection(mouseState);
+
+                    useAbility(mouseState, boardFunc);
+
+                    clickedInAbilityBox = true;
+                    resetAllCards(boardFunc);
+                }
             }
             selectAction.resetIfNoSelection(mouseState, INITIALCARD.getCurrentContainer(boardFunc.friendlySide), INITIALCARD, boardFunc);
+        }
+        public override void useAbility(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            boardFunc.DirectDamage(INITIALCARD, this, returnSelectedCard(mouseState, boardFunc));
+            base.useAbility(mouseState, boardFunc);
         }
         public override void setTarget(MouseState mouseState, BoardFunctionality boardFunc)
         {
@@ -167,9 +243,9 @@ namespace CardGame
         public override Card returnSelectedCard(MouseState mouseState, BoardFunctionality boardFunc)
         {
 
-            if (selectAction.TargetEnemyCard(mouseState, boardFunc) != null)
+            if (selectAction.TargetEnemyCard(mouseState, boardFunc, true) != null)
             {
-                return selectAction.TargetEnemyCard(mouseState, boardFunc);
+                return selectAction.TargetEnemyCard(mouseState, boardFunc, true);
             }
             else
                 return null;

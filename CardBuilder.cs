@@ -27,6 +27,8 @@ namespace CardGame
             if (identifier == 0)
             {
                 constructor.setFieldUnit(identifier);
+                Card.Race[] cost = { Card.Race.Elf, Card.Race.Elf };
+                constructor.setCost(new Cost(2, cost));
                 constructor.setPower(3);
                 constructor.setRace(Card.Race.Elf);
                 constructor.setDefense(3);
@@ -38,6 +40,8 @@ namespace CardGame
             else if(identifier == 1)
             {
                 constructor.setGeneral(identifier);
+                Card.Race[] cost = { Card.Race.Human };
+                constructor.setCost(new Cost(3, cost));
                 constructor.setPower(0);
                 constructor.setRace(Card.Race.Human);
                 constructor.setDefense(4);
@@ -50,15 +54,17 @@ namespace CardGame
             else if(identifier == 2)
             {
                 constructor.setArmy(identifier);
-                constructor.setPower(1);
+                constructor.setPower(2);
                 constructor.setRace(Card.Race.Orc);
-                constructor.setDefense(1);
+                constructor.setDefense(4);
                 constructor.setRarity(Card.Rarity.Bronze);
                 constructor.setName("Thing");
             }
             else if(identifier == 3)
             {
                 constructor.setFieldUnit(identifier);
+                Card.Race[] cost = { Card.Race.Orc };
+                constructor.setCost(new Cost(0, cost));
                 constructor.setPower(1);
                 constructor.setRace(Card.Race.Orc);
                 constructor.setDefense(2);
@@ -68,12 +74,14 @@ namespace CardGame
             else if(identifier == 4)
             {
                 constructor.setGeneral(identifier);
+                Card.Race[] cost = { Card.Race.Orc };
+                constructor.setCost(new Cost(2, cost));
                 constructor.setPower(0);
                 constructor.setRace(Card.Race.Orc);
                 constructor.setDefense(2);
                 constructor.setRarity(Card.Rarity.Bronze);
                 constructor.setName("COOL GENERAL");
-                constructor.addAbility(new TargetDamage(1, 2));
+                constructor.addAbility(new Reveal(2));
                 constructor.addAbility(new BoardDamage(1, -1));
                 constructor.addAbility(new BoardDamage(12, -10));
             }
@@ -94,9 +102,14 @@ namespace CardGame
         protected Card card;
         public CardImageStorage tempStorage;
         //
+
         public CardConstructor()
         {
             tempStorage = new CardImageStorage();
+        }
+        public void setCost(Cost cost)
+        {
+            card.cardProps.cost = cost;
         }
         public void setGeneral(int identifier)
         {
@@ -110,6 +123,7 @@ namespace CardGame
         public void setPower(int power)
         {
             card.setPower(power);
+            card.cardProps.initialPower = power;
         }
         public void setRarity(Card.Rarity rarity)
         {

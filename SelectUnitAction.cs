@@ -56,29 +56,38 @@ namespace CardGame
                 }
             }
         }
-        public Card TargetAnyCard(MouseState mouseState, BoardFunctionality boardFunc)
+        public Card TargetAnyCard(MouseState mouseState, BoardFunctionality boardFunc, bool pressToTarget)
         {
-            if (TargetCard(mouseState,boardFunc.friendlySide) != null)
+            if (TargetCard(mouseState,boardFunc.friendlySide,pressToTarget) != null)
             {
-                return TargetCard(mouseState, boardFunc.friendlySide);
+                return TargetCard(mouseState, boardFunc.friendlySide,pressToTarget);
             }
-            if (TargetCard(mouseState,  boardFunc.enemySide) != null)
+            if (TargetCard(mouseState,  boardFunc.enemySide,pressToTarget) != null)
             {
-                return TargetCard(mouseState,boardFunc.enemySide);
+                return TargetCard(mouseState,boardFunc.enemySide,pressToTarget);
             }
             return null;
         }
-        public Card TargetEnemyCard(MouseState mouseState, BoardFunctionality boardFunc)
+        public Card TargetEnemyCard(MouseState mouseState, BoardFunctionality boardFunc, bool pressToTarget)
         {
-            return TargetCard(mouseState,  boardFunc.enemySide);
+            return TargetCard(mouseState,  boardFunc.enemySide, pressToTarget);
         }
-        public Card TargetFriendlyCard(MouseState mouseState, BoardFunctionality boardFunc)
+        public Card TargetFriendlyCard(MouseState mouseState, BoardFunctionality boardFunc, bool pressToTarget)
         {
-            return TargetCard(mouseState, boardFunc.friendlySide);
+            return TargetCard(mouseState, boardFunc.friendlySide, pressToTarget);
         }
-        public Card TargetCard(MouseState mouseState, Side side)
+        public Card TargetCard(MouseState mouseState, Side side, bool pressToTarget)
         {
-            if (mouseState.LeftButton == ButtonState.Pressed)
+            ButtonState state;
+            if(pressToTarget)
+            {
+                state = ButtonState.Pressed;
+            }
+            else
+            {
+                state = ButtonState.Released;
+            }
+            if (mouseState.LeftButton == state)
             {
                 foreach (FunctionalRow row in side.Rows)
                 {

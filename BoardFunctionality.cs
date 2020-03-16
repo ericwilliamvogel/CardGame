@@ -18,10 +18,10 @@ namespace CardGame
     {
         public BoardPositionUpdater boardPosLogic = new BoardPositionUpdater();
         public BoardActions boardActions = new BoardActions();
-        ActionConstructor actionConstructor = new ActionConstructor();
-        HandFunctionality handFunction = new HandFunctionality();
-        RowFunctionality rowFunction = new RowFunctionality();
-
+        public ActionConstructor actionConstructor = new ActionConstructor();
+        public HandFunctionality handFunction = new HandFunctionality();
+        public RowFunctionality rowFunction = new RowFunctionality();
+        GameComponent rowFog = new GameComponent();
         public void assignAction()
         {
 
@@ -29,6 +29,7 @@ namespace CardGame
 
         public override void initializeGameComponent(ContentManager content)
         {
+            rowFog.setSprite(content, "rowNotRevealed");
             //load all card textures
             //load decks of players
 
@@ -38,11 +39,110 @@ namespace CardGame
 
         public void DrawCard(Side side)
         {
+
             actionConstructor.addDrawAction(side.Deck, side.Hand, this);
         }
-        public void PlayCard(Side side, FunctionalRow row, Card card)
+        public void PlayCard(Side side,  Card card)
         {
-            actionConstructor.moveTo(side.Hand, row, card, this);
+            switch(card.cardProps.type)
+            {
+                case CardType.Army:
+                    if(side.canPlayArmy)
+                    {
+                        playCardIfSideHasSufficientResources(side, card);
+
+                    }
+                    else
+                    {
+                        returnToHand(side, card);
+                    }
+                    break;
+                default:
+                    playCardIfSideHasSufficientResources(side, card);
+                    break;
+            }
+
+            
+        }
+        private void playCardIfSideHasSufficientResources(Side side, Card card)
+        {
+            if (card.canBePlayed(side))
+            {
+                //int temporaryCounter = card.cardProps.cost.raceCost.Count;
+                deductCostFromResourcesAndPlayCard(side, card);
+
+            }
+            else
+            {
+                returnToHand(side, card);
+                //boardPosLogic.updateBoard(this);
+                //throw new Exception("does not have enough MANA");
+            }
+        }
+        private void deductCostFromResourcesAndPlayCard(Side side, Card card)
+        {
+            if (card.cardProps.cost.raceCost != null)
+            {
+                List<Card.Race> deductedResources = new List<Card.Race>();
+
+                foreach (Card.Race cardResource in card.cardProps.cost.raceCost)
+                {
+                    bool check = false;
+                    foreach (Card.Race resource in side.Resources)
+                    {
+                        if (cardResource == resource && check == false)
+                        {
+                            deductedResources.Add(resource);
+                            check = true;
+                        }
+                    }
+                }
+                if (deductedResources.Count < card.cardProps.cost.raceCost.Count)
+                {
+
+                    returnToHand(side, card);
+
+                }
+                else
+                {
+                    foreach (Card.Race resource in deductedResources)
+                    {
+                        side.Resources.Remove(resource);
+
+                    }
+                    for (int i = 0; i < card.cardProps.cost.unanimousCost; i++)
+                    {
+                        side.Resources.Remove(0);
+                    }
+                    resumeWithPlayingCard(side, card);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < card.cardProps.cost.totalCost; i++)
+                {
+                    side.Resources.Remove(0);
+                }
+                resumeWithPlayingCard(side, card);
+            }
+        }
+        private void resumeWithPlayingCard(Side side, Card card)
+        {
+            actionConstructor.moveTo(side.Hand, card.correctRow(side), card, this);
+
+            if (card.cardProps.type == CardType.Army)
+            {
+                side.canPlayArmy = false;
+            }
+            else
+            {
+                card.cardProps.exhausted = true;
+            }
+        }
+        private void returnToHand(Side side, Card card)
+        {
+            actionConstructor.moveTo(side.Hand, side.Hand, card, this);
+
         }
         public void DiscardCard(Side side, Card card)
         {
@@ -85,10 +185,19 @@ namespace CardGame
             {
                 foreach(Card card in row.cardsInContainer)
                 {
-                    card.cardProps.defense = card.cardProps.initialDefense;
-                    card.cardProps.power = card.cardProps.initialPower;
+                    if (card.cardProps.type != CardType.General)
+                    {
+
+                        card.cardProps.defense = card.cardProps.initialDefense;
+                        card.cardProps.power = card.cardProps.initialPower;
+                    }
                 }
             }
+            resetFog(enemySide);
+            resetFog(friendlySide);
+            enemySide.Resources = new List<Card.Race>();
+            friendlySide.Resources = new List<Card.Race>();
+            side.canPlayArmy = true;
         }
         private void resetAllExhaustedCardsOnSide(Side side)
         {
@@ -100,11 +209,20 @@ namespace CardGame
                 }
             }
         }
+
+        private void resetFog(Side side)
+        {
+            foreach (FunctionalRow row in side.Rows)
+            {
+                row.revealed = row.revealedTrueValue;
+            }
+        }
         public void PassTurn()
         {
             if (controllingPlayer == friendlySide)
             {
                 controllingPlayer = enemySide;
+                enemySide.boardFunc.controllingPlayer = enemySide.boardFunc.friendlySide;
             }
             else if(controllingPlayer == enemySide)
             {
@@ -115,18 +233,40 @@ namespace CardGame
             StartTurn(controllingPlayer);
         }
 
-
-        public void StartGame(Board board)
+        Action<Board> updateSide;
+        public void initSide(Board board, Side RELATIVEfriendlySide)
         {
-            this.friendlySide = board.friendlySide;
-            this.enemySide = board.enemySide;
+            if (board.enemySide == RELATIVEfriendlySide)
+            {
+                this.friendlySide = RELATIVEfriendlySide;
+                updateSide = (Board newBoard) => {
+                    this.enemySide = newBoard.friendlySide;
+                    this.friendlySide = newBoard.enemySide;
+                    newBoard.controllingPlayer = this.controllingPlayer;
+                };
+                updateSide(board);
+            }
+            if (board.friendlySide == RELATIVEfriendlySide)
+            {
+                this.friendlySide = RELATIVEfriendlySide;
+                updateSide = (Board newBoard) => {
+                    this.enemySide = newBoard.enemySide;
+                    this.friendlySide = newBoard.friendlySide;
+                    newBoard.controllingPlayer = this.controllingPlayer;
+                };
+            }
+            updateSide(board);
+        }
+        public void StartGame(Board board, Side side)
+        {
+
+
 
             controllingPlayer = friendlySide;
             StartTurn(controllingPlayer);
             DrawHand(friendlySide);
             DrawHand(enemySide);
 
-            controllingPlayer = friendlySide;
 
             boardPosLogic.updateBoard(this);
 
@@ -136,6 +276,14 @@ namespace CardGame
 
         public override void drawSprite(SpriteBatch spriteBatch)
         {
+            foreach (FunctionalRow row in enemySide.Rows)
+            {
+                if (!row.revealed)
+                {
+                    rowFog.setPos(row.getPosition());
+                    rowFog.drawSprite(spriteBatch);
+                }
+            }
             cardDrawer.drawSprite(spriteBatch, this);
             if(abilityButtons != null)
             {
@@ -144,6 +292,7 @@ namespace CardGame
                     button.drawSprite(spriteBatch);
                 }
             }
+
 
         }
 
@@ -156,16 +305,23 @@ namespace CardGame
 
         public void Update(Board board)
         {
-            this.friendlySide = board.friendlySide;
-            this.enemySide = board.enemySide;
 
-
+            updateSide(board);
             boardActions.updateAnimations();
             updateAllAssets();
             if (boardActions.isActive())
             {
                 resetSelectedCard();
             }
+
+            /*if(enemySide.boardFunc.controllingPlayer == enemySide.boardFunc.enemySide)
+            {
+                controllingPlayer = friendlySide;
+            }
+            else
+            {
+                controllingPlayer = enemySide;
+            }*/
         }
 
         public void updateAllAssets()
@@ -225,39 +381,12 @@ namespace CardGame
         {
             if(controllingPlayer == friendlySide)
             {
-                if (SELECTEDCARD == null && !boardActions.isActive())
-                    friendlySide.Hand.modifyCardInteractivity(mouseState, this);
-
-                foreach (FunctionalRow row in friendlySide.Rows)
-                {
-                    if (SELECTEDCARD == null && !boardActions.isActive())
-                        row.modifyCardInteractivity(mouseState, this);
-                }
-                foreach (FunctionalRow row in enemySide.Rows)
-                {
-                    if (!boardActions.isActive())
-                        row.modifyCardInteractivity(mouseState, this);
-                }
-                handFunction.setCardToMouse(mouseState, this);
-                handFunction.playSelectedCard(mouseState, this);
-
-
-                if (state != State.Selection)
-                rowFunction.rowLogic(mouseState, this);
-
-                if (abilityButtons != null)
-                {
-                    foreach (Button button in abilityButtons)
-                    {
-                        button.mouseStateLogic(mouseState, content);
-                    }
-                }
-
-                    base.mouseStateLogic(mouseState, content);
+                friendlySide.Player.decide(mouseState, content, this);
+                    
             }
             else if(controllingPlayer == enemySide && !boardActions.isActive())
             {
-                enemySide.Player.decide(this);
+                //enemySide.Player.decide(mouseState, content, this);
             }
             if (state == State.Selection && selection != null)
             {
@@ -351,7 +480,7 @@ namespace CardGame
                 }
             }
         }
-        List<Button> abilityButtons = new List<Button>();
+        public List<Button> abilityButtons = new List<Button>();
         public enum State
         {
             Regular,
@@ -464,6 +593,26 @@ namespace CardGame
             SELECTEDCARD = null;
 
         }
+        public void RevealBoard(Card fromCard, Ability ability)
+        {
+            boardPosLogic.scaleToHand(fromCard);
+            fromCard.setRegular();
+            int xpos = 50 + GraphicsSettings.toResolution(600);
+            int ypos = Game1.windowH / 2 - fromCard.getWidth() * 2;
+            fromCard.setPos(xpos - fromCard.getWidth(), ypos);
+            showEnemyCard = true;
+
+            Action newAction = () =>
+            {
+                revealBoardForRemainderOfTurn(fromCard, ability);
+                finalizeCardInteraction(fromCard, fromCard);
+
+                //exhausts both units anyway
+
+                boardActions.nextAction();
+            };
+            actionConstructor.addWaitAction(newAction, 60, this);
+        }
         public void Exhaust(Card fromCard, Card targetCard)
         {
             boardPosLogic.scaleToHand(fromCard);
@@ -487,7 +636,7 @@ namespace CardGame
             };
             actionConstructor.addWaitAction(newAction, 60, this);
         }
-        public void BoardDamage(Card fromCard, Ability ability)
+        public void BoardDamage(Card fromCard, Ability ability, Card targetCard)
         {
             boardPosLogic.scaleToHand(fromCard);
             fromCard.setRegular();
@@ -499,7 +648,7 @@ namespace CardGame
 
             Action newAction = () =>
             {
-                dealBoardDamageAndDisposeOfDead(fromCard, ability);
+                dealBoardDamageAndDisposeOfDead(fromCard, ability, targetCard);
 
                 boardActions.nextAction();
             };
@@ -571,10 +720,19 @@ namespace CardGame
             finalizeCardInteraction(fromCard, targetCard);
 
         }
-        public void dealBoardDamageAndDisposeOfDead(Card fromCard, Ability ability)
+        public void revealBoardForRemainderOfTurn(Card fromCard, Ability ability)
         {
+            foreach(FunctionalRow row in enemySide.Rows)
+            {
+                row.revealed = true;
+            }
+
+        }
+        public void dealBoardDamageAndDisposeOfDead(Card fromCard, Ability ability, Card targetCard)
+        {
+
             int damage = ability.power;
-            foreach(Card card in enemySide.Rows[Side.FieldUnit].cardsInContainer)
+            foreach(Card card in targetCard.correctRow(enemySide).cardsInContainer)
             {
                 card.cardProps.defense -= damage;
             }

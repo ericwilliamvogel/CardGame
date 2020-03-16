@@ -31,6 +31,26 @@ namespace CardGame
             setPortraitWidgetPositions();
             setHandSpaceTextures(content);
             setHandSpacePositions();
+            setTokens(content);
+        }
+        private void setTokens(ContentManager content)
+        {
+            int startingPosX = (int)board.rows[5].getPosition().X + board.rows[5].getWidth() + 50;
+            int yPos = (int)board.rows[5].getPosition().Y;
+            board.unanimousToken.setSprite(content, "unanimousToken");
+            board.unanimousToken.setPos(startingPosX, yPos);
+
+            startingPosX += GraphicsSettings.toResolution(100);
+            board.elfToken.setSprite(content, "elfToken");
+            board.elfToken.setPos(startingPosX, yPos);
+
+            startingPosX += GraphicsSettings.toResolution(100);
+            board.orcToken.setSprite(content, "orcToken");
+            board.orcToken.setPos(startingPosX, yPos);
+
+            startingPosX += GraphicsSettings.toResolution(100);
+            board.humanToken.setSprite(content, "humanToken");
+            board.humanToken.setPos(startingPosX, yPos);
         }
         private void setHandSpaceTextures(ContentManager content)
         {

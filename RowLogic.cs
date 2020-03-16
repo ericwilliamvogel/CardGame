@@ -31,6 +31,7 @@ namespace CardGame
                 switch (row.type)
                 {
                     case CardType.Army:
+                        armyLogic.setCardToView(mouseState, row, boardFunc, friendly);
                         break;
                     case CardType.FieldUnit:
                         fieldUnitLogic.setCardToView(mouseState, row, boardFunc, friendly);
@@ -59,26 +60,36 @@ namespace CardGame
         }
         public abstract void fieldLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc);
 
-        public void setCardToView(MouseState mouseState, FunctionalRow row, BoardFunctionality boardFunc, bool friendly)
+        public virtual void setCardToView(MouseState mouseState, FunctionalRow row, BoardFunctionality boardFunc, bool friendly)
         {
             foreach (Card card in row.cardsInContainer)
             {
                 if (card.isSelected() && !card.cardProps.exhausted)
                 {
                     if (friendly)
+                    {
                         boardFunc.SELECTEDCARD = card;
-                    if (!friendly)
-                        boardFunc.ENEMYSELECTEDCARD = card;
+                        if (boardFunc.state == BoardFunctionality.State.Regular)
+                        {
+                            viewLogic(mouseState, row, card, boardFunc);
+                            fieldLogic(mouseState, row, card, boardFunc);
+                        }
+                        else
+                        {
+                            boardFunc.viewCardWithAbilities(mouseState, card);
 
-                    if (boardFunc.state == BoardFunctionality.State.Regular)
-                    {
-                        viewLogic(mouseState, row, card, boardFunc);
-                        fieldLogic(mouseState, row, card, boardFunc);
+                        }
                     }
-                    else
+
+                    if (!friendly)
                     {
-                        boardFunc.viewCardWithAbilities(mouseState, card);
+                            boardFunc.ENEMYSELECTEDCARD = card;
+                            viewLogic(mouseState, row, card, boardFunc);
                     }
+                        
+
+
+
                 }
             }
         }
@@ -117,16 +128,69 @@ namespace CardGame
     }
     public class ArmyLogic : RowLogic
     {
+        bool rightClickedInBox;
         public override void fieldLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc)
         {
+            if (mouseState.RightButton == ButtonState.Pressed && row.isWithinModifiedPosition(mouseState, card) && !card.cardProps.exhausted)
+            {
+                //card.setPos(mouseState.X - card.getWidth() / 2, mouseState.Y - card.getHeight() / 2);
+                rightClickedInBox = true;
+                //throw new Exception();
+            }
+            if (mouseState.RightButton == ButtonState.Released && rightClickedInBox && row.isWithinModifiedPosition(mouseState, card))
+            {
+                rightClickedInBox = false;
+                card.cardProps.exhausted = true;
+                
+                boardFunc.friendlySide.Resources.Add(card.race);
+                boardFunc.resetSelectedCard();
+                card.setRegular();
+                //send animation?
+            }
+        }
+        public override void setCardToView(MouseState mouseState, FunctionalRow row, BoardFunctionality boardFunc, bool friendly)
+        {
+            foreach (Card card in row.cardsInContainer)
+            {
+                if (card.isSelected() && !card.cardProps.exhausted)
+                {
+                    if (friendly)
+                    {
+                        boardFunc.SELECTEDCARD = card;
+                    }
 
+                    if (!friendly)
+                    {
+                        boardFunc.ENEMYSELECTEDCARD = card;
+                    }
+
+
+                    if (boardFunc.state == BoardFunctionality.State.Regular)
+                    {
+                        viewLogic(mouseState, row, card, boardFunc);
+                    }
+                    else
+                    {
+                        boardFunc.viewCardWithAbilities(mouseState, card);
+                    }
+                }
+
+                if(friendly)
+                fieldLogic(mouseState, row, card, boardFunc);
+            }
         }
     }
     public class GeneralLogic : RowLogic
     {
         public override void fieldLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc)
         {
-
+            if (clickedInCardBox)
+            {
+                if ( !row.isWithinModifiedPosition(mouseState, card))
+                {
+                    resetIfNoSelection(mouseState, row, card, boardFunc);
+                }
+            }
         }
     }
     
@@ -140,9 +204,10 @@ namespace CardGame
             if (clickedInCardBox)
             {
                 selectAction.SetTargetCard(mouseState, row, card, boardFunc.enemySide);
-                if (selectAction.TargetEnemyCard(mouseState, boardFunc) != null && !row.isWithinModifiedPosition(mouseState, card))
+                if (selectAction.TargetEnemyCard(mouseState, boardFunc, false) != null && !row.isWithinModifiedPosition(mouseState, card))
                 {
-                    boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState,boardFunc));
+                    if(selectAction.TargetEnemyCard(mouseState, boardFunc, false).correctRow(boardFunc.enemySide).revealed)
+                    boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState,boardFunc, false));
                 }
                 resetIfNoSelection(mouseState, row, card, boardFunc);
             }

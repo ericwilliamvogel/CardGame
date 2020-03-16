@@ -52,17 +52,11 @@ namespace CardGame
         private void updateHandPositions(BoardFunctionality boardFunc)
         {
             setHandPositions(boardFunc.friendlySide);
-            setContainerPlayState(boardFunc.friendlySide.Hand, Card.PlayState.Revealed);
+
             setHandPositions(boardFunc.enemySide);
-            setContainerPlayState(boardFunc.enemySide.Hand, Card.PlayState.Hidden);
+
         }
-        private void setContainerPlayState(CardContainer container, Card.PlayState playState)
-        {
-            foreach (Card card in container.cardsInContainer)
-            {
-                card.playState = playState;
-            }
-        }
+
         private void updateBoardPositions(BoardFunctionality boardFunc)
         {
             for (int i = 0; i < Side.MaxRows; i++)

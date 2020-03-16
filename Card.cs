@@ -12,6 +12,23 @@ using System.Threading.Tasks;
 
 namespace CardGame
 {
+    public class Cost
+    {
+        public Cost()
+        {
+
+        }
+        public Cost(int unanimousCost, Card.Race[] races)
+        {
+            raceCost = new List<Card.Race>();
+            this.unanimousCost = unanimousCost;
+            raceCost.AddRange(races.ToList());
+            totalCost = unanimousCost + raceCost.Count;
+        }
+        public List<Card.Race> raceCost;
+        public int unanimousCost = 0;
+        public int totalCost = 0;
+    }
     public class Card : GameComponent
     {
         public bool makingAction;
@@ -28,7 +45,7 @@ namespace CardGame
             public string name;
             public List<Effect> effects = new List<Effect>();
             public List<Ability> abilities = new List<Ability>();
-            public int cost = 0;
+            public Cost cost = new Cost();
             public int initialPower = 0;
             public int initialDefense = 1;
             public int power = 0;
@@ -61,7 +78,8 @@ namespace CardGame
         {
             Orc,
             Elf,
-            Human
+            Human,
+            Unanimous
         }
         public enum Rarity
         {
@@ -91,8 +109,20 @@ namespace CardGame
             this.cardProps.defense = defense;
         }
 
+        public FunctionalRow correctRow(Side side)
+        {
+            foreach(FunctionalRow row in side.Rows)
+            {
+                if(row.type == cardProps.type)
+                {
+                    return row;
+                }
+            }
+            return null;
+        }
         public Card(int identifier)
         {
+            
             cardProps = new CardProperties();
             this.cardProps.identifier = identifier;
             suppTextures = new CardSupplementalTextures();
@@ -166,6 +196,24 @@ namespace CardGame
             }
         }
 
+        public bool canBePlayed(Side side)
+        {
+            if(cardProps.cost.totalCost <= side.Resources.Count)
+            {
+                return true;
+            }
+            return false;
+        }
+        public bool isFirstArmy(Side side)
+        {
+                if(side.canPlayArmy)
+                {
+                    return true;
+                }
+            
+            return false;
+        }
+
         public override void drawSprite(SpriteBatch spriteBatch)
         {
             switch (playState)
@@ -190,17 +238,65 @@ namespace CardGame
                         drawHighlight(spriteBatch);
                     }
                     drawCardSelectionBorder(spriteBatch);
-                    spriteBatch.DrawString(Game1.spritefont, cardProps.name, new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + 40 * getScale().X), Color.Black, 0, new Vector2(0, 0), 3f * getScale(), SpriteEffects.None, 0);
-                    spriteBatch.DrawString(Game1.spritefont, cardProps.cost.ToString(), new Vector2(getPosition().X + getWidth() - 70 * getScale().X, getPosition().Y + 30 * getScale().X), Color.Red, 0, new Vector2(0, 0), 4f * getScale(), SpriteEffects.None, 0);
-                    spriteBatch.DrawString(Game1.spritefont, cardProps.defense.ToString(), new Vector2(getPosition().X + getWidth() - 70 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 5f * getScale(), SpriteEffects.None, 0);
+                    spriteBatch.DrawString(Game1.spritefont, cardProps.name, new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + 40 * getScale().X), Color.Black, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
+
+
+               
+                    spriteBatch.DrawString(Game1.spritefont, cardProps.defense.ToString(), new Vector2(getPosition().X + getWidth() - 70 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 1.66f * getScale(), SpriteEffects.None, 0);
                     if(cardProps.power != 0)
-                    spriteBatch.DrawString(Game1.spritefont, cardProps.power.ToString(), new Vector2(getPosition().X + 40 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 5f * getScale(), SpriteEffects.None, 0);
+                    spriteBatch.DrawString(Game1.spritefont, cardProps.power.ToString(), new Vector2(getPosition().X + 40 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 1.66f * getScale(), SpriteEffects.None, 0);
 
                     for(int i = 0; i < cardProps.abilities.Count; i++)
                     {
-                        spriteBatch.DrawString(Game1.spritefont, cardProps.abilities[i].name.ToString() + " "+cardProps.abilities[i].description.ToString(), new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + getHeight() * 2/3 + (80 * getScale().X) * i), Color.Black, 0, new Vector2(0, 0), 3f * getScale(), SpriteEffects.None, 0);
+                        spriteBatch.DrawString(Game1.spritefont, cardProps.abilities[i].name.ToString() + " "+cardProps.abilities[i].description.ToString(), new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + getHeight() * 2/3 + (80 * getScale().X) * i), Color.Black, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
                     }
 
+
+                    int counter = 0;
+                    int selector = 0;
+                    int tokenWidth = (int) (suppTextures.supplements[suppTextures.elfToken].getWidth() - 20 * getScale().X);
+                    int borderOffset = (int)(10 * getScale().X);
+
+                    if (cardProps.cost.raceCost != null)
+                    {
+                        foreach (Race resource in cardProps.cost.raceCost)
+                        {
+
+                            if (resource == Race.Elf)
+                            {
+                                selector = suppTextures.elfToken;
+                            }
+                            else if (resource == Race.Orc)
+                            {
+                                selector = suppTextures.orcToken;
+                            }
+                            else if (resource == Race.Human)
+                            {
+                                selector = suppTextures.humanToken;
+                            }
+
+
+                            spriteBatch.Draw(suppTextures.supplements[selector].getTexture(), new Vector2(getPosition().X + getWidth() - borderOffset * 2 - tokenWidth - tokenWidth * counter, getPosition().Y + borderOffset), null, null, null, getRotation(), getScale(), getColor(), properties.spriteEffects, 0);
+                            //suppTextures.supplements[selector].setPos(new Vector2(getPosition().X + getWidth() - borderOffset - tokenWidth - tokenWidth * counter, getPosition().Y + borderOffset));
+                            //suppTextures.supplements[selector].drawSprite(spriteBatch);
+                            counter++;
+                        }
+                    }
+
+
+                    //
+                    //COST
+                    if (cardProps.cost.unanimousCost > 0)
+                    {
+
+                        selector = suppTextures.unanimousToken;
+                        spriteBatch.Draw(suppTextures.supplements[selector].getTexture(), new Vector2(getPosition().X + getWidth() - borderOffset * 2 - tokenWidth - tokenWidth * counter, getPosition().Y + borderOffset), null, null, null, getRotation(), getScale(), getColor(), properties.spriteEffects, 0);
+                        spriteBatch.DrawString(Game1.spritefont, cardProps.cost.unanimousCost.ToString(), new Vector2(getPosition().X + getWidth() - borderOffset * 2- tokenWidth - tokenWidth * counter + tokenWidth / 2 - borderOffset / 2, getPosition().Y + borderOffset * 3), Color.Black, 0, new Vector2(0, 0), 1.33f * getScale(), SpriteEffects.None, 0);
+                    }
+
+
+                    //
+                    //
                     /*for(int i = 0; i < 3; i++)
                     {
                         suppTextures.supplements[suppTextures.abilityDisplay].drawSprite(spriteBatch);

@@ -20,7 +20,7 @@ namespace CardGame
             drawStack(boardFunc.friendlySide.Oblivion, spriteBatch);
 
 
-            drawRows(boardFunc.enemySide, spriteBatch);
+            drawRevealedRows(boardFunc.enemySide, spriteBatch);
             drawRows(boardFunc.friendlySide, spriteBatch);
 
             drawHand(boardFunc.enemySide, spriteBatch);
@@ -50,6 +50,21 @@ namespace CardGame
                 {
                     card.drawSprite(spriteBatch);
                 }
+            }
+
+        }
+        private void drawRevealedRows(Side side, SpriteBatch spriteBatch)
+        {
+            foreach (FunctionalRow row in side.Rows)
+            {
+                if(row.revealed)
+                {
+                    foreach (Card card in row.cardsInContainer)
+                    {
+                        card.drawSprite(spriteBatch);
+                    }
+                }
+
             }
 
         }

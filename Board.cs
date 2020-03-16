@@ -13,7 +13,34 @@ namespace CardGame
 
 
 
-   
+    public class Token : GameComponent
+    {
+        public int resources;
+        public Card.Race race;
+        public Token(Card.Race race)
+        {
+            this.race = race;
+        }
+        public override void drawSprite(SpriteBatch spriteBatch)
+        {
+
+            base.drawSprite(spriteBatch);
+            spriteBatch.DrawString(Game1.spritefont, resources.ToString(), new Vector2(getPosition().X + getWidth()/2 - 10 * getScale().X, getPosition().Y + getHeight() / 2 - 20 * getScale().X), Color.Black, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
+        }
+        public void adjustResourceValue(Side side)
+        {
+            int x = 0;
+            foreach(Card.Race resource in side.Resources)
+            {
+                if(resource == race)
+                {
+                    x++;
+                }
+            }
+
+            resources = x;
+        }
+    }
     public class Board : PrimaryComponent
     {
         public List<PortraitWidget> portraitWidgets = new List<PortraitWidget>();
@@ -22,8 +49,12 @@ namespace CardGame
         public List<StackPlaceholder> deckHolder = new List<StackPlaceholder>();
         public List<StackPlaceholder> oblivionHolder = new List<StackPlaceholder>();
         public List<HandSpace> handSpace = new List<HandSpace>();
+        public Token unanimousToken;
+        public Token elfToken;
+        public Token orcToken;
+        public Token humanToken;
 
-        BoardFunctionality gameLoop;
+        //BoardFunctionality gameLoop;
 
         public Side friendlySide;
         public Side enemySide;
@@ -31,10 +62,16 @@ namespace CardGame
         int sideCounter = 0;
         BoardTextures textures;
         Button button;
+        public Side controllingPlayer;
+
         public override void initializeGameComponent(ContentManager content)
         {
 
-            gameLoop = new BoardFunctionality();
+            unanimousToken = new Token(Card.Race.Unanimous);
+            elfToken = new Token(Card.Race.Elf);
+            orcToken = new Token(Card.Race.Orc);
+            humanToken = new Token(Card.Race.Human);
+            //gameLoop = new BoardFunctionality();
             oblivionHolder = new List<StackPlaceholder>();
             deckHolder = new List<StackPlaceholder>();
             rows = new List<Row>();
@@ -47,7 +84,7 @@ namespace CardGame
 
             button = new Button(content, new Vector2(Game1.windowW - 100, Game1.windowH / 2 + 100), "secondButtonTexture");
             button.setPos(new Vector2(Game1.windowW - 100 - button.getWidth(), Game1.windowH / 2 + 100));
-            button.setAction(() => { gameLoop.PassTurn(); });
+            button.setAction(() => { friendlySide.boardFunc.PassTurn(); });
 
 
             switcherButtons = new List<SwitcherButton>();
@@ -71,20 +108,24 @@ namespace CardGame
             int identifierCounter = 0;
             for (int i = 0; i < deckLimitForTesting; i++)
             {
-                if (identifierCounter == 0)
+                /*if (identifierCounter == 0)
                 {
                     identifierCounter = 4;
                 }
                 else
                     identifierCounter = 0;
-
+*/
                 Card card = cardBuilder.cardConstruct(cardConstructor,identifierCounter);
                 card.setSupplementalTextures(library);
                 Card car2 = cardBuilder.cardConstruct(cardConstructor,identifierCounter);
                 car2.setSupplementalTextures(library);
                 TEST.cardsInContainer.Add(car2);
                 deck.cardsInContainer.Add(card);
-
+                identifierCounter++;
+                if(identifierCounter > 4)
+                {
+                    identifierCounter = 0;
+                }
             }
 
             library = cardConstructor.tempStorage;
@@ -95,7 +136,7 @@ namespace CardGame
             //
 
             //
-            Player player1 = new Player();
+            Player player1 = new ActivePlayer();
             Player player2 = new AIPlayer();
 
             friendlySide = new Side(player1);
@@ -104,15 +145,18 @@ namespace CardGame
             TEST.loadCardsInDeck(library.cardTextureDictionary);
             friendlySide.Deck = deck;
             enemySide.Deck = TEST;
+
             setSide(enemySide);
             setSide(friendlySide);
 
-
+            enemySide.boardFunc.initSide(this, enemySide);
+            friendlySide.boardFunc.initSide(this, friendlySide);
+            friendlySide.boardFunc.initializeGameComponent(content);
 
 
 
             //gameLoop.initializeGameComponent(content);
-            gameLoop.StartGame(this);
+            friendlySide.boardFunc.StartGame(this, friendlySide);
         }
         int multiplier = 0;
         private void updateHandPosition()
@@ -135,7 +179,7 @@ namespace CardGame
                 sideCounter = 0;
                 multiplier = 0;
             }
-            //throw new Exception(side.Deck.POS.ToString());
+            side.boardFunc.initSide(this, side);
         }
         
         public override void drawSprite(SpriteBatch spriteBatch)
@@ -157,42 +201,59 @@ namespace CardGame
             {
                 widget.drawSprite(spriteBatch);
             }
-            foreach(HandSpace hand in handSpace)
-            {
-                //hand.drawSprite(spriteBatch);
-            }
+            unanimousToken.drawSprite(spriteBatch);
+            elfToken.drawSprite(spriteBatch);
+            orcToken.drawSprite(spriteBatch);
+            humanToken.drawSprite(spriteBatch);
+
             button.drawSprite(spriteBatch);
-            gameLoop.drawSprite(spriteBatch);
+            friendlySide.boardFunc.drawSprite(spriteBatch);
         }
         bool pressed;
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
-            foreach(Row row in rows)
+            setContainerPlayState(friendlySide.Hand, Card.PlayState.Revealed);
+            setContainerPlayState(enemySide.Hand, Card.PlayState.Hidden);
+            foreach (Row row in rows)
             {
                 row.mouseStateLogic(mouseState, content);
             }
             //
             //
             //handSpace[friendly].mouseStateLogic(mouseState, content);
-            gameLoop.mouseStateLogic(mouseState, content);
             
+            friendlySide.boardFunc.mouseStateLogic(mouseState, content);
+            enemySide.boardFunc.mouseStateLogic(mouseState, content);
             ////
             if(mouseState.MiddleButton == ButtonState.Pressed && pressed == false)
             {
-                gameLoop.DrawHand(friendlySide);
-                gameLoop.DrawHand(enemySide);
+                friendlySide.boardFunc.DrawHand(friendlySide);
+                friendlySide.boardFunc.DrawHand(enemySide);
                 pressed = true;
             }
             if(mouseState.MiddleButton == ButtonState.Released)
             {
-                pressed = false;
+                pressed = false; 
             }
             button.mouseStateLogic(mouseState, content);
         }
+
+        private void setContainerPlayState(CardContainer container, Card.PlayState playState)
+        {
+            foreach (Card card in container.cardsInContainer)
+            {
+                card.playState = playState;
+            }
+        }
         public override void updateGameComponent(ContentManager content)
         {
-            gameLoop.Update(this);
+            friendlySide.boardFunc.Update(this);
+            enemySide.boardFunc.Update(this);
             updateHandPosition();
+            unanimousToken.adjustResourceValue(friendlySide);
+            elfToken.adjustResourceValue(friendlySide);
+            orcToken.adjustResourceValue(friendlySide);
+            humanToken.adjustResourceValue(friendlySide);
         }
 
         public int enemy = 0;

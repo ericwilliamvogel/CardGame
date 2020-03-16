@@ -40,7 +40,7 @@ namespace CardGame
                             if (row.type == card.cardProps.type)
                             {
                                 card.setRegular();
-                                boardFunc.PlayCard(boardFunc.friendlySide, row, card);
+                                boardFunc.PlayCard(boardFunc.friendlySide,/* row,*/ card);
 
                                 boardFunc.SELECTEDCARD = null;
                             }
