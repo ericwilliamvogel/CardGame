@@ -13,7 +13,7 @@ namespace CardGame
         {
             containerScale = CardScale.Hand;
         }
-        int extension = GraphicsSettings.toResolution(150);
+        int extension = GraphicsSettings.toResolution(100);
 
         protected override void additionalAction(Card card)
         {

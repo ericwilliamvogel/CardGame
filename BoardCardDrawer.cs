@@ -23,8 +23,13 @@ namespace CardGame
             drawRevealedRows(boardFunc.enemySide, spriteBatch);
             drawRows(boardFunc.friendlySide, spriteBatch);
 
-            drawHand(boardFunc.enemySide, spriteBatch);
-            drawHand(boardFunc.friendlySide, spriteBatch);
+
+            if(!boardFunc.handFunction.placingCard)
+            {
+                drawHand(boardFunc.enemySide, spriteBatch);
+                drawHand(boardFunc.friendlySide, spriteBatch);
+            }
+
 
             if (boardFunc.SELECTEDCARD != null)
             {

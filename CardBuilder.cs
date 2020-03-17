@@ -85,6 +85,42 @@ namespace CardGame
                 constructor.addAbility(new BoardDamage(1, -1));
                 constructor.addAbility(new BoardDamage(12, -10));
             }
+            else if (identifier == 5)
+            {
+                constructor.setGeneral(identifier);
+                Card.Race[] cost = { Card.Race.Orc, Card.Race.Orc };
+                constructor.setCost(new Cost(0, cost));
+                constructor.setPower(0);
+                constructor.setRace(Card.Race.Orc);
+                constructor.setDefense(1);
+                constructor.setRarity(Card.Rarity.Bronze);
+                constructor.setName("Spawner General");
+                constructor.addAbility(new SpawnCard(10, +1));
+                constructor.addAbility(new SpawnCard(11, -1));
+                constructor.addAbility(new BoardDamage(12, -10));
+            }
+            else if (identifier == 10)
+            {
+                constructor.setFieldUnit(identifier);
+                constructor.setPower(4);
+                constructor.setRace(Card.Race.Orc);
+                constructor.setDefense(1);
+                constructor.setRarity(Card.Rarity.Bronze);
+                constructor.setName("Spawned");
+
+                constructor.addAbility(new TargetDamage(1));
+
+            }
+            else if (identifier == 11)
+            {
+                constructor.setArmy(identifier);
+                constructor.setPower(1);
+                constructor.setRace(Card.Race.Orc);
+                constructor.setDefense(1);
+                constructor.setRarity(Card.Rarity.Bronze);
+                constructor.setName("Spawn Army");
+
+            }
         }
         /*public void Assemble2(CardConstructor constructor)
         {
@@ -134,6 +170,7 @@ namespace CardGame
 
                 card.setDefense(defense);
             card.cardProps.initialDefense = defense;
+            card.cardProps.aiCalcDefense = defense;
             
         }
         public void setRace(Card.Race race)

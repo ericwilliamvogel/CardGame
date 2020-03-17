@@ -68,9 +68,12 @@ namespace CardGame
     {
         public override void decide(MouseState mouseState, ContentManager content, BoardFunctionality boardFunc)
         {
-            if (boardFunc.SELECTEDCARD == null && !boardFunc.boardActions.isActive())
+
+            if (/*boardFunc.SELECTEDCARD == null && */!boardFunc.boardActions.isActive() && !boardFunc.handFunction.placingCard)
                 boardFunc.friendlySide.Hand.modifyCardInteractivity(mouseState, boardFunc);
 
+            boardFunc.handFunction.setCardToMouse(mouseState, boardFunc);
+            boardFunc.handFunction.playSelectedCard(mouseState, boardFunc);
             foreach (FunctionalRow row in boardFunc.friendlySide.Rows)
             {
                 if (boardFunc.SELECTEDCARD == null && !boardFunc.boardActions.isActive())
@@ -81,55 +84,286 @@ namespace CardGame
                 if (!boardFunc.boardActions.isActive() && row.revealed)
                     row.modifyCardInteractivity(mouseState, boardFunc);
             }
-            boardFunc.handFunction.setCardToMouse(mouseState, boardFunc);
-            boardFunc.handFunction.playSelectedCard(mouseState, boardFunc);
 
 
             if (boardFunc.state != State.Selection)
                 boardFunc.rowFunction.rowLogic(mouseState, boardFunc);
 
-            if (boardFunc.abilityButtons != null)
-            {
-                foreach (Button button in boardFunc.abilityButtons)
-                {
-                    button.mouseStateLogic(mouseState, content);
-                }
-            }
+
+
+
+
+            boardFunc.cardViewer.updateButtonsOnPopup(mouseState, content);
 
            
         }
     }
+
     public class AIPlayer : Player
     {
-
+        bool endTurnOnce = false;
+        public override void ResetPlayer()
+        {
+            endTurnOnce = false;
+            base.ResetPlayer();
+        }
         int currentArmyCount;
         public override void decide(MouseState mouseState, ContentManager content, BoardFunctionality boardFunc)
         {
-            foreach(Card card in boardFunc.friendlySide.Hand.cardsInContainer)
-            {
-                //boardFunc.PlayCard(boardFunc.friendlySide, /*boardFunc.enemySide.Rows[Side.FieldUnit],*/ card);
-                playArmies(card, boardFunc);
-            }
-            playCardIfThereAreEnoughArmies(boardFunc);
-            attackIfBeneficial(boardFunc);
-            //throw new
-            boardFunc.PassTurn();
-        }
-        private void attackIfBeneficial(BoardFunctionality boardFunc)
-        {
-            List<int> valueOfPlay = new List<int>();
-            foreach(Card card in boardFunc.friendlySide.Rows[Side.General].cardsInContainer)
+            if (!endTurnOnce)
             {
 
+
+                foreach (Card card in boardFunc.friendlySide.Hand.cardsInContainer)
+                {
+                    //boardFunc.PlayCard(boardFunc.friendlySide, /*boardFunc.enemySide.Rows[Side.FieldUnit],*/ card);
+                    playArmies(card, boardFunc);
+                }
+                playCardIfThereAreEnoughArmies(boardFunc);
+                VERYBASICATTACKLOGIC(boardFunc);
+                //attackIfBeneficial(boardFunc);
+                //throw new
+                if (!endTurnOnce )
+                {
+                    boardFunc.PassTurn();
+
+                }
+                endTurnOnce = true;
+            }
+
+        }
+        private void attackIfBeneficial(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            Board tempBoard = new Board();
+            BoardFunctionality tempBoardFunc = new BoardFunctionality();
+            List<int> valueOfPlay = new List<int>();
+            List<Outcome> outcomes = new List<Outcome>();
+
+            int counter = 0;
+            int thisSideValue = 0;
+            int thatSideValue = 0;
+            int valueDifference = 0;
+            int finalValueDifference = 0;
+
+            foreach (Card card in boardFunc.friendlySide.Rows[Side.General].cardsInContainer)
+            {
+                thisSideValue += card.returnValue();
             }
             foreach (Card card in boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer)
             {
-
+                thisSideValue += card.returnValue(); 
             }
+            foreach(Card card in boardFunc.enemySide.Rows[Side.FieldUnit].cardsInContainer)
+            {
+                thatSideValue += card.returnValue();
+            }
+
+            valueDifference = (int)thisSideValue - thatSideValue;
+
+            foreach (Card card in boardFunc.friendlySide.Rows[Side.General].cardsInContainer)
+            {
+                outcomes.Add(new Outcome(card));
+                foreach(Ability ability in card.cardProps.abilities)
+                {
+                    foreach(FunctionalRow row in boardFunc.enemySide.Rows)
+                    {
+                        if(row.revealed)
+                        {
+                            foreach(Card enemyCard in row.cardsInContainer)
+                            {
+                                Action action = () =>
+                                {
+                                    ability.useAIAbility(this, boardFunc, enemyCard);
+                                };
+                                outcomes[counter].actions.Add(action);
+
+                                Action<BoardFunctionality> realAction = (BoardFunctionality realFunc) =>
+                                {
+                                    ability.useAbility(mouseState, realFunc);
+                                };
+                                outcomes[counter].REALACTIONS.Add(realAction);
+                            }
+
+
+                        }
+                    }
+                    Action noAction = () =>
+                    {
+
+                    };
+                    outcomes[counter].actions.Add(noAction);
+                }
+                counter++;
+            }
+
+
+
+            foreach (Card card in boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer)
+            {
+                outcomes.Add(new Outcome(card));
+                    foreach (FunctionalRow row in boardFunc.enemySide.Rows)
+                    {
+                        if (row.revealed)
+                        {
+                            foreach (Card enemyCard in row.cardsInContainer)
+                            {
+                                Action action = () =>
+                                {
+                                    card.cardProps.aiCalcDefense -= enemyCard.cardProps.power;
+                                    enemyCard.cardProps.aiCalcDefense -= card.cardProps.power;
+                                };
+                                outcomes[counter].actions.Add(action);
+
+                                Action<BoardFunctionality> realAction = (BoardFunctionality realFunc) =>
+                                {
+                                    realFunc.Fight(card, enemyCard);
+                                };
+                                outcomes[counter].REALACTIONS.Add(realAction);
+                            }
+
+
+                        }
+                    }
+                    Action noAction = () =>
+                    {
+
+                    };
+                    outcomes[counter].actions.Add(noAction);
+                
+                counter++;
+            }
+
+
         }
-        private void exchangeValues(Card card, Card otherCard)
+        public void startFirstAction(List<Outcome> outcomes)
         {
 
+        }
+        public void goThroughAllActions(List<Outcome> outcomes, Outcome usedOutcome)
+        {
+
+            int selector = 1;
+
+            Strategy strategy = new Strategy();
+
+            List<Action> actions = new List<Action>();
+
+
+                    int strategyCounter = 0;
+            
+                    foreach (Action newAction in outcomes[0].actions)
+                    {
+                        actions = new List<Action>();
+                        bool finished = false;
+                        while (!finished)
+                        {
+                            for (int j = selector; j < outcomes.Count; j++)
+                            {
+                                int internalCounter = outcomes[j].actionCounter;
+                                for (int k = outcomes[j].actionCounter; k < outcomes[j].actions.Count; k++)
+                                {
+                                    actions = new List<Action>();
+                                    
+
+                                    if (outcomes[j].actionCounter > outcomes[j].actions.Count)
+                                    {
+                                        throw new Exception("shouldn't happen in this loop...");
+                                        outcomes[j].actionCounter = outcomes[j].actionCounter;
+                                    }
+                                    foreach (Outcome OUTCOME in outcomes)
+                                    {
+
+                                        actions.Add(OUTCOME.actions[OUTCOME.actionCounter]);
+                                    }
+                                    outcomes[j].actionCounter++;
+                                    strategy.strat.Add(actions);
+                                }
+                                outcomes[j].actionCounter = internalCounter;
+
+                            }
+                            outcomes[selector].actionCounter++;
+
+                            selector++;
+                            if(selector >= outcomes.Count)
+                            {
+                                selector = 1;
+                                outcomes[selector].actionCounter++;
+                            }
+                            
+                            if(outcomes[outcomes.Count - 1].actionCounter >= outcomes[outcomes.Count - 1].actions.Count)
+                            {
+                                finished = true;
+                            }
+                        }
+                        selector = 1;
+
+
+                        //NBEED TO LOOP BEFORE THIS
+                        //strategy.strat.Add(actions);
+                        outcomes[0].actionCounter++;
+                        if(outcomes[0].actionCounter > outcomes[0].actions.Count)
+                        {
+                            outcomes[0].actionCounter = 0;
+                        }
+                    }
+                
+
+      
+
+                    strategyCounter++;
+        }
+        public class Strategy
+        {
+            public List<List<Action>> strat;
+            public void Add(List<Outcome> outcomes, Outcome currentOutcome, Action action, int counter)
+            {
+                List<Action> actions = new List<Action>();
+                actions.Add(action);
+                foreach (Outcome outcome in outcomes)
+                {
+                    if (outcome != currentOutcome)
+                    {
+                       
+                    }
+                }
+                strat.Add(actions);
+            }
+
+        }
+        public class Outcome
+        {
+            public int actionCounter = 0;
+            public Card card;
+            public List<Action> actions;
+            public List<Action<BoardFunctionality>> REALACTIONS;
+            public Outcome(Card card)
+            {
+                this.card = card;
+            }
+        }
+
+        public void VERYBASICATTACKLOGIC(BoardFunctionality boardFunc)
+        {
+            foreach(Card card in boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer)
+            {
+                foreach(Card enemyCard in boardFunc.enemySide.Rows[Side.FieldUnit].cardsInContainer)
+                {
+                    if(!card.cardProps.exhausted)
+                    {
+                        if (enemyCard.cardProps.defense - card.cardProps.power <= 0)
+                        {
+                            card.cardProps.exhausted = true;
+                            boardFunc.Fight(card, enemyCard);
+                        }
+                        else if (card.cardProps.defense - enemyCard.cardProps.power > 0)
+                        {
+                            card.cardProps.exhausted = true;
+                            boardFunc.Fight(card, enemyCard);
+                        }
+
+                    }
+                }
+            }
         }
         private void playArmies(Card card, BoardFunctionality boardFunc)
         {
@@ -153,7 +387,7 @@ namespace CardGame
             {
                 if(newCard.cardProps.cost.totalCost <= counter)
                 {
-                    exhaustArmies(boardFunc.friendlySide, newCard); 
+                    //exhaustArmies(boardFunc.friendlySide, newCard); 
                     boardFunc.PlayCard(boardFunc.friendlySide, /*boardFunc.enemySide.Rows[Side.FieldUnit]*/ newCard);
                 }
             }

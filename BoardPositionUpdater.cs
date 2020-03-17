@@ -16,7 +16,7 @@ namespace CardGame
             updateBoardPositions(boardFunc);
             updateDeckPositions(boardFunc.friendlySide);
             updateDeckPositions(boardFunc.enemySide);
-            boardFunc.updateAllAssets();
+            boardFunc.assetUpdater.updateAllAssets(boardFunc);
             this.SELECTEDCARD = boardFunc.SELECTEDCARD;
         }
 

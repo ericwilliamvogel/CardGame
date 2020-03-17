@@ -10,15 +10,7 @@ namespace CardGame
     public class Deck : CardContainer
     {
 
-        public void loadCardsInDeck(Dictionary<int, Texture2D> imageDictionary)
-        {
-            
-            foreach(Card card in cardsInContainer)
-            {
-                card.suppTextures.supplements[card.suppTextures.portrait].setTexture(imageDictionary[card.cardProps.identifier]);
-                card.setColorForRace();
-            }
-        }
+
 
         public void Shuffle()
         {

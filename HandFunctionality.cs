@@ -12,6 +12,7 @@ namespace CardGame
 {
     public class HandFunctionality
     {
+        public bool placingCard;
         private bool isWithinProperRow(MouseState mouseState, BoardFunctionality boardFunc)
         {
             if (boardFunc.SELECTEDCARD != null)
@@ -39,6 +40,7 @@ namespace CardGame
                         {
                             if (row.type == card.cardProps.type)
                             {
+                                placingCard = false;
                                 card.setRegular();
                                 boardFunc.PlayCard(boardFunc.friendlySide,/* row,*/ card);
 
@@ -66,7 +68,7 @@ namespace CardGame
                     }
                     else
                     {
-                        boardFunc.viewFullSizeCard(mouseState, card);
+                        boardFunc.cardViewer.viewFullSizeCard(mouseState, card, boardFunc);
                     }
                 }
 
@@ -79,9 +81,15 @@ namespace CardGame
             {
                 card.setPos(mouseState.X - card.getWidth() / 2, mouseState.Y - card.getHeight() / 2);
                 clickedInCardBox = true;
+                if (!boardFunc.friendlySide.Hand.isWithinModifiedPosition(mouseState, card))
+                {
+                    placingCard = true;
+                }
             }
+
             if (mouseState.LeftButton == ButtonState.Released && !isWithinProperRow(mouseState, boardFunc) && !boardFunc.friendlySide.Hand.isWithinModifiedPosition(mouseState, card))
             {
+                placingCard = false;
                 clickedInCardBox = false;
                 card.setRegular();
                 boardFunc.SELECTEDCARD = null;
@@ -89,6 +97,7 @@ namespace CardGame
             }
             if (mouseState.LeftButton == ButtonState.Released && clickedInCardBox && boardFunc.friendlySide.Hand.isWithinModifiedPosition(mouseState, card))
             {
+                placingCard = false;
                 clickedInCardBox = false;
                 boardFunc.state = BoardFunctionality.State.CardView;
                 card.resetCardSelector();

@@ -68,7 +68,7 @@ namespace CardGame
             {
                 throw new Exception(endingContainer.getPosition().ToString());
             }
-            int timeUntilArrival = 1;
+            int timeUntilArrival = 3;
             int speedX = (int)GameComponent.ToAbsolute((newPosition.X - card.getPosition().X)) / timeUntilArrival;
 
             if (speedX < 1)

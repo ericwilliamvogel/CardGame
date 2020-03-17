@@ -76,7 +76,7 @@ namespace CardGame
                         }
                         else
                         {
-                            boardFunc.viewCardWithAbilities(mouseState, card);
+                            boardFunc.cardViewer.viewCardWithAbilities(mouseState, card, boardFunc);
 
                         }
                     }
@@ -143,7 +143,7 @@ namespace CardGame
                 card.cardProps.exhausted = true;
                 
                 boardFunc.friendlySide.Resources.Add(card.race);
-                boardFunc.resetSelectedCard();
+                boardFunc.cardViewer.resetSelectedCard(boardFunc);
                 card.setRegular();
                 //send animation?
             }
@@ -171,7 +171,7 @@ namespace CardGame
                     }
                     else
                     {
-                        boardFunc.viewCardWithAbilities(mouseState, card);
+                        boardFunc.cardViewer.viewCardWithAbilities(mouseState, card, boardFunc);
                     }
                 }
 
@@ -206,8 +206,29 @@ namespace CardGame
                 selectAction.SetTargetCard(mouseState, row, card, boardFunc.enemySide);
                 if (selectAction.TargetEnemyCard(mouseState, boardFunc, false) != null && !row.isWithinModifiedPosition(mouseState, card))
                 {
-                    if(selectAction.TargetEnemyCard(mouseState, boardFunc, false).correctRow(boardFunc.enemySide).revealed)
-                    boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState,boardFunc, false));
+
+                    if (selectAction.TargetEnemyCard(mouseState, boardFunc, false).correctRow(boardFunc.enemySide).revealed)
+                    {
+                        switch (selectAction.TargetEnemyCard(mouseState, boardFunc, false).correctRow(boardFunc.enemySide).type)
+                        {
+                            case CardType.FieldUnit:
+                                boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
+                                break;
+                            case CardType.Army:
+                                if (boardFunc.enemySide.Rows[Side.FieldUnit].isEmpty())
+                                {
+                                    boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
+                                }
+                                break;
+                            case CardType.General:
+                                if (boardFunc.enemySide.Rows[Side.FieldUnit].isEmpty() && boardFunc.enemySide.Rows[Side.Armies].isEmpty())
+                                {
+                                    boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
+                                }
+                                break;
+                        }
+                    }
+
                 }
                 resetIfNoSelection(mouseState, row, card, boardFunc);
             }

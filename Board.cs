@@ -81,7 +81,7 @@ namespace CardGame
             background.setSprite(content, "board");
             textures = new BoardTextures(this);
             textures.initTextures(content);
-
+            
             button = new Button(content, new Vector2(Game1.windowW - 100, Game1.windowH / 2 + 100), "secondButtonTexture");
             button.setPos(new Vector2(Game1.windowW - 100 - button.getWidth(), Game1.windowH / 2 + 100));
             button.setAction(() => { friendlySide.boardFunc.PassTurn(); });
@@ -122,14 +122,15 @@ namespace CardGame
                 TEST.cardsInContainer.Add(car2);
                 deck.cardsInContainer.Add(card);
                 identifierCounter++;
-                if(identifierCounter > 4)
+                if(identifierCounter > 5)
                 {
                     identifierCounter = 0;
                 }
             }
 
-            library = cardConstructor.tempStorage;
+
             //library.cardTextureDictionary = new Dictionary<int, Texture2D>();
+            library = cardConstructor.tempStorage;
             library.loadCardSupplementalTextures(content);
             library.loadAllDictionaryTextures(content);
 
@@ -141,18 +142,20 @@ namespace CardGame
 
             friendlySide = new Side(player1);
             enemySide = new Side(player2);
-            deck.loadCardsInDeck(library.cardTextureDictionary);
-            TEST.loadCardsInDeck(library.cardTextureDictionary);
+            deck.loadCardImagesInContainer(library.cardTextureDictionary);
+            TEST.loadCardImagesInContainer(library.cardTextureDictionary);
             friendlySide.Deck = deck;
             enemySide.Deck = TEST;
 
             setSide(enemySide);
             setSide(friendlySide);
 
-            enemySide.boardFunc.initSide(this, enemySide);
-            friendlySide.boardFunc.initSide(this, friendlySide);
+            friendlySide.boardFunc.passDown(library, cardConstructor);
+            enemySide.boardFunc.passDown(library, cardConstructor);
+            //enemySide.boardFunc.initSide(this, enemySide);
+            //friendlySide.boardFunc.initSide(this, friendlySide);
             friendlySide.boardFunc.initializeGameComponent(content);
-
+            enemySide.boardFunc.initializeGameComponent(content);
 
 
             //gameLoop.initializeGameComponent(content);
@@ -179,7 +182,7 @@ namespace CardGame
                 sideCounter = 0;
                 multiplier = 0;
             }
-            side.boardFunc.initSide(this, side);
+            side.boardFunc.sideSetter.initSide(this, side, side.boardFunc);
         }
         
         public override void drawSprite(SpriteBatch spriteBatch)
@@ -210,6 +213,7 @@ namespace CardGame
             friendlySide.boardFunc.drawSprite(spriteBatch);
         }
         bool pressed;
+        bool handHidden;
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
             setContainerPlayState(friendlySide.Hand, Card.PlayState.Revealed);
@@ -235,6 +239,27 @@ namespace CardGame
             {
                 pressed = false; 
             }
+
+
+                KeyboardState state = Keyboard.GetState();
+                if (state.IsKeyDown(Keys.X) && handHidden == false)
+                {
+                if (!friendlySide.boardFunc.handFunction.placingCard)
+                {
+                    friendlySide.boardFunc.handFunction.placingCard = true;
+                }
+                else if (friendlySide.boardFunc.handFunction.placingCard)
+                    friendlySide.boardFunc.handFunction.placingCard = false;
+
+                handHidden = true;
+                }
+                if (state.IsKeyUp(Keys.X))
+                {
+
+                    handHidden = false;
+                }
+            
+            //handSpace[friendly].mouseStateLogic(mouseState, content);*/
             button.mouseStateLogic(mouseState, content);
         }
 

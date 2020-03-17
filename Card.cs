@@ -48,6 +48,7 @@ namespace CardGame
             public Cost cost = new Cost();
             public int initialPower = 0;
             public int initialDefense = 1;
+            public int aiCalcDefense = 1;
             public int power = 0;
             public int defense = 1;
             public CardType type;
@@ -55,7 +56,11 @@ namespace CardGame
             public bool doubleExhausted;
         }
 
-
+        public int returnValue()
+        {
+            int value = cardProps.power + cardProps.defense + cardProps.cost.totalCost;
+            return value;
+        }
         //public List<Button> abilityButtons = new List<Button>();
        // public bool showAbilities;
         public HorizontalContainer getCurrentContainer(Side side)

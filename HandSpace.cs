@@ -30,31 +30,24 @@ namespace CardGame
         {
             positionOffset = (int)(150 * getScale().Y);
             initPos = getPosition();
-            extendedPos = new Vector2(getPosition().X, getPosition().Y - positionOffset);
+            extendedPos = new Vector2(getPosition().X, getPosition().Y + positionOffset);
+            state = State.Retracted;
             base.initializeGameComponent();
         }
         public Action action;
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
-            action();
+            //action();
             switch (state)
             {
 
                 case State.Retracted:
-                    setPos(initPos);
-                    if (isWithinBox(mouseState))
-                    {
-                        state = State.Extended;
-                        
-                    }
+                    setPos(extendedPos);
+
                     break;
                 case State.Extended:
-                    setPos(extendedPos);
-                    if (!isWithinBox(mouseState))
-                    {
-                        state = State.Retracted;
-                        
-                    }
+                    
+                    setPos(initPos);
                     break;
 
 

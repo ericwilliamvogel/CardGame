@@ -76,6 +76,10 @@ namespace CardGame
             }
 
         }
+        public virtual void useAIAbility(AIPlayer player, BoardFunctionality boardFunc, Card targetCard)
+        {
+
+        }
         private void resetSide(Side side)
         {
             foreach (FunctionalRow row in side.Rows)
@@ -96,7 +100,7 @@ namespace CardGame
         }
         public Exhaust(int exchangeValue)
         {
-            this.exchangeValue = exchangeValue;
+            displayGeneralIncrements(exchangeValue);
         }
         public override Card returnSelectedCard(MouseState mouseState, BoardFunctionality boardFunc)
         {
@@ -119,7 +123,7 @@ namespace CardGame
 
 
                     //INITIALCARD.finalizeAbilities();
-                    boardFunc.resetCardSelection(mouseState);
+                    boardFunc.cardViewer.resetCardSelection(mouseState, boardFunc);
                     useAbility(mouseState, boardFunc);
 
                     clickedInAbilityBox = true;
@@ -132,6 +136,54 @@ namespace CardGame
         {
             boardFunc.Exhaust(INITIALCARD, returnSelectedCard(mouseState, boardFunc));
             base.useAbility(mouseState, boardFunc);
+        }
+
+        public override void useAIAbility(AIPlayer player, BoardFunctionality boardFunc, Card targetCard)
+        {
+            if (player != null)
+            {
+                //
+            }
+
+        }
+
+    }
+    public class SpawnCard : Ability
+    {
+        public int identifier;
+        public SpawnCard(int identifier)
+        {
+            this.identifier = identifier;
+            name = "Exhaust:";
+            description = "Spawn unit";
+        }
+        public SpawnCard(int identifier, int exchangeValue) : this(identifier)
+        {
+            displayGeneralIncrements(exchangeValue);
+        }
+        public override void activateAbilityOnSelection(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            if (INITIALCARD.cardProps.exhausted == false && clickedInAbilityBox == false)
+            {
+                boardFunc.cardViewer.resetCardSelection(mouseState, boardFunc);
+                useAbility(mouseState, boardFunc);
+                clickedInAbilityBox = true;
+                resetAllCards(boardFunc);
+            }
+        }
+        public override void useAbility(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            boardFunc.SpawnCard(INITIALCARD, this);
+            base.useAbility(mouseState, boardFunc);
+        }
+
+        public override void useAIAbility(AIPlayer player, BoardFunctionality boardFunc, Card targetCard)
+        {
+            if (player != null)
+            {
+                boardFunc.boardDef.revealBoardForRemainderOfTurn(targetCard, this, boardFunc);
+            }
+
         }
 
     }
@@ -150,7 +202,7 @@ namespace CardGame
 
 
                     //INITIALCARD.finalizeAbilities();
-                    boardFunc.resetCardSelection(mouseState);
+                    boardFunc.cardViewer.resetCardSelection(mouseState, boardFunc);
                     useAbility(mouseState, boardFunc);
                     clickedInAbilityBox = true;
                     resetAllCards(boardFunc);
@@ -161,7 +213,20 @@ namespace CardGame
         public override void useAbility(MouseState mouseState, BoardFunctionality boardFunc)
         {
             boardFunc.BoardDamage(INITIALCARD, this, returnSelectedCard(mouseState, boardFunc));
-            base.useAbility(mouseState, boardFunc);
+            //base.useAbility(mouseState, boardFunc);
+        }
+
+        public override void useAIAbility(AIPlayer player, BoardFunctionality boardFunc, Card targetCard)
+        {
+            if (player != null)
+            {
+                foreach(Card card in targetCard.correctRow(boardFunc.enemySide).cardsInContainer)
+                {
+                    card.cardProps.aiCalcDefense -= this.power;
+                }
+
+            }
+
         }
     }
     public class Reveal : Ability
@@ -180,7 +245,7 @@ namespace CardGame
         {
             if (INITIALCARD.cardProps.exhausted == false && clickedInAbilityBox == false)
             {
-                boardFunc.resetCardSelection(mouseState);
+                boardFunc.cardViewer.resetCardSelection(mouseState, boardFunc);
                 useAbility(mouseState, boardFunc);
 
                 clickedInAbilityBox = true;
@@ -193,6 +258,14 @@ namespace CardGame
             base.useAbility(mouseState, boardFunc);
         }
 
+        public override void useAIAbility(AIPlayer player, BoardFunctionality boardFunc, Card targetCard)
+        {
+            if (player != null)
+            {
+                boardFunc.boardDef.revealBoardForRemainderOfTurn(targetCard, this, boardFunc);
+            }
+
+        }
 
 
     }
@@ -219,7 +292,7 @@ namespace CardGame
 
 
                     //INITIALCARD.finalizeAbilities();
-                    boardFunc.resetCardSelection(mouseState);
+                    boardFunc.cardViewer.resetCardSelection(mouseState, boardFunc);
 
                     useAbility(mouseState, boardFunc);
 
@@ -233,6 +306,15 @@ namespace CardGame
         {
             boardFunc.DirectDamage(INITIALCARD, this, returnSelectedCard(mouseState, boardFunc));
             base.useAbility(mouseState, boardFunc);
+        }
+
+        public override void useAIAbility(AIPlayer player, BoardFunctionality boardFunc, Card targetCard)
+        {
+            if (player != null)
+            {
+                targetCard.cardProps.aiCalcDefense -= this.power;
+            }
+
         }
         public override void setTarget(MouseState mouseState, BoardFunctionality boardFunc)
         {
