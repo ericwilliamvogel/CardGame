@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -49,6 +51,7 @@ namespace CardGame
         public List<StackPlaceholder> deckHolder = new List<StackPlaceholder>();
         public List<StackPlaceholder> oblivionHolder = new List<StackPlaceholder>();
         public List<HandSpace> handSpace = new List<HandSpace>();
+        public List<LifeTotal> lifeTotal = new List<LifeTotal>();
         public Token unanimousToken;
         public Token elfToken;
         public Token orcToken;
@@ -72,6 +75,7 @@ namespace CardGame
             orcToken = new Token(Card.Race.Orc);
             humanToken = new Token(Card.Race.Human);
             //gameLoop = new BoardFunctionality();
+            lifeTotal = new List<LifeTotal>();
             oblivionHolder = new List<StackPlaceholder>();
             deckHolder = new List<StackPlaceholder>();
             rows = new List<Row>();
@@ -137,7 +141,12 @@ namespace CardGame
             //
 
             //
+
             Player player1 = new ActivePlayer();
+
+            //connectNow();
+            //PlayerProxy proxy;
+            //proxy = new PlayerProxy();
             Player player2 = new AIPlayer();
 
             friendlySide = new Side(player1);
@@ -161,6 +170,7 @@ namespace CardGame
             //gameLoop.initializeGameComponent(content);
             friendlySide.boardFunc.StartGame(this, friendlySide);
         }
+      
         int multiplier = 0;
         private void updateHandPosition()
         {
@@ -174,6 +184,7 @@ namespace CardGame
             side.Rows[Side.Armies].setValuesToImage(rows[multiplier + 1]);
             side.Rows[Side.FieldUnit].setValuesToImage(rows[multiplier + 2]);
             side.Hand.setValuesToImage(handSpace[sideCounter]);
+            side.Life.setValuesToImage(lifeTotal[sideCounter]);
 
             sideCounter++;
             multiplier += 3;
@@ -209,6 +220,10 @@ namespace CardGame
             orcToken.drawSprite(spriteBatch);
             humanToken.drawSprite(spriteBatch);
 
+            foreach(LifeTotal total in lifeTotal)
+            {
+                total.drawSprite(spriteBatch);
+            }
             button.drawSprite(spriteBatch);
             friendlySide.boardFunc.drawSprite(spriteBatch);
         }
@@ -279,6 +294,11 @@ namespace CardGame
             elfToken.adjustResourceValue(friendlySide);
             orcToken.adjustResourceValue(friendlySide);
             humanToken.adjustResourceValue(friendlySide);
+
+
+            lifeTotal[enemy].updateLifeValue(enemySide.LifeTotal);
+            lifeTotal[friendly].updateLifeValue(friendlySide.LifeTotal);
+
         }
 
         public int enemy = 0;

@@ -219,16 +219,41 @@ namespace CardGame
                                 {
                                     boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
                                 }
+                                else
+                                {
+                                    boardFunc.BOARDMESSAGE.addMessage("Cannot fight an Army if a FieldUnit is present on the board!");
+                                }
                                 break;
                             case CardType.General:
                                 if (boardFunc.enemySide.Rows[Side.FieldUnit].isEmpty() && boardFunc.enemySide.Rows[Side.Armies].isEmpty())
                                 {
-                                    boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
+                                    //i dont think i want soldiers to touch generals. needs to be a spell
+                                    //boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
+                                }
+                                else
+                                {
+                                    boardFunc.BOARDMESSAGE.addMessage("A FieldUnit cannot target a General!");
                                 }
                                 break;
                         }
                     }
 
+                }
+                if(mouseState.LeftButton == ButtonState.Released && boardFunc.enemySide.Life.isWithinBox(mouseState) )
+                {
+                    if (boardFunc.enemySide.Rows[Side.FieldUnit].isEmpty() && boardFunc.enemySide.Rows[Side.Armies].isEmpty() && boardFunc.enemySide.Rows[Side.Armies].revealed)
+                    {
+                        boardFunc.LifeDamage(card);
+                    }
+                    else
+                    {
+                        boardFunc.BOARDMESSAGE.addMessage("---> or Fog");
+                        boardFunc.BOARDMESSAGE.addMessage("---> an Enemy Army");
+                        boardFunc.BOARDMESSAGE.addMessage("---> an Enemy FieldUnit");
+                        boardFunc.BOARDMESSAGE.addMessage("Cannot deal damage to a player if there's:");
+                    }
+
+                    clickedInCardBox = false;
                 }
                 resetIfNoSelection(mouseState, row, card, boardFunc);
             }

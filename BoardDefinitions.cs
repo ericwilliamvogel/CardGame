@@ -75,7 +75,7 @@ namespace CardGame
 
                     if (deductedResources.Count < card.cardProps.cost.raceCost.Count || deductedResources.Count + otherAvailableResources.Count < card.cardProps.cost.totalCost)
                     {
-
+                        boardFunc.BOARDMESSAGE.addMessage("Not enough armies to produce the needed resources!");
                         returnToHand(side, card, boardFunc);
 
                     }
@@ -95,7 +95,11 @@ namespace CardGame
                     }
                 }
                 else
+                {
+                    boardFunc.BOARDMESSAGE.addMessage("Not enough armies to produce the needed resources!");
                     returnToHand(side, card, boardFunc);
+                }
+
                 //boardPosLogic.updateBoard(this);
                 //throw new Exception("does not have enough MANA");
             }
@@ -122,7 +126,7 @@ namespace CardGame
                 {
 
                     returnToHand(side, card, boardFunc);
-
+                    boardFunc.BOARDMESSAGE.addMessage("Not enough mana of the correct type!");
                 }
                 else
                 {
@@ -147,6 +151,7 @@ namespace CardGame
                 resumeWithPlayingCard(side, card, boardFunc);
             }
         }
+        
         public void resumeWithPlayingCard(Side side, Card card, BoardFunctionality boardFunc)
         {
             boardFunc.actionConstructor.moveTo(side.Hand, card.correctRow(side), card, boardFunc);
@@ -165,7 +170,15 @@ namespace CardGame
             boardFunc.actionConstructor.moveTo(side.Hand, side.Hand, card, boardFunc);
 
         }
-
+        
+        public void dealPlayerDamage(Card card, BoardFunctionality boardFunc)
+        {
+            boardFunc.enemySide.LifeTotal -= card.cardProps.power;
+        }
+        public void dealPlayerDamage(Card card, Ability ability, BoardFunctionality boardFunc)
+        {
+            boardFunc.enemySide.LifeTotal -= ability.power;
+        }
         public void spawnSpecifiedUnit(Card card, SpawnCard ability, BoardFunctionality boardFunc)
         {
 

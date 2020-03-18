@@ -3,12 +3,14 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 using static CardGame.BoardFunctionality;
 
 namespace CardGame
 {
+
     public class Player
     {
         public enum TurnCycle
@@ -66,7 +68,14 @@ namespace CardGame
     }
     public class ActivePlayer : Player
     {
-        public override void decide(MouseState mouseState, ContentManager content, BoardFunctionality boardFunc)
+        ClientHandle clientHandle = ClientHandle.getInstance();
+        ClientSend clientSend = ClientSend.getInstance();
+        ClientTCP clientTCP = ClientTCP.getInstance();
+        public ActivePlayer()
+        {
+            ClientTCP.instance.Start();
+        }
+        public override void decide(MouseState mouseState, ContentManager content, CardGame.BoardFunctionality boardFunc)
         {
 
             if (/*boardFunc.SELECTEDCARD == null && */!boardFunc.boardActions.isActive() && !boardFunc.handFunction.placingCard)

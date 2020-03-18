@@ -24,9 +24,12 @@ namespace CardGame
             boardFunc = new BoardFunctionality();
             Hand = new Hand();
             Oblivion = new CardContainer();
+            LifeTotal = SetLife;
+            Life = new CardContainer();
         }
         public bool canPlayArmy;
         public BoardFunctionality boardFunc;
+        public CardContainer Life;
         public Deck Deck;
         public Player Player;
         public FunctionalRow[] Rows;
@@ -34,6 +37,8 @@ namespace CardGame
         public static int Armies = 1;
         public static int FieldUnit = 2;
         public static int MaxRows = 3;
+        public int LifeTotal = 0;
+        private int SetLife = 25;
         public List<Card.Race> Resources;
         public Hand Hand;
         public CardContainer Oblivion;

@@ -11,6 +11,34 @@ using Microsoft.Xna.Framework.Input;
 
 namespace CardGame
 {
+    public class LifeTotal : GameComponent
+    {
+        int life;
+        int borderOffset = GraphicsSettings.toResolution(40);
+        public LifeTotal()
+        {
+            setContentName("lifeCounterImage");
+        }
+        public void updateLifeValue(int life)
+        {
+
+            this.life = life;
+        }
+        public override void drawSprite(SpriteBatch spriteBatch)
+        {
+            int yPos = 0;
+            base.drawSprite(spriteBatch);
+            if(properties.spriteEffects == SpriteEffects.None)
+            {
+                yPos = (int)getPosition().Y + borderOffset * 2;
+            }
+            else
+            {
+                yPos = (int)getPosition().Y + getHeight() - borderOffset * 3;
+            }
+            spriteBatch.DrawString(Game1.spritefont, life.ToString(), new Vector2(getPosition().X + getWidth()/2 - borderOffset, yPos), Color.Black, 0, new Vector2(0, 0), 1.33f * getScale(), SpriteEffects.None, 0);
+        }
+    }
     public class BoardTextures
     {
         public int enemy = 0;
@@ -32,6 +60,27 @@ namespace CardGame
             setHandSpaceTextures(content);
             setHandSpacePositions();
             setTokens(content);
+            setLifeTotalTexture(content);
+            setLifeTotalPositions();
+        }
+        private void setLifeTotalTexture(ContentManager content)
+        {
+            board.lifeTotal.Add(new LifeTotal());
+            board.lifeTotal.Add(new LifeTotal());
+            foreach(LifeTotal total in board.lifeTotal)
+            {
+                total.setTexture(content);
+            }
+        }
+        private void setLifeTotalPositions()
+        {
+            int startingPosX = (int)board.rows[5].getPosition().X + board.rows[5].getWidth() + GraphicsSettings.toResolution(50);
+            int yPos = 0;
+            board.lifeTotal[enemy].setPos(startingPosX, yPos);
+            board.lifeTotal[enemy].properties.spriteEffects = SpriteEffects.FlipVertically;
+
+            yPos = Game1.windowH - board.lifeTotal[friendly].getHeight();
+            board.lifeTotal[friendly].setPos(startingPosX, yPos);
         }
         private void setTokens(ContentManager content)
         {
@@ -89,14 +138,16 @@ namespace CardGame
         private void setHolderPositions()
         {
             int borderOffset = 50;
+            int yOffset = borderOffset * 4;
             int xPos = borderOffset * 2 + board.rows[enemy].getWidth();
-            board.deckHolder[enemy].setPos(xPos, borderOffset * 2);
-            board.deckHolder[friendly].setPos(xPos, Game1.windowH - borderOffset * 2 - board.deckHolder[friendly].getHeight());
+            board.deckHolder[enemy].setPos(xPos, yOffset);
+            board.deckHolder[friendly].setPos(xPos, Game1.windowH - board.deckHolder[friendly].getHeight() - yOffset);
 
             int newXPOS = xPos + borderOffset + board.oblivionHolder[0].getWidth();
-            int newYPOS = borderOffset * 4;
-            board.oblivionHolder[enemy].setPos(newXPOS, newYPOS);
-            board.oblivionHolder[friendly].setPos(newXPOS, Game1.windowH - newYPOS - board.oblivionHolder[friendly].getHeight());
+            //int newYPOS = borderOffset * 4;
+            //int newYPOS = board.deckHolder[ene]
+            board.oblivionHolder[enemy].setPos(newXPOS, yOffset);
+            board.oblivionHolder[friendly].setPos(newXPOS, Game1.windowH - board.deckHolder[friendly].getHeight() - yOffset);
         }
         private void setHolderTextures(ContentManager content)
         {

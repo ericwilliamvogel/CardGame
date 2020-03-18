@@ -12,11 +12,10 @@ using MonoGame.Utilities;
 namespace CardGame
 {
 
-
-    
     public class BoardFunctionality : PrimaryComponent
     {
 
+        public MessageBox BOARDMESSAGE = new MessageBox();
         public BoardCardDrawer cardDrawer = new BoardCardDrawer();
         public BoardPositionUpdater boardPosLogic = new BoardPositionUpdater();
         public BoardActions boardActions = new BoardActions();
@@ -75,7 +74,7 @@ namespace CardGame
             }
             cardDrawer.drawSprite(spriteBatch, this);
             cardViewer.drawSprite(spriteBatch);
-
+            BOARDMESSAGE.drawSprite(spriteBatch);
 
 
         }
@@ -111,6 +110,7 @@ namespace CardGame
         public void DrawCard(Side side)
         {
             actionConstructor.addDrawAction(side.Deck, side.Hand, this);
+
         }
         public void PlayCard(Side side,  Card card)
         {
@@ -178,7 +178,14 @@ namespace CardGame
         
 
 
-
+        public void LifeDamage(Card fromCard)
+        {
+            setUpCard(fromCard);
+            sendActionToQueue(() => {
+                boardDef.dealPlayerDamage(fromCard, this);
+                finalizeCardInteraction(fromCard, fromCard);
+            });
+        }
         public void RevealBoard(Card fromCard, Ability ability)
         {
             setUpCard(fromCard);
@@ -208,7 +215,7 @@ namespace CardGame
             setUpCard(fromCard, targetCard);
             sendActionToQueue(() => {
                 boardDef.dealDirectDamageAndDisposeOfDead(fromCard, ability, targetCard);
-                finalizeCardInteraction(fromCard, fromCard);
+                finalizeCardInteraction(fromCard, targetCard);
             });
         }
         public void SpawnCard(Card fromCard, SpawnCard ability)
