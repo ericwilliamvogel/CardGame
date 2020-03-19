@@ -37,6 +37,7 @@ namespace CardGame
         {
             { (int)ServerPackets.welcome, Welcome }
         };
+            //throw new Exception();
         }
         public void HandleData(byte[] _data)
         {
@@ -68,6 +69,9 @@ namespace CardGame
                     buffer.ReadInt();
                     _data = buffer.ReadBytes(_packetLength);
                     HandlePackets(_data);
+
+                    //throw new Exception();
+
                 }
                 _packetLength = 0;
                 if (buffer.Length() >= 4)
@@ -149,8 +153,10 @@ namespace CardGame
         {
             ByteBuffer _buffer = new ByteBuffer();
             _buffer.WriteInt((int)ClientPackets.welcomeReceived);
-            _buffer.WriteString("Test player name");
+            string test = "Test player name";
+            _buffer.WriteString(test);
             SendDataToServer(_buffer.ToArray());
+            //throw new Exception(test);
             _buffer.Dispose();
         }
     }

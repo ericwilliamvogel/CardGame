@@ -15,34 +15,6 @@ namespace CardGame
 
 
 
-    public class Token : GameComponent
-    {
-        public int resources;
-        public Card.Race race;
-        public Token(Card.Race race)
-        {
-            this.race = race;
-        }
-        public override void drawSprite(SpriteBatch spriteBatch)
-        {
-
-            base.drawSprite(spriteBatch);
-            spriteBatch.DrawString(Game1.spritefont, resources.ToString(), new Vector2(getPosition().X + getWidth()/2 - 10 * getScale().X, getPosition().Y + getHeight() / 2 - 20 * getScale().X), Color.Black, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
-        }
-        public void adjustResourceValue(Side side)
-        {
-            int x = 0;
-            foreach(Card.Race resource in side.Resources)
-            {
-                if(resource == race)
-                {
-                    x++;
-                }
-            }
-
-            resources = x;
-        }
-    }
     public class Board : PrimaryComponent
     {
         public List<PortraitWidget> portraitWidgets = new List<PortraitWidget>();
@@ -57,24 +29,92 @@ namespace CardGame
         public Token orcToken;
         public Token humanToken;
 
-        //BoardFunctionality gameLoop;
-
         public Side friendlySide;
         public Side enemySide;
-
+        int multiplier = 0;
         int sideCounter = 0;
         BoardTextures textures;
         Button button;
         public Side controllingPlayer;
+        CardBuilder cardBuilder = new CardBuilder();
+        CardConstructor cardConstructor = new CardConstructor();
+        DeckBuilder deckBuilder = new DeckBuilder();
+        DeckConstructor deckConstructor = new DeckConstructor();
+        CardImageStorage library = new CardImageStorage();
+        Player player1;
+        Player player2;
 
         public override void initializeGameComponent(ContentManager content)
         {
+            imageAndFunctionsSetup(content);
+            loadBuildersAndConstructors();
 
+            /**********************/
+
+            Deck playerDeck = new Deck();
+            Deck aiDeck = new Deck();
+            playerDeck = deckBuilder.getDeck(deckConstructor, "TESTDECK");
+            aiDeck = deckBuilder.getDeck(deckConstructor, "TESTDECK2");
+
+            /*********************/
+
+
+            loadLibraryAssets(content);
+            loadPlayers();
+
+            friendlySide = new Side(player1);
+            enemySide = new Side(player2);
+            playerDeck.loadCardImagesInContainer(library);
+            aiDeck.loadCardImagesInContainer(library);
+            friendlySide.Deck = playerDeck;
+            enemySide.Deck = aiDeck;
+
+            setSide(enemySide);
+            setSide(friendlySide);
+
+            friendlySide.boardFunc.passDown(library, cardConstructor);
+            enemySide.boardFunc.passDown(library, cardConstructor);
+
+            friendlySide.boardFunc.initializeGameComponent(content);
+            enemySide.boardFunc.initializeGameComponent(content);
+
+            friendlySide.boardFunc.StartGame(this, friendlySide);
+        }
+
+        private void loadBuildersAndConstructors()
+        {
+            cardBuilder = new CardBuilder();
+            cardConstructor = new CardConstructor();
+            deckBuilder = new DeckBuilder();
+            deckConstructor = new DeckConstructor();
+
+        }
+        private void loadPlayers()
+        {
+            player1 = new ActivePlayer();
+            player2 = new AIPlayer();
+        }
+        private void loadLibraryAssets(ContentManager content)
+        {
+            library = new CardImageStorage();
+            library = deckConstructor.cardConstructor.tempStorage;
+            library.loadCardSupplementalTextures(content);
+            library.loadAllDictionaryTextures(content);
+        }
+        public void imageAndFunctionsSetup(ContentManager content)
+        {
+            initAllComponents();
+            background.setSprite(content, "board");
+            textures = new BoardTextures(this);
+            textures.initTextures(content);
+            initButtons(content);
+        }
+        private void initAllComponents()
+        {
             unanimousToken = new Token(Card.Race.Unanimous);
             elfToken = new Token(Card.Race.Elf);
             orcToken = new Token(Card.Race.Orc);
             humanToken = new Token(Card.Race.Human);
-            //gameLoop = new BoardFunctionality();
             lifeTotal = new List<LifeTotal>();
             oblivionHolder = new List<StackPlaceholder>();
             deckHolder = new List<StackPlaceholder>();
@@ -82,96 +122,18 @@ namespace CardGame
             portraitWidgets = new List<PortraitWidget>();
             background = new GameComponent();
             handSpace = new List<HandSpace>();
-            background.setSprite(content, "board");
-            textures = new BoardTextures(this);
-            textures.initTextures(content);
-            
+        }
+        private void initButtons(ContentManager content)
+        {
             button = new Button(content, new Vector2(Game1.windowW - 100, Game1.windowH / 2 + 100), "secondButtonTexture");
             button.setPos(new Vector2(Game1.windowW - 100 - button.getWidth(), Game1.windowH / 2 + 100));
             button.setAction(() => { friendlySide.boardFunc.PassTurn(); });
-
 
             switcherButtons = new List<SwitcherButton>();
             switcherButtons.Add(new SwitcherButton(content, new Vector2(0, 0), "exitImage", 1));
             int switcherButtonPosX = Game1.windowW - switcherButtons[0].getWidth();
             switcherButtons[0].setPos(switcherButtonPosX, 0);
-
-            //
-            //
-            //
-            CardImageStorage library = new CardImageStorage();
-            library.loadCardSupplementalTextures(content);
-
-            Card card1;
-            CardBuilder cardBuilder = new CardBuilder();
-            CardConstructor cardConstructor = new CardConstructor();
-
-            Deck deck = new Deck();
-            Deck TEST = new Deck();
-            int deckLimitForTesting = 100;
-            int identifierCounter = 0;
-            for (int i = 0; i < deckLimitForTesting; i++)
-            {
-                /*if (identifierCounter == 0)
-                {
-                    identifierCounter = 4;
-                }
-                else
-                    identifierCounter = 0;
-*/
-                Card card = cardBuilder.cardConstruct(cardConstructor,identifierCounter);
-                card.setSupplementalTextures(library);
-                Card car2 = cardBuilder.cardConstruct(cardConstructor,identifierCounter);
-                car2.setSupplementalTextures(library);
-                TEST.cardsInContainer.Add(car2);
-                deck.cardsInContainer.Add(card);
-                identifierCounter++;
-                if(identifierCounter > 5)
-                {
-                    identifierCounter = 0;
-                }
-            }
-
-
-            //library.cardTextureDictionary = new Dictionary<int, Texture2D>();
-            library = cardConstructor.tempStorage;
-            library.loadCardSupplementalTextures(content);
-            library.loadAllDictionaryTextures(content);
-
-            //
-
-            //
-
-            Player player1 = new ActivePlayer();
-
-            //connectNow();
-            //PlayerProxy proxy;
-            //proxy = new PlayerProxy();
-            Player player2 = new AIPlayer();
-
-            friendlySide = new Side(player1);
-            enemySide = new Side(player2);
-            deck.loadCardImagesInContainer(library.cardTextureDictionary);
-            TEST.loadCardImagesInContainer(library.cardTextureDictionary);
-            friendlySide.Deck = deck;
-            enemySide.Deck = TEST;
-
-            setSide(enemySide);
-            setSide(friendlySide);
-
-            friendlySide.boardFunc.passDown(library, cardConstructor);
-            enemySide.boardFunc.passDown(library, cardConstructor);
-            //enemySide.boardFunc.initSide(this, enemySide);
-            //friendlySide.boardFunc.initSide(this, friendlySide);
-            friendlySide.boardFunc.initializeGameComponent(content);
-            enemySide.boardFunc.initializeGameComponent(content);
-
-
-            //gameLoop.initializeGameComponent(content);
-            friendlySide.boardFunc.StartGame(this, friendlySide);
         }
-      
-        int multiplier = 0;
         private void updateHandPosition()
         {
             friendlySide.Hand.setPos(handSpace[friendly].getPosition());

@@ -8,18 +8,10 @@ namespace CardGame
 {
     public class CardBuilder
     {
-        //DECLARE ALL ABILITIES HERE
-
-            //DICTIONARY THAT EXCHANGES ACTION
-        public CardBuilder()
-        {
-            //Effect effect = new Effect()
-        }
         public Card cardConstruct(CardConstructor constructor, int identifier)
         {
             Assemble(constructor, identifier);
-            
-            //constructor.addEffect(new Effect(Effect.EffectType.DamageAllUnits, Effect.EffectTrigger.OnDefense, 3));
+
             return constructor.getCard();
         }
         public void Assemble(CardConstructor constructor, int identifier)
@@ -122,84 +114,6 @@ namespace CardGame
 
             }
         }
-        /*public void Assemble2(CardConstructor constructor)
-        {
-            if (identifier == 1)
-            {
-                constructor.setFieldUnit(1);
-                constructor.setPower(2);
-                constructor.setRace(Card.Race.Elf);
-                constructor.setDefense(3);
-            }
-        }*/
     }
-    public class CardConstructor
-    {
-        protected Card card;
-        public CardImageStorage tempStorage;
-        //
-
-        public CardConstructor()
-        {
-            tempStorage = new CardImageStorage();
-        }
-        public void setCost(Cost cost)
-        {
-            card.cardProps.cost = cost;
-        }
-        public void setGeneral(int identifier)
-        {
-            card = new General(identifier);
-            tempStorage.fillDictionary(identifier);
-        }
-        public void setName(string name)
-        {
-            card.cardProps.name = name;
-        }
-        public void setPower(int power)
-        {
-            card.setPower(power);
-            card.cardProps.initialPower = power;
-        }
-        public void setRarity(Card.Rarity rarity)
-        {
-            card.rarity = rarity;
-        }
-        public void setDefense(int defense)
-        {
-
-                card.setDefense(defense);
-            card.cardProps.initialDefense = defense;
-            card.cardProps.aiCalcDefense = defense;
-            
-        }
-        public void setRace(Card.Race race)
-        {
-            card.race = race;
-        }
-        public void addEffect(Effect effect)
-        {
-            card.cardProps.effects.Add(effect);
-        }
-        public void addAbility(Ability ability)
-        {
-            card.cardProps.abilities.Add(ability);
-        }
-
-        public void setArmy(int identifier)
-        {
-            card = new Army(identifier);
-            tempStorage.fillDictionary(identifier);
-        }
-        public void setFieldUnit(int identifier)
-        {
-            card = new FieldUnit(identifier);
-            tempStorage.fillDictionary(identifier);
-        }
-        public Card getCard()
-        {
-            card.finalizeAbilities();
-            return card;
-        }
-    }
+    
 }

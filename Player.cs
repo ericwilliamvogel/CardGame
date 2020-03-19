@@ -68,12 +68,10 @@ namespace CardGame
     }
     public class ActivePlayer : Player
     {
-        ClientHandle clientHandle = ClientHandle.getInstance();
-        ClientSend clientSend = ClientSend.getInstance();
-        ClientTCP clientTCP = ClientTCP.getInstance();
+
         public ActivePlayer()
         {
-            ClientTCP.instance.Start();
+
         }
         public override void decide(MouseState mouseState, ContentManager content, CardGame.BoardFunctionality boardFunc)
         {

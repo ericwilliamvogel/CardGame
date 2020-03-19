@@ -23,6 +23,11 @@ namespace CardGame
         private ComponentManager componentManager;
         public MouseState mouseState;
         public static Texture2D abilityTexture;
+
+        ClientHandle clientHandle = ClientHandle.getInstance();
+        ClientSend clientSend = ClientSend.getInstance();
+        ClientTCP clientTCP = ClientTCP.getInstance();
+
         public Game1()
         {
             //BasicEffect basicEffect;
@@ -39,6 +44,8 @@ namespace CardGame
             this.IsMouseVisible = true;
             //battlefield = new Battlefield(this.Content);
             //throw new Exception(windowH.ToString());
+            //ClientTCP.instance.Start();
+            //ClientSend.instance.WelcomeReceived();
         }
 
         public void Close()

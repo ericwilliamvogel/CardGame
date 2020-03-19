@@ -24,12 +24,21 @@ namespace CardGame
         public int horizontalSpacing = 0;
         public int spacing = 20;
 
-        public void loadCardImagesInContainer(Dictionary<int, Texture2D> imageDictionary)
+        public void loadCardSupplementalTexturesInContainer()
+        {
+            foreach(Card card in cardsInContainer)
+            {
+                //
+            }
+
+        }
+        public void loadCardImagesInContainer(CardImageStorage library)
         {
 
             foreach (Card card in cardsInContainer)
             {
-                card.suppTextures.supplements[card.suppTextures.portrait].setTexture(imageDictionary[card.cardProps.identifier]);
+                card.suppTextures.supplements[card.suppTextures.portrait].setTexture(library.cardTextureDictionary[card.cardProps.identifier]);
+                card.setSupplementalTextures(library);
                 card.setColorForRace();
             }
         }

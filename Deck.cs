@@ -12,6 +12,52 @@ namespace CardGame
 
 
 
+        public void KidsShuffle()
+        {
+            int numberOfPiles = 10;
+            List<List<Card>> piles = new List<List<Card>>();
+            for(int i = 0; i < numberOfPiles; i++)
+            {
+                piles.Add(new List<Card>());
+            }
+
+            int counter = 0;
+            foreach(Card card in cardsInContainer)
+            {
+                piles[counter].Add(card);
+
+                counter++;
+                if(counter >= numberOfPiles)
+                {
+                    counter = 0;
+                }
+            }
+
+            for(int i = 0; i < numberOfPiles; i++)
+            {
+
+            }
+            List<Card> shuffledDeck = new List<Card>();
+        }
+        public void importedShuffle()
+        {
+            Shuffle(cardsInContainer);
+        }
+        //took this off stackoverflow :D!
+        private Random rng = new Random();
+
+        public void Shuffle(List<Card> list)
+        {
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                Card value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
         public void Shuffle()
         {
             int split = cardsInContainer.Count / 2;
@@ -30,7 +76,7 @@ namespace CardGame
         private List<Card> rearrangeCards(Card[] oneHalf, Card[] otherHalf)
         {
             oneHalf.Reverse();
-            otherHalf.Reverse();
+            //otherHalf.Reverse();
 
             List<Card> returnDeck = new List<Card>();
             int lowHalf = lowerHalf(oneHalf, otherHalf);
