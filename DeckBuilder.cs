@@ -8,10 +8,6 @@ namespace CardGame
 {
     public class DeckBuilder
     {
-        public DeckBuilder()
-        {
-
-        }
 
         public Deck getDeck(DeckConstructor constructor, string identifier)
         {

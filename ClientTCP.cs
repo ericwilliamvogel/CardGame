@@ -4,11 +4,22 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Net;
+using System.IO;
 
 namespace CardGame
 {
+    public enum ServerPackets
+    {
+        // Sent from server to client
+        welcome = 1
+    }
+    public enum ClientPackets
+    {
+        // Sent from client to server
+        welcomeReceived = 1,
 
+    }
     public class ClientHandle
     {
         public static ClientHandle instance;
@@ -36,6 +47,7 @@ namespace CardGame
             packets = new Dictionary<int, Packet>
         {
             { (int)ServerPackets.welcome, Welcome }
+               // {(int)ClientPackets.welcomeReceived, ClientSend.WelcomeReceived }
         };
             //throw new Exception();
         }
@@ -62,6 +74,7 @@ namespace CardGame
                     return;
                 }
             }
+
             while (_packetLength > 0 && _packetLength <= buffer.Length() - 4)
             {
                 if (_packetLength <= buffer.Length() - 4)
@@ -69,8 +82,6 @@ namespace CardGame
                     buffer.ReadInt();
                     _data = buffer.ReadBytes(_packetLength);
                     HandlePackets(_data);
-
-                    //throw new Exception();
 
                 }
                 _packetLength = 0;
@@ -95,13 +106,16 @@ namespace CardGame
             _buffer.WriteBytes(_data);
             int _packetID = _buffer.ReadInt();
             _buffer.Dispose();
+
             if (packets.TryGetValue(_packetID, out Packet _packet))
             {
+                //throw new Exception();
                 _packet.Invoke(_data);
             }
         }
         private static void Welcome(byte[] _data)
         {
+            //throw new Exception();
             ByteBuffer _buffer = new ByteBuffer();
             _buffer.WriteBytes(_data);
             _buffer.ReadInt();
@@ -111,6 +125,7 @@ namespace CardGame
             //Debug.Log("Message from server: " + _msg);
             ClientTCP.instance.myPlayerID = _myPlayerID;
             ClientSend.instance.WelcomeReceived();
+
         }
     }
 
@@ -141,6 +156,7 @@ namespace CardGame
                     _buffer.WriteInt(_data.GetUpperBound(0) - _data.GetLowerBound(0) + 1);
                     _buffer.WriteBytes(_data);
                     ClientTCP.instance.stream.BeginWrite(_buffer.ToArray(), 0, _buffer.ToArray().Length, null, null);
+
                     _buffer.Dispose();
                 }
             }
@@ -148,6 +164,8 @@ namespace CardGame
             {
                 //Debug.Log("Error sending data: " + _ex);
             }
+
+
         }
         public void WelcomeReceived()
         {
@@ -156,28 +174,21 @@ namespace CardGame
             string test = "Test player name";
             _buffer.WriteString(test);
             SendDataToServer(_buffer.ToArray());
-            //throw new Exception(test);
+
+            //confirmed buffer length 24
+            
+            //File.WriteAllText(".\\DEBUG.txt", _buffer.ToArray().ToString());
             _buffer.Dispose();
         }
     }
-    public enum ServerPackets
-    {
-        // Sent from server to client
-        welcome = 1
-    }
-    public enum ClientPackets
-    {
-        // Sent from client to server
-        welcomeReceived = 1,
 
-    }
     class ClientTCP
     {
 
         public static ClientTCP instance;
         public string ip = "127.0.0.1";
         public int port = 16320;
-        public int myPlayerID = 0;
+        public int myPlayerID = 1;
         public TcpClient socket;
         public NetworkStream stream;
         private byte[] receiveBuffer;
@@ -210,10 +221,12 @@ namespace CardGame
                 socket.NoDelay = true;
                 stream = socket.GetStream();
                 stream.BeginRead(receiveBuffer, 0, socket.ReceiveBufferSize, ReceivedData, null);
+
             }
         }
         private void ReceivedData(IAsyncResult _result)
         {
+
             try
             {
                 int _byteLength = stream.EndRead(_result);
@@ -224,6 +237,7 @@ namespace CardGame
                 }
                 byte[] _tempBuffer = new byte[_byteLength];
                 Array.Copy(receiveBuffer, _tempBuffer, _byteLength);
+
                 ClientHandle.instance.HandleData(_tempBuffer);
                 stream.BeginRead(receiveBuffer, 0, socket.ReceiveBufferSize, ReceivedData, null);
             }
