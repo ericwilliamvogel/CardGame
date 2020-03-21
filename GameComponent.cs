@@ -79,7 +79,7 @@ namespace CardGame
         {
             
             if(getTexture() != null)
-            spriteBatch.Draw(getTexture(), getPosition(), null, null, null, getRotation(), getScale(), getColor(), properties.spriteEffects, 0);
+            spriteBatch.Draw(getTexture(), getPosition(), null, null, null, getRotation(), getScale() , getColor() * properties.transparency, properties.spriteEffects, 0);
         }
 
         public virtual void setPos(int x, int y)

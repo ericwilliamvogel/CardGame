@@ -21,8 +21,13 @@ namespace CardGame
         public readonly int humanToken = 8;
         public readonly int elfToken = 9;
         public readonly int unanimousToken = 10;
+        public readonly int attackIcon = 11;
+        public readonly int defenseIcon = 12;
+        public readonly int generalSymbol = 13;
+        public readonly int armySymbol = 14;
+        public readonly int fieldUnitSymbol = 15;
 
-        public int TOTAL = 11;
+        public int TOTAL = 16;
         public List<CardSupplement> supplements;
         public CardSupplementalTextures()
         {
@@ -43,6 +48,11 @@ namespace CardGame
             supplements[elfToken].setContentName("elfToken");
             supplements[humanToken].setContentName("humanToken");
             supplements[unanimousToken].setContentName("unanimousToken");
+            supplements[attackIcon].setContentName("attackIcon");
+            supplements[defenseIcon].setContentName("defenseIcon");
+            supplements[generalSymbol].setContentName("generalSymbol");
+            supplements[armySymbol].setContentName("armySymbol");
+            supplements[fieldUnitSymbol].setContentName("fieldUnitSymbol");
         }
 
         public void setAllPositionsRelativeTo(GameComponent component)

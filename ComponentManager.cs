@@ -21,14 +21,14 @@ namespace CardGame
         public void adjustSettingsOnStartup(GraphicsDeviceManager graphics)
         {
             GraphicsSettings.currentResolution = settings.settings["Resolution"];
-            GraphicsSettings.correctResolutionForMonitor();
+
             Game1.windowH = graphics.PreferredBackBufferHeight =(int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].Y;
             Game1.windowW = graphics.PreferredBackBufferWidth = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].X;
 
             Properties.globalScale = GraphicsSettings.trueGameScale(GraphicsSettings.resolutions[GraphicsSettings.currentResolution]);
             loadFullScreen(graphics);
 
-
+            GraphicsSettings.correctResolutionForMonitor();
             graphics.HardwareModeSwitch = false;
             graphics.ApplyChanges();
         }

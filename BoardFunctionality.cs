@@ -57,6 +57,7 @@ namespace CardGame
             cardConstructor = new CardConstructor();
             Card card = cardBuilder.cardConstruct(cardConstructor, 10);
             card = cardBuilder.cardConstruct(cardConstructor, 11);
+            card = cardBuilder.cardConstruct(cardConstructor, 6);
             library = cardConstructor.tempStorage;
             library.loadCardSupplementalTextures(content);
             library.loadAllDictionaryTextures(content);
@@ -177,7 +178,14 @@ namespace CardGame
 
         
 
-
+        public void AbilityDrawCard(Card fromCard, Side side)
+        {
+            setUpCard(fromCard);
+            sendActionToQueue(() => {
+                DrawCard(side);
+                finalizeCardInteraction(fromCard, fromCard);
+            });
+        }
         public void LifeDamage(Card fromCard)
         {
             setUpCard(fromCard);

@@ -91,6 +91,20 @@ namespace CardGame
                 constructor.addAbility(new SpawnCard(11, -1));
                 constructor.addAbility(new BoardDamage(12, -10));
             }
+            else if(identifier == 6)
+            {
+                constructor.setGeneral(identifier);
+                Card.Race[] cost = { Card.Race.Orc, Card.Race.Orc };
+                constructor.setCost(new Cost(0, cost));
+                constructor.setPower(0);
+                constructor.setRace(Card.Race.Orc);
+                constructor.setDefense(6);
+                constructor.setRarity(Card.Rarity.Bronze);
+                constructor.setName("Jess's General");
+                constructor.addAbility(new BothSidesDrawCard(1, +2));
+                constructor.addAbility(new SpawnCard(6, -5));
+                constructor.addAbility(new BoardDamage(12, -10));
+            }
             else if (identifier == 10)
             {
                 constructor.setFieldUnit(identifier);

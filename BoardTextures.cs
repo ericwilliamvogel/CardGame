@@ -137,9 +137,9 @@ namespace CardGame
         }
         private void setHolderPositions()
         {
-            int borderOffset = 50;
-            int yOffset = borderOffset * 4;
-            int xPos = borderOffset * 2 + board.rows[enemy].getWidth();
+            int borderOffset = GraphicsSettings.toResolution(75);
+            int yOffset = GraphicsSettings.toResolution(borderOffset * 4);
+            int xPos = GraphicsSettings.toResolution(borderOffset * 2) + board.rows[enemy].getWidth();
             board.deckHolder[enemy].setPos(xPos, yOffset);
             board.deckHolder[friendly].setPos(xPos, Game1.windowH - board.deckHolder[friendly].getHeight() - yOffset);
 

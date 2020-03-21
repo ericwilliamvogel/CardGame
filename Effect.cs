@@ -91,6 +91,100 @@ namespace CardGame
             }
         }
     }
+    public class BothSidesDrawCard : Ability
+    {
+        private void setDesc()
+        {
+            if (power <= 1)
+            {
+                description = "Draw a card";
+            }
+            else
+            {
+                description = "Draw " + power.ToString() + " cards";
+            }
+        }
+        public BothSidesDrawCard(int amountOfCards)
+        {
+            name = "Exhaust:";
+            setDesc();
+
+        }
+        public BothSidesDrawCard(int amountOfCards, int exchangeValue)
+        {
+            this.power = amountOfCards;
+            displayGeneralIncrements(exchangeValue);
+            setDesc();
+        }
+
+        public override void activateAbilityOnSelection(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            if (INITIALCARD.cardProps.exhausted == false && clickedInAbilityBox == false)
+            {
+                boardFunc.cardViewer.resetCardSelection(mouseState, boardFunc);
+                useAbility(mouseState, boardFunc);
+                clickedInAbilityBox = true;
+                resetAllCards(boardFunc);
+            }
+        }
+        public override void useAbility(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            for (int i = 0; i < power; i++)
+            {
+                boardFunc.AbilityDrawCard(INITIALCARD, boardFunc.friendlySide);
+                boardFunc.AbilityDrawCard(INITIALCARD, boardFunc.enemySide);
+            }
+
+            base.useAbility(mouseState, boardFunc);
+        }
+
+    }
+    public class DrawCard : Ability
+    {
+        private void setDesc()
+        {
+            if (power <= 1)
+            {
+                description = "Draw a card";
+            }
+            else
+            {
+                description = "Draw " + power.ToString() + " cards";
+            }
+        }
+        public DrawCard(int amountOfCards)
+        {
+            name = "Exhaust:";
+            setDesc();
+
+        }
+        public DrawCard(int amountOfCards, int exchangeValue)
+        {
+            this.power = amountOfCards;
+            displayGeneralIncrements(exchangeValue);
+            setDesc();
+        }
+
+        public override void activateAbilityOnSelection(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            if (INITIALCARD.cardProps.exhausted == false && clickedInAbilityBox == false)
+            {
+                boardFunc.cardViewer.resetCardSelection(mouseState, boardFunc);
+                useAbility(mouseState, boardFunc);
+                clickedInAbilityBox = true;
+                resetAllCards(boardFunc);
+            }
+        }
+        public override void useAbility(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            for(int i = 0; i < power; i++)
+            {
+                boardFunc.AbilityDrawCard(INITIALCARD, boardFunc.friendlySide);
+            }
+
+            base.useAbility(mouseState, boardFunc);
+        }
+    }
     public class Exhaust : Ability
     {
         public Exhaust()

@@ -20,11 +20,12 @@ namespace CardGame
 
             if(identifier == "TESTDECK")
             {
-                constructor.addCardsToDeck(10, 1);
+                constructor.addCardsToDeck(10, 6);
+                constructor.addCardsToDeck(10, 5);
                 constructor.addCardsToDeck(10, 2);
                 constructor.addCardsToDeck(10, 3);
                 constructor.addCardsToDeck(10, 4);
-                constructor.addCardsToDeck(10, 0);
+
             }
             else if(identifier == "TESTDECK2")
             {

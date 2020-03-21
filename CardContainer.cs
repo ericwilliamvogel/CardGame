@@ -218,10 +218,43 @@ namespace CardGame
                 }
             }
         }
+        public virtual Vector2 getEntrancePosition(Card card)
+        {
+            Vector2 position;
+            position = getPosition();
+            return position;
+        }
     }
     public class HorizontalContainer : CardContainer
     {
         public float containerScale;
+
+        public override Vector2 getEntrancePosition(Card card)
+        {
+
+            Vector2 position;
+            int xPos = 0;
+
+            if (Count() > 0)
+            {
+                if (card != cardsInContainer[Count() - 1])
+                {
+                    xPos = (int)cardsInContainer[Count() - 1].getPosition().X + (int)trueContainerWidth(cardsInContainer[Count() - 1]);
+                }
+                else
+                {
+                    xPos = (int)cardsInContainer[Count() - 2].getPosition().X + (int)trueContainerWidth(cardsInContainer[Count() - 2]);
+                }
+                
+            }
+            else
+            {
+                xPos = (int)(getPosition().X + getWidth() / 2);
+            }
+
+            position = new Vector2(xPos, getPosition().Y);
+            return position;
+        }
         public virtual void setCorrectCenterSpacing(Card card)
         {
             if (centerSpacing)

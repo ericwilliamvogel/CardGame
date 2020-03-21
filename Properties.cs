@@ -24,6 +24,7 @@ namespace CardGame
         public Color color { get; set; }
         public Vector2 scale { get; set; }
         public float rotation { get; set; }
+        public float transparency = 1f;
 
         private int toScale(int input)
         {

@@ -24,28 +24,24 @@ namespace CardGame
         public MouseState mouseState;
         public static Texture2D abilityTexture;
 
-        ClientHandle clientHandle = ClientHandle.getInstance();
-        ClientSend clientSend = ClientSend.getInstance();
-        ClientTCP clientTCP = ClientTCP.getInstance();
+        //ClientHandle clientHandle = ClientHandle.getInstance();
+        //ClientSend clientSend = ClientSend.getInstance();
+        //ClientTCP clientTCP = ClientTCP.getInstance();
 
         public Game1()
         {
-            //BasicEffect basicEffect;
-
+            //clientHandle = ClientHandle.getInstance();
+            //clientSend = ClientSend.getInstance();
+            //clientTCP = ClientTCP.getInstance();
             mouseState = new MouseState();
             componentManager = new ComponentManager(this.Content);
             windowParams = new Vector2((int)windowW, (int)windowH);
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             componentManager.adjustSettingsOnStartup(graphics);
-
-            //windowH = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].Y;
-            //windowW = (int)GraphicsSettings.resolutions[GraphicsSettings.currentResolution].X;
             this.IsMouseVisible = true;
-            //battlefield = new Battlefield(this.Content);
-            //throw new Exception(windowH.ToString());
+
             //ClientTCP.instance.Start();
-            //ClientSend.instance.WelcomeReceived();
         }
 
         public void Close()

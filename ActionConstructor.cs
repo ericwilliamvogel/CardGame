@@ -59,8 +59,8 @@ namespace CardGame
         public void movementLogic(CardContainer startingContainer, CardContainer endingContainer, Card card, BoardFunctionality boardFunc)
         {
             card.makingAction = true;
-            Vector2 newPosition = endingContainer.getPosition();
-            if (newPosition.X > Game1.windowW || newPosition.X < 0)
+            Vector2 newPosition = endingContainer.getEntrancePosition(card);
+            if (newPosition.X > Game1.windowW || newPosition.X < -100)
             {
                 throw new Exception(endingContainer.getPosition().ToString());
             }

@@ -245,10 +245,28 @@ namespace CardGame
                     drawCardSelectionBorder(spriteBatch);
                     spriteBatch.DrawString(Game1.spritefont, cardProps.name, new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + 40 * getScale().X), Color.Black, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
 
+                    switch(cardProps.type)
+                    {
+                        case CardType.Army:
+                            suppTextures.supplements[suppTextures.armySymbol].drawSprite(spriteBatch);
+                            break;
+                        case CardType.General:
+                            suppTextures.supplements[suppTextures.generalSymbol].drawSprite(spriteBatch);
+                            break;
+                        case CardType.FieldUnit:
+                            suppTextures.supplements[suppTextures.fieldUnitSymbol].drawSprite(spriteBatch);
+                            break;
+                    }
 
-               
-                    spriteBatch.DrawString(Game1.spritefont, cardProps.defense.ToString(), new Vector2(getPosition().X + getWidth() - 70 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 1.66f * getScale(), SpriteEffects.None, 0);
-                    if(cardProps.power != 0)
+                    if (cardProps.type != CardType.General)
+                    {
+                        suppTextures.supplements[suppTextures.attackIcon].drawSprite(spriteBatch);
+                    }
+
+                    suppTextures.supplements[suppTextures.defenseIcon].drawSprite(spriteBatch);
+
+                    spriteBatch.DrawString(Game1.spritefont, cardProps.defense.ToString(), new Vector2(getPosition().X + getWidth() - 80 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 1.66f * getScale(), SpriteEffects.None, 0);
+                    if(cardProps.type != CardType.General)
                     spriteBatch.DrawString(Game1.spritefont, cardProps.power.ToString(), new Vector2(getPosition().X + 40 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 1.66f * getScale(), SpriteEffects.None, 0);
 
                     for(int i = 0; i < cardProps.abilities.Count; i++)
@@ -372,6 +390,30 @@ namespace CardGame
             suppTextures.supplements[suppTextures.cardBack].setOffset(0 * w, 0 * w);
             suppTextures.supplements[suppTextures.abilityDisplay].setOffset(properties.width * w, 0);
 
+            int afterCardImageBorder = (int)(584 * w);
+            suppTextures.supplements[suppTextures.generalSymbol].setOffset(0 * w, afterCardImageBorder);
+            suppTextures.supplements[suppTextures.armySymbol].setOffset(0 * w, afterCardImageBorder);
+            suppTextures.supplements[suppTextures.fieldUnitSymbol].setOffset(0 * w, afterCardImageBorder);
+
+            float symbolTransparency = .2f;
+            suppTextures.supplements[suppTextures.generalSymbol].properties.transparency = symbolTransparency;
+            suppTextures.supplements[suppTextures.armySymbol].properties.transparency = symbolTransparency;
+            suppTextures.supplements[suppTextures.fieldUnitSymbol].properties.transparency = symbolTransparency;
+
+            Color symbolColor = Color.Gray;
+            suppTextures.supplements[suppTextures.generalSymbol].properties.color = symbolColor;
+            suppTextures.supplements[suppTextures.armySymbol].properties.color = symbolColor;
+            suppTextures.supplements[suppTextures.fieldUnitSymbol].properties.color = symbolColor;
+
+
+            int attackPosY = (int)(properties.height * w - suppTextures.supplements[suppTextures.attackIcon].getHeight() * 7/8);
+            int attackPosX = (int)-(suppTextures.supplements[suppTextures.attackIcon].getWidth() * 3/16);
+
+            int defensePosY = (int)(properties.height*w - suppTextures.supplements[suppTextures.attackIcon].getHeight() * 7/8);
+            int defensePosX = (int)(properties.width*w -suppTextures.supplements[suppTextures.attackIcon].getWidth() * 7/8);
+
+            suppTextures.supplements[suppTextures.attackIcon].setOffset(attackPosX , attackPosY );
+            suppTextures.supplements[suppTextures.defenseIcon].setOffset(defensePosX , defensePosY );
 
 
             properties.width = suppTextures.supplements[suppTextures.cardBack].properties.width;
@@ -467,7 +509,7 @@ namespace CardGame
             }
             if (race == Race.Orc)
             {
-                return Color.DarkViolet;
+                return Color.Green;
             }
 
             return Color.White;

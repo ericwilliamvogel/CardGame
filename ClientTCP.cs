@@ -122,7 +122,8 @@ namespace CardGame
             string _msg = _buffer.ReadString();
             int _myPlayerID = _buffer.ReadInt();
             _buffer.Dispose();
-            //Debug.Log("Message from server: " + _msg);
+            File.WriteAllText(".\\DEBUG.txt", _msg);
+            //throw new Exception
             ClientTCP.instance.myPlayerID = _myPlayerID;
             ClientSend.instance.WelcomeReceived();
 
