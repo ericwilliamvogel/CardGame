@@ -61,7 +61,11 @@ namespace CardGame
             Story
         }
 
-        public int controller = 2;
+        public readonly int MENU = 1;
+        public readonly int SETTINGS = 0;
+        public readonly int BOARD = 2;
+
+        public int controller = 1;
         private Transition fadeScreen;
         private int currentComponent;
         public static int LEVEL = 0;

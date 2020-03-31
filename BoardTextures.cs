@@ -84,7 +84,7 @@ namespace CardGame
         }
         private void setTokens(ContentManager content)
         {
-            int startingPosX = (int)board.rows[5].getPosition().X + board.rows[5].getWidth() + 50;
+            int startingPosX = (int)board.rows[5].getPosition().X + board.rows[5].getWidth() + GraphicsSettings.toResolution(50);
             int yPos = (int)board.rows[5].getPosition().Y;
             board.unanimousToken.setSprite(content, "unanimousToken");
             board.unanimousToken.setPos(startingPosX, yPos);
@@ -112,7 +112,7 @@ namespace CardGame
         }
         private void setHandSpacePositions()
         {
-            int xPos = 200;
+            int xPos = GraphicsSettings.toResolution(200);
             int yPos = Game1.windowH - board.handSpace[0].getHeight() / 2;
             board.handSpace[enemy].setPos(xPos, GraphicsSettings.toResolution(-120));
             board.handSpace[enemy].properties.spriteEffects = SpriteEffects.FlipVertically;
@@ -121,7 +121,7 @@ namespace CardGame
         }
         private void setPortraitWidgetPositions()
         {
-            int yPos = 100;
+            int yPos = GraphicsSettings.toResolution(100);
             int xPos = Game1.windowW - board.portraitWidgets[enemy].getWidth();
             board.portraitWidgets[enemy].setPos(xPos, yPos);
             board.portraitWidgets[friendly].setPos(xPos, Game1.windowH - yPos - board.portraitWidgets[enemy].getHeight());
@@ -137,9 +137,9 @@ namespace CardGame
         }
         private void setHolderPositions()
         {
-            int borderOffset = GraphicsSettings.toResolution(75);
-            int yOffset = GraphicsSettings.toResolution(borderOffset * 4);
-            int xPos = GraphicsSettings.toResolution(borderOffset * 2) + board.rows[enemy].getWidth();
+            int borderOffset = GraphicsSettings.toResolution(60);
+            int yOffset = borderOffset * 4;
+            int xPos = borderOffset * 2 + board.rows[enemy].getWidth();
             board.deckHolder[enemy].setPos(xPos, yOffset);
             board.deckHolder[friendly].setPos(xPos, Game1.windowH - board.deckHolder[friendly].getHeight() - yOffset);
 
@@ -177,8 +177,8 @@ namespace CardGame
         private void setRowPositions()
         {
             int changingYPOS = 0;
-            int borderOffset = 50;
-            int staticXPOS = 60;
+            int borderOffset = GraphicsSettings.toResolution(50);
+            int staticXPOS = GraphicsSettings.toResolution(60);
             for (int i = 0; i < 3; i++)
             {
                 changingYPOS = borderOffset + i * board.rows[i].getHeight();

@@ -18,9 +18,30 @@ namespace CardGame
             updateDeckPositions(boardFunc.enemySide);
             boardFunc.assetUpdater.updateAllAssets(boardFunc);
             this.SELECTEDCARD = boardFunc.SELECTEDCARD;
+            deselectCards(boardFunc);
         }
 
+        public void deselectCards(BoardFunctionality boardFunc)
+        {
+            deselectSide(boardFunc.friendlySide);
+            deselectSide(boardFunc.enemySide);
+        }
+        private void deselectSide(Side side)
+        {
+            deselectContainer(side.Hand);
+            deselectContainer(side.Rows[Side.Armies]);
+            deselectContainer(side.Rows[Side.FieldUnit]);
+            deselectContainer(side.Rows[Side.General]);
 
+        }
+        private void deselectContainer(CardContainer container)
+        {
+            foreach (Card card in container.cardsInContainer)
+            {
+                if(card.selectState == Card.SelectState.Selected)
+                card.setRegular();
+            }
+        }
         private void updateDeckPositions(Side side)
         {
             foreach (Card card in side.Deck.cardsInContainer)

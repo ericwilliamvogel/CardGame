@@ -8,7 +8,7 @@ namespace CardGame
 {
     public static class CardScale
     {
-        public static float Hand = -.6f;
+        public static float Hand = -(Properties.globalScale.X - Properties.globalScale.X * 1/4);
         public static float View = 0f;
         public static float Board = -(Properties.globalScale.X - Properties.globalScale.X / 6);
 

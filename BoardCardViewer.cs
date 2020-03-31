@@ -93,7 +93,7 @@ namespace CardGame
                 abilityButtons[i].setTexture(card.suppTextures.supplements[card.suppTextures.abilityDisplay].getTexture());
                 abilityButtons[i].setPos(new Vector2(card.getPosition().X + card.getWidth(), card.getPosition().Y + abilityButtons[i].getHeight() * i));
                 abilityButtons[i].setButtonText(card.cardProps.abilities[i].description);
-                abilityButtons[i].wantedScale = 4f;
+                abilityButtons[i].wantedScale = 1f;
                 card.cardProps.abilities[i].clickedInAbilityBox = false;
 
                 //THE REASONING BEHIND THIS IS THAT THE I ITERATOR WILL END OUTSIDE OF THE ARRAY, AND EACH TIME THE BUTTONS ARE PRESSED THEY
@@ -108,7 +108,7 @@ namespace CardGame
                     action = (MouseState newMouseState) => {
                         card.cardProps.abilities[0].setTarget(newMouseState, boardFunc);
                         card.cardProps.abilities[0].activateAbilityOnSelection(newMouseState, boardFunc);
-                        resetCardSelection(newMouseState, boardFunc);
+                        resetCardSelectionOnRightClick(newMouseState, boardFunc);
                     };
                 }
                 if (i == 1)
@@ -116,7 +116,7 @@ namespace CardGame
                     action = (MouseState newMouseState) => {
                         card.cardProps.abilities[1].setTarget(newMouseState, boardFunc);
                         card.cardProps.abilities[1].activateAbilityOnSelection(newMouseState, boardFunc);
-                        resetCardSelection(newMouseState, boardFunc);
+                        resetCardSelectionOnRightClick(newMouseState, boardFunc);
                     };
                 }
                 if (i == 2)
@@ -124,7 +124,7 @@ namespace CardGame
                     action = (MouseState newMouseState) => {
                         card.cardProps.abilities[2].setTarget(newMouseState, boardFunc);
                         card.cardProps.abilities[2].activateAbilityOnSelection(newMouseState, boardFunc);
-                        resetCardSelection(newMouseState, boardFunc);
+                        resetCardSelectionOnRightClick(newMouseState, boardFunc);
                     };
                 }
                 if (i == 3)
@@ -132,7 +132,7 @@ namespace CardGame
                     action = (MouseState newMouseState) => {
                         card.cardProps.abilities[3].setTarget(newMouseState, boardFunc);
                         card.cardProps.abilities[3].activateAbilityOnSelection(newMouseState, boardFunc);
-                        resetCardSelection(newMouseState, boardFunc);
+                        resetCardSelectionOnRightClick(newMouseState, boardFunc);
                     };
                 }
                 else
@@ -170,14 +170,11 @@ namespace CardGame
             }
         }
 
-        public void resetCardSelection(MouseState mouseState, BoardFunctionality boardFunc)
+        public void resetCardSelectionOnRightClick(MouseState mouseState, BoardFunctionality boardFunc)
         {
             if (mouseState.RightButton == ButtonState.Pressed)
             {
-                boardFunc.state = State.Regular;
-                selection = null;
-                resetSelectedCard(boardFunc);
-                boardFunc.boardPosLogic.updateBoard(boardFunc);
+                hardResetSelection(boardFunc);
                 abilityButtons = new List<Button>();
                 createButtonsOnView = false;
                 if (selection != null)
@@ -186,6 +183,13 @@ namespace CardGame
 
                 }
             }
+        }
+        public void hardResetSelection(BoardFunctionality boardFunc)
+        {
+            boardFunc.state = State.Regular;
+            selection = null;
+            resetSelectedCard(boardFunc);
+            boardFunc.boardPosLogic.updateBoard(boardFunc);
         }
         public void resetSelectedCard(BoardFunctionality boardFunc)
         {

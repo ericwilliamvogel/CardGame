@@ -41,6 +41,7 @@ namespace CardGame
         DeckBuilder deckBuilder = new DeckBuilder();
         DeckConstructor deckConstructor = new DeckConstructor();
         CardImageStorage library = new CardImageStorage();
+        public BoardActions boardActions = new BoardActions();
         Player player1;
         Player player2;
 
@@ -125,8 +126,10 @@ namespace CardGame
         }
         private void initButtons(ContentManager content)
         {
-            button = new Button(content, new Vector2(Game1.windowW - 100, Game1.windowH / 2 + 100), "secondButtonTexture");
-            button.setPos(new Vector2(Game1.windowW - 100 - button.getWidth(), Game1.windowH / 2 + 100));
+            int offSet = GraphicsSettings.toResolution(100);
+            button = new Button(content, new Vector2(Game1.windowW - offSet, Game1.windowH / 2 + offSet), "secondButtonTexture");
+            button.setPos(new Vector2(Game1.windowW - offSet - button.getWidth(), Game1.windowH / 2 + offSet));
+            button.setButtonText("END");
             button.setAction(() => { friendlySide.boardFunc.PassTurn(); });
 
             switcherButtons = new List<SwitcherButton>();
@@ -260,7 +263,7 @@ namespace CardGame
 
             lifeTotal[enemy].updateLifeValue(enemySide.LifeTotal);
             lifeTotal[friendly].updateLifeValue(friendlySide.LifeTotal);
-
+            boardActions.updateAnimations();
         }
 
         public int enemy = 0;

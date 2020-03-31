@@ -81,8 +81,9 @@ namespace CardGame
         }
         public void Update(Board board)
         {
+            boardActions = board.boardActions;
             sideSetter.updateSide(board);
-            boardActions.updateAnimations();
+            //boardActions.updateAnimations();
             assetUpdater.updateAllAssets(this);
             if(boardActions.isActive())
             {
@@ -165,6 +166,7 @@ namespace CardGame
 
 
             controllingPlayer = friendlySide;
+            Update(board);
             StartTurn(controllingPlayer);
             DrawHand(friendlySide);
             DrawHand(enemySide);

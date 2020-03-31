@@ -81,7 +81,7 @@ namespace CardGame
             
             base.drawSprite(spriteBatch);
             if(buttonProperties.message != null)
-            spriteBatch.DrawString(Game1.spritefont, buttonProperties.message, new Vector2(centerText(getPosition().X), centerText(getPosition().Y)), Color.Gold, 0, new Vector2(0, 0), wantedScale * getScale(), SpriteEffects.None, 0);
+            spriteBatch.DrawString(Game1.spritefont, buttonProperties.message, new Vector2(centerText(getPosition().X), centerText(getPosition().Y)), Color.Black, 0, new Vector2(0, 0), wantedScale * getScale(), SpriteEffects.None, 0);
         }
 
         protected float centerText(float value)
@@ -89,7 +89,7 @@ namespace CardGame
             return value + 20;
         }
 
-        public float wantedScale;
+        public float wantedScale = 1f;
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
             try

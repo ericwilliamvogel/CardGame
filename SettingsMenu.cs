@@ -75,7 +75,7 @@ namespace CardGame
             
             buttons.Add(new Button(content, noVal, imgSrc));
             
-            buttons.Add(new Button(content, noVal,smallImgSrc));
+            buttons.Add(new Button(content, noVal, smallImgSrc));
             setButtonPositions();
         }
         public void setButtonPositions()
@@ -85,10 +85,10 @@ namespace CardGame
             int buttonPositionX = GraphicsSettings.realScreenWidth() / 2 - tempButton.getWidth() / 2;
             int buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
             switcherButtons[0].setPos(new Vector2(buttonPositionX, buttonPositionY));
-            switcherButtons[0].setButtonText("TO MAIN");
+            switcherButtons[0].setButtonText("Main Menu");
             counter++;
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
-            buttons[0].setButtonText("FullScreen TOGGLE");
+            buttons[0].setButtonText("Toggle Fullscreen");
             buttons[0].setPos(new Vector2(buttonPositionX, buttonPositionY));
             counter++;
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
@@ -96,7 +96,7 @@ namespace CardGame
             buttons[1].setPos(new Vector2(buttonPositionX, buttonPositionY));
 
             buttonPositionY = counter * tempButton.getHeight() + tempButton.getHeight() / 3;
-            buttons[2].setButtonText("Apply");
+            buttons[2].setButtonText("Apply changes on startup");
             buttons[2].setPos(new Vector2(buttonPositionX + tempButton.getWidth(), buttonPositionY));
         }
         public void getPermissionToModifyGraphics(GraphicsDeviceManager graphics)
