@@ -39,7 +39,7 @@ namespace CardGame
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             componentManager.adjustSettingsOnStartup(graphics);
-            this.IsMouseVisible = true;
+            this.IsMouseVisible = false;
 
             //ClientTCP.instance.Start();
         }

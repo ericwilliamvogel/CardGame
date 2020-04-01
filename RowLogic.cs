@@ -104,11 +104,15 @@ namespace CardGame
                 //card.setPos(mouseState.X - card.getWidth() / 2, mouseState.Y - card.getHeight() / 2);
                 clickedInCardBox = true;
             }
-            if (mouseState.LeftButton == ButtonState.Released && clickedInCardBox && row.isWithinModifiedPosition(mouseState, card))
+            if (mouseState.LeftButton == ButtonState.Released && clickedInCardBox)
             {
-                clickedInCardBox = false;
-                boardFunc.state = BoardFunctionality.State.CardView;
-
+                if(row.isWithinModifiedPosition(mouseState, card))
+                {
+                    clickedInCardBox = false;
+                    boardFunc.state = BoardFunctionality.State.CardView;
+                }
+ 
+                MouseTransformer.Set(MouseTransformer.State.Reg);
             }
 
 
@@ -122,6 +126,7 @@ namespace CardGame
                 card.resetCardSelector();
                 boardFunc.SELECTEDCARD = null;
                 boardFunc.boardPosLogic.updateBoard(boardFunc);
+                MouseTransformer.Set(MouseTransformer.State.Reg);
             }
         }
 
@@ -204,38 +209,44 @@ namespace CardGame
             if (clickedInCardBox)
             {
                 selectAction.SetTargetCard(mouseState, row, card, boardFunc.enemySide);
-                if (selectAction.TargetEnemyCard(mouseState, boardFunc, false) != null && !row.isWithinModifiedPosition(mouseState, card))
+                if (!row.isWithinModifiedPosition(mouseState, card))
                 {
-
-                    if (selectAction.TargetEnemyCard(mouseState, boardFunc, false).correctRow(boardFunc.enemySide).revealed)
+                    MouseTransformer.Set(MouseTransformer.State.Atk);
+                    if(selectAction.TargetEnemyCard(mouseState, boardFunc, false) != null)
                     {
-                        switch (selectAction.TargetEnemyCard(mouseState, boardFunc, false).correctRow(boardFunc.enemySide).type)
+                        MouseTransformer.Set(MouseTransformer.State.Reg);
+                        if (selectAction.TargetEnemyCard(mouseState, boardFunc, false).correctRow(boardFunc.enemySide).revealed)
                         {
-                            case CardType.FieldUnit:
-                                boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
-                                break;
-                            case CardType.Army:
-                                if (boardFunc.enemySide.Rows[Side.FieldUnit].isEmpty())
-                                {
+                            switch (selectAction.TargetEnemyCard(mouseState, boardFunc, false).correctRow(boardFunc.enemySide).type)
+                            {
+                                case CardType.FieldUnit:
                                     boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
-                                }
-                                else
-                                {
-                                    boardFunc.BOARDMESSAGE.addMessage("Cannot fight an Army if a FieldUnit is present on the board!");
-                                }
-                                break;
-                            case CardType.General:
-                                if (boardFunc.enemySide.Rows[Side.FieldUnit].isEmpty() && boardFunc.enemySide.Rows[Side.Armies].isEmpty())
-                                {
-                                    //i dont think i want soldiers to touch generals. needs to be a spell
-                                    //boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
-                                }
-                                else
-                                {
-                                    boardFunc.BOARDMESSAGE.addMessage("A FieldUnit cannot target a General!");
-                                }
-                                break;
+                                    break;
+                                case CardType.Army:
+                                    if (boardFunc.enemySide.Rows[Side.FieldUnit].isEmpty())
+                                    {
+                                        boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
+                                    }
+                                    else
+                                    {
+                                        boardFunc.BOARDMESSAGE.addMessage("Cannot fight an Army if a FieldUnit is present on the board!");
+                                    }
+                                    break;
+                                case CardType.General:
+                                    if (boardFunc.enemySide.Rows[Side.FieldUnit].isEmpty() && boardFunc.enemySide.Rows[Side.Armies].isEmpty())
+                                    {
+                                        //i dont think i want soldiers to touch generals. needs to be a spell
+                                        //boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
+                                    }
+                                    else
+                                    {
+                                        boardFunc.BOARDMESSAGE.addMessage("A FieldUnit cannot target a General!");
+                                    }
+                                    break;
+                            }
                         }
+                        
+                    
                     }
 
                 }

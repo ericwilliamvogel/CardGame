@@ -57,7 +57,7 @@ namespace CardGame
                 constructor.setFieldUnit(identifier);
                 Card.Race[] cost = { Card.Race.Orc };
                 constructor.setCost(new Cost(0, cost));
-                constructor.setPower(1);
+                constructor.setPower(5);
                 constructor.setRace(Card.Race.Orc);
                 constructor.setDefense(2);
                 constructor.setRarity(Card.Rarity.Bronze);

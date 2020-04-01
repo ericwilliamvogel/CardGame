@@ -63,7 +63,7 @@ namespace CardGame
         }
         public virtual void setTarget(MouseState mouseState, BoardFunctionality boardFunc)
         {
-
+            MouseTransformer.Set(MouseTransformer.State.Tgt);
         }
         public virtual Card returnSelectedCard(MouseState mouseState, BoardFunctionality boardFunc)
         {
@@ -73,22 +73,32 @@ namespace CardGame
         {
             resetSide(boardFunc.enemySide);
             resetSide(boardFunc.friendlySide);
+            MouseTransformer.Set(MouseTransformer.State.Reg);
         }
         public virtual void useAbility(MouseState mouseState, BoardFunctionality boardFunc)
         {
             if (INITIALCARD.cardProps.type == CardType.General)
             {
-                if (INITIALCARD.cardProps.defense >= GameComponent.ToAbsolute(exchangeValue) && exchangeValue < 0)
+                if (exchangeValue < 0)
                 {
-                    INITIALCARD.cardProps.defense += exchangeValue;
-                    abilityImplementation(mouseState, boardFunc);
+                    if(INITIALCARD.cardProps.defense >= GameComponent.ToAbsolute(exchangeValue))
+                    {
+                        INITIALCARD.cardProps.defense += exchangeValue;
+                        abilityImplementation(mouseState, boardFunc);
+                    }
+                    else
+                    {
+                        boardFunc.BOARDMESSAGE.addMessage(INITIALCARD.cardProps.name + " does not have enough power yet.");
+                        clickedInAbilityBox = false;
+                        resetAllCards(boardFunc);
+                        boardFunc.cardViewer.hardResetSelection(boardFunc);
+                    }
+
                 }
                 else
                 {
-                    boardFunc.BOARDMESSAGE.addMessage(INITIALCARD.cardProps.name + " does not have enough power yet.");
-                    clickedInAbilityBox = false;
-                    resetAllCards(boardFunc);
-                    boardFunc.cardViewer.hardResetSelection(boardFunc);
+                    INITIALCARD.cardProps.defense += exchangeValue;
+                    abilityImplementation(mouseState, boardFunc);
                 }
             }
             else
@@ -233,10 +243,6 @@ namespace CardGame
 
         public override void useAIAbility(AIPlayer player, BoardFunctionality boardFunc, Card targetCard)
         {
-            if (player != null)
-            {
-                //
-            }
 
         }
 

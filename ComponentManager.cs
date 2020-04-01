@@ -92,6 +92,7 @@ namespace CardGame
 
         public ComponentManager(ContentManager content)
         {
+
             settings = new SettingsMenu();
             primaryComponent = new PrimaryComponent[3];
             primaryComponent[0] = settings;
@@ -134,6 +135,7 @@ namespace CardGame
 
         public override void initializeGameComponent(ContentManager content)
         {
+            MouseTransformer.initTextures(content);
             fadeScreen = new Transition(content);
             initializePrimaryComponent(content, controller);
         }
@@ -165,6 +167,7 @@ namespace CardGame
         {
             primaryComponent[controller].mouseStateLogic(mouseState, content);
             updateSwitcherMouseLogic(mouseState, content);
+            MouseTransformer.updateMouseTransformerPosition(mouseState);
         }
 
         public override void drawSprite(SpriteBatch spriteBatch)
@@ -173,7 +176,7 @@ namespace CardGame
             drawSwitcherButtons(spriteBatch);
             if (fadeScreen.blackScreen.getLoadedTexture() != null)
                 fadeScreen.drawSprite(spriteBatch);
-
+            MouseTransformer.drawMouseTransformer(spriteBatch);
 
         }
 

@@ -137,7 +137,7 @@ namespace CardGame
                 }
                 else
                 {
-                    Console.WriteLine("too many abilities in card");
+                    Console.WriteLine(card.cardProps.name + " was loaded with more than 4 abilities. Maybe it loaded twice?");
                 }
                 //THIS ACTUALLY WORKED PERFECTLY IM SO MAD
 
@@ -190,6 +190,7 @@ namespace CardGame
             selection = null;
             resetSelectedCard(boardFunc);
             boardFunc.boardPosLogic.updateBoard(boardFunc);
+            MouseTransformer.Set(MouseTransformer.State.Reg);
         }
         public void resetSelectedCard(BoardFunctionality boardFunc)
         {

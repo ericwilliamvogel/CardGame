@@ -102,7 +102,7 @@ namespace CardGame
 
             boardFunc.cardViewer.updateButtonsOnPopup(mouseState, content);
 
-           
+
         }
     }
 
@@ -121,10 +121,10 @@ namespace CardGame
             {
                 playArmies(boardFunc);
                 playCardIfThereAreEnoughArmies(boardFunc);
-                VERYBASICATTACKLOGIC(boardFunc);
-                //attackIfBeneficial(boardFunc);
+                //VERYBASICATTACKLOGIC(boardFunc);
+                attackIfBeneficial(boardFunc);
                 //throw new
-                if (!endTurnOnce )
+                if (!endTurnOnce)
                 {
                     boardFunc.PassTurn();
 
@@ -136,11 +136,11 @@ namespace CardGame
 
         public void VERYBASICATTACKLOGIC(BoardFunctionality boardFunc)
         {
-            foreach(Card card in boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer)
+            foreach (Card card in boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer)
             {
-                foreach(Card enemyCard in boardFunc.enemySide.Rows[Side.FieldUnit].cardsInContainer)
+                foreach (Card enemyCard in boardFunc.enemySide.Rows[Side.FieldUnit].cardsInContainer)
                 {
-                    if(!card.cardProps.exhausted)
+                    if (!card.cardProps.exhausted)
                     {
                         if (enemyCard.cardProps.defense - card.cardProps.power <= 0)
                         {
@@ -160,9 +160,9 @@ namespace CardGame
         private void playArmies(BoardFunctionality boardFunc)
         {
             bool trigger = false;
-            if(!hasPlayedArmyThisTurn)
+            if (!hasPlayedArmyThisTurn)
             {
-                foreach(Card card in boardFunc.friendlySide.Hand.cardsInContainer)
+                foreach (Card card in boardFunc.friendlySide.Hand.cardsInContainer)
                 {
                     if (card.cardProps.type == CardType.Army && trigger == false)
                     {
@@ -177,17 +177,17 @@ namespace CardGame
         private void playCardIfThereAreEnoughArmies(BoardFunctionality boardFunc)
         {
             int counter = 0;
-            foreach(Card newCard in boardFunc.friendlySide.Rows[Side.Armies].cardsInContainer)
+            foreach (Card newCard in boardFunc.friendlySide.Rows[Side.Armies].cardsInContainer)
             {
-                if(!newCard.cardProps.exhausted)
+                if (!newCard.cardProps.exhausted)
                 {
                     counter++;
                 }
 
             }
-            foreach(Card newCard in boardFunc.friendlySide.Hand.cardsInContainer)
+            foreach (Card newCard in boardFunc.friendlySide.Hand.cardsInContainer)
             {
-                if(newCard.cardProps.cost.totalCost <= counter)
+                if (newCard.cardProps.cost.totalCost <= counter)
                 {
                     //exhaustArmies(boardFunc.friendlySide, newCard); 
                     boardFunc.PlayCard(boardFunc.friendlySide, /*boardFunc.enemySide.Rows[Side.FieldUnit]*/ newCard);
@@ -239,16 +239,246 @@ namespace CardGame
 
         private FunctionalRow getCorrectRow(Card card, BoardFunctionality boardFunc)
         {
-            foreach(FunctionalRow row in boardFunc.friendlySide.Rows)
+            foreach (FunctionalRow row in boardFunc.friendlySide.Rows)
             {
-                if(row.type == card.cardProps.type)
+                if (row.type == card.cardProps.type)
                 {
                     return row;
                 }
             }
             return null;
         }
+
+        private Dictionary<Card, CardPlayShell> playDictionary;
+        public GroupPlayManager groupPlayManager= new GroupPlayManager();
+        private void attackIfBeneficial(BoardFunctionality boardFunc)
+        {
+            if (boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer.Count > 0)
+            {
+                playDictionary = new Dictionary<Card, CardPlayShell>();
+                foreach (Card friendlyCard in boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer)
+                {
+                    CardPlayShell cardPlayShell = new CardPlayShell();
+                    foreach (Card enemyCard in boardFunc.enemySide.Rows[Side.FieldUnit].cardsInContainer)
+                    {
+                        cardPlayShell.AddEnemy(enemyCard);
+                    }
+                    cardPlayShell.SetCardToMakePlay(friendlyCard);
+                    cardPlayShell.SetPlays(boardFunc);
+                    playDictionary.Add(friendlyCard, cardPlayShell);
+                }
+
+                List<Card> list = boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer;
+                int lastMember = list.Count - 1;
+                Iterate(lastMember, list); //biggish load of work for comp, maybe make this async?
+                groupPlayManager.executeBestPlay(boardFunc); //assign those sweet actions
+            }
+            else
+            {
+                boardFunc.BOARDMESSAGE.addMessage("AI has no attacks this round");
+            }
+        }
+
+
+        private void Iterate(int selector, List<Card> list)
+        {
+            CardPlayShell shell = playDictionary[list[selector]];
+            foreach (KeyValuePair<int, Play> play in shell.play)
+            {
+                foreach (Card card in list)
+                {
+                    groupPlayManager.AddGroup(playDictionary);
+                }
+                shell.increaseIterator();
+                if (selector > 0)
+                {
+                    Iterate(selector - 1, list);
+                }
+
+            }
+            shell.iterator = 0;
+        }
     }
+
+    public class GroupPlayManager
+    {
+        public List<GroupPlay> groupPlays = new List<GroupPlay>();
+        
+        public void AddGroup(Dictionary<Card, CardPlayShell> friendlyCards)
+        {
+            GroupPlay groupPlay = new GroupPlay();
+            groupPlay.addGroupPlay(friendlyCards);
+            groupPlays.Add(groupPlay);
+        }
+        public void executeBestPlay(BoardFunctionality boardFunc)
+        {
+            int highestValue = 0;
+            GroupPlay selectedCombination = null;
+            foreach(GroupPlay group in groupPlays)
+            {
+                if (highestValue == 0)
+                {
+                    highestValue = group.fullPlayValue;
+                    selectedCombination = group;
+                }
+                if (group.fullPlayValue > highestValue)
+                {
+                    highestValue = group.fullPlayValue;
+                    selectedCombination = group;
+                }
+            }
+
+            if(selectedCombination == null)
+            {
+                boardFunc.BOARDMESSAGE.addMessage("For some reason the AI is not functioning~");
+            }
+            else
+            {
+                foreach (Play play in selectedCombination.plays)
+                {
+                    play.realPlay();
+                }
+            }
+
+        }
+    }
+    public class GroupPlay
+    {
+        public List<Play> plays;
+        public int fullPlayValue;
+        public void addGroupPlay(List<Play> newGroupPlay)
+        {
+            plays = new List<Play>();
+            plays = newGroupPlay;
+            fullPlayValue = calcPlayValue();
+        }
+        public void addGroupPlay(Dictionary<Card, CardPlayShell> friendlyCards)
+        {
+            plays = new List<Play>();
+            foreach (KeyValuePair<Card, CardPlayShell> pair in friendlyCards)
+            {
+                Play play = new Play();
+                play = pair.Value.play[pair.Value.iterator];
+                plays.Add(play);
+            }
+            fullPlayValue = calcPlayValue();
+        }
+        public int calcPlayValue()
+        {
+            int totalValue = 0;
+            foreach (Play play in plays)
+            {
+                totalValue += play.testPlay();
+                play.resetValues();
+            }
+            return totalValue;
+        }
+    }
+    public class Play
+    {
+        public int value = 0;
+        public Func<int> testPlay;
+        public Action realPlay;
+        public Action resetValues;
+    }
+    public class CardPlayShell
+    {
+        private Card OPERATOR;
+        private List<Card> enemyCards;
+        public int iterator = 0;
+        public int maxPlays;
+        public Dictionary<int, Play> play;
+
+        public CardPlayShell()
+        {
+            enemyCards = new List<Card>();
+            play = new Dictionary<int, Play>();
+        }
+        public void increaseIterator()
+        {
+            iterator++;
+            if (iterator >= play.Count)
+            {
+                iterator = 0;
+            }
+        }
+        public void SetCardToMakePlay(Card card)
+        {
+            OPERATOR = card;
+        }
+        public void AddEnemy(Card card)
+        {
+            enemyCards.Add(card);
+        }
+        private int getValue(Card card)
+        {
+            int value = card.cardProps.initialDefense + card.cardProps.initialPower + card.cardProps.cost.totalCost;
+            return value;
+        }
+        public void SetPlays(BoardFunctionality boardFunc)
+        {
+            int counter = 0;
+            /*foreach(Ability ability in OPERATOR.cardProps.abilities)
+            {
+
+            }*/
+
+            foreach(Card card in enemyCards)
+            {
+                Play newPlay = new Play();
+                Func<int> testAction = () =>
+                {
+                    if(card.cardProps.aiCalcDefense > 0)
+                    {
+                        card.cardProps.aiCalcDefense -= OPERATOR.cardProps.power;
+                        OPERATOR.cardProps.aiCalcDefense -= card.cardProps.power;
+
+                        if (card.cardProps.aiCalcDefense <= 0)
+                        {
+                            int value = getValue(card);
+                            return value;
+                        }
+                        if (OPERATOR.cardProps.aiCalcDefense <= 0)
+                        {
+                            int value = -getValue(OPERATOR);
+                            return value;
+                        }
+
+                    }
+                    return 0;
+
+                };
+                Action realAction = () =>
+                {
+                    boardFunc.Fight(OPERATOR, card);
+                };
+                Action resetAction = () =>
+                {
+                    card.cardProps.aiCalcDefense = card.cardProps.defense;
+                    OPERATOR.cardProps.aiCalcDefense = OPERATOR.cardProps.defense;
+                };
+
+                newPlay.testPlay = testAction;
+                newPlay.realPlay = realAction;
+                newPlay.resetValues = resetAction;
+                play.Add(counter, newPlay);
+                counter++;
+            }
+
+            Play nothingPlay = new Play();
+            Action nothingAction = () => { };
+            Func<int> nothingReturn = () => { return 0; };
+            nothingPlay.realPlay = nothingAction;
+            nothingPlay.testPlay = nothingReturn;
+            nothingPlay.resetValues = nothingAction;
+            play.Add(counter, nothingPlay);
+            counter++;
+
+            maxPlays = counter;
+        }
+    
+    }
+
 
     /*private void attackIfBeneficial(MouseState mouseState, BoardFunctionality boardFunc)
 {
