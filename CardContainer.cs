@@ -32,6 +32,18 @@ namespace CardGame
             }
 
         }
+        public int unexhaustedCount()
+        {
+            int counter = 0;
+            foreach(Card card in cardsInContainer)
+            {
+                if(!card.cardProps.exhausted)
+                {
+                    counter++;
+                }
+            }
+            return counter;
+        }
         public void loadCardImagesInContainer(CardImageStorage library)
         {
 

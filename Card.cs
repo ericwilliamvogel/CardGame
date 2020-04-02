@@ -137,7 +137,7 @@ namespace CardGame
         public Card(Card card)
         {
             this.suppTextures = card.suppTextures;
-            this.properties.POS = card.getPosition();
+            //this.properties.POS = card.getPosition();
             this.setScale(card.properties.scale.X);
             this.cardProps = card.cardProps;
             this.properties.Width = card.properties.width;
@@ -219,6 +219,18 @@ namespace CardGame
             return false;
         }
 
+        public bool containsReveal()
+        {
+            foreach(Ability ability in cardProps.abilities)
+            {
+                if(ability is Reveal)
+                {
+                    throw new Exception("IN FILE EFFECT / CLASS REVEAL / CODE IS WORKING!~");
+                    return true;
+                }
+            }
+            return false;
+        }
         public override void drawSprite(SpriteBatch spriteBatch)
         {
             switch (playState)

@@ -40,7 +40,7 @@ namespace CardGame
             Content.RootDirectory = "Content";
             componentManager.adjustSettingsOnStartup(graphics);
             this.IsMouseVisible = false;
-
+            MoveHistory.AttackIcon.attackIcon = Content.Load<Texture2D>("fightIcon");
             //ClientTCP.instance.Start();
         }
 

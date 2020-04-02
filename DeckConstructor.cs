@@ -12,6 +12,10 @@ namespace CardGame
         public CardBuilder cardBuilder = new CardBuilder();
         public CardConstructor cardConstructor = new CardConstructor();
 
+        //
+
+
+            //
         public void setDeck()
         {
             deck = new Deck();
@@ -30,9 +34,15 @@ namespace CardGame
                 Card card = cardBuilder.cardConstruct(cardConstructor, identifier);
                 tempList.Add(card);
             }
-
+            loadAllPossibleTextures();
 
             return tempList;
+        }
+        private void loadAllPossibleTextures()
+        {
+            Card card = cardBuilder.cardConstruct(cardConstructor, 10);
+            card = cardBuilder.cardConstruct(cardConstructor, 11);
+            card = cardBuilder.cardConstruct(cardConstructor, 6);
         }
         public Deck getDeck()
         {

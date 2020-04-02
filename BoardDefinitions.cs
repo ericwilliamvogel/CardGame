@@ -218,9 +218,19 @@ namespace CardGame
         {
 
             int damage = ability.power;
-            foreach (Card card in targetCard.correctRow(boardFunc.enemySide).cardsInContainer)
+            if (targetCard != null)
             {
-                card.cardProps.defense -= damage;
+                foreach (Card card in targetCard.correctRow(boardFunc.enemySide).cardsInContainer)
+                {
+                    card.cardProps.defense -= damage;
+                }
+            }
+            else
+            { //used by ai
+                foreach (Card card in boardFunc.enemySide.Rows[Side.FieldUnit].cardsInContainer)
+                {
+                    card.cardProps.defense -= damage;
+                }
             }
         }
     }

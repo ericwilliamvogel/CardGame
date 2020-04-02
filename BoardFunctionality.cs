@@ -30,7 +30,7 @@ namespace CardGame
         public CardBuilder cardBuilder = new CardBuilder();
         public CardConstructor cardConstructor = new CardConstructor();
         public BoardFunctionalityAssetUpdater assetUpdater = new BoardFunctionalityAssetUpdater();
-
+        public MoveHistory moveHistory = new MoveHistory();
         public enum State
         {
             Regular,
@@ -53,14 +53,9 @@ namespace CardGame
 
         public override void initializeGameComponent(ContentManager content)
         {
-            cardBuilder = new CardBuilder();
-            cardConstructor = new CardConstructor();
-            Card card = cardBuilder.cardConstruct(cardConstructor, 10);
-            card = cardBuilder.cardConstruct(cardConstructor, 11);
-            card = cardBuilder.cardConstruct(cardConstructor, 6);
-            library = cardConstructor.tempStorage;
-            library.loadCardSupplementalTextures(content);
-            library.loadAllDictionaryTextures(content);
+            //cardBuilder = new CardBuilder();
+            //cardConstructor = new CardConstructor();
+
             rowFog.setSprite(content, "rowNotRevealed");
         }
         public override void drawSprite(SpriteBatch spriteBatch)
@@ -82,6 +77,7 @@ namespace CardGame
         public void Update(Board board)
         {
             boardActions = board.boardActions;
+            moveHistory = board.moveHistory;
             sideSetter.updateSide(board);
             //boardActions.updateAnimations();
             assetUpdater.updateAllAssets(this);
@@ -142,6 +138,7 @@ namespace CardGame
         {
             boardActions.AddAction(() =>
            {
+               moveHistory.storeTurnAndReset();
                if (controllingPlayer == friendlySide)
                {
                    controllingPlayer = enemySide;
@@ -177,7 +174,17 @@ namespace CardGame
             //assignCardPositionsOnHandExtension(board);
         }
 
+        private Card duplicate(Card card)
+        {
+            Card duplicate = cardBuilder.cardConstruct(cardConstructor, card.cardProps.identifier);
+            duplicate.suppTextures.supplements[duplicate.suppTextures.portrait].setTexture(library.cardTextureDictionary[duplicate.cardProps.identifier]);
+            duplicate.setSupplementalTextures(library);
+            duplicate.setColorForRace();
 
+            duplicate.setScale(CardScale.Board);
+            duplicate.initSupplements();
+            return duplicate;
+        }
         
 
         public void AbilityDrawCard(Card fromCard, Side side)
@@ -241,11 +248,21 @@ namespace CardGame
         {
             setUpCard(card, otherCard);
             sendActionToQueue(() => {
+                moveHistory.AddNewAttackMove(duplicate(card), duplicate(otherCard));
                 boardDef.deductAttributesAndDecideWinner(card, otherCard);
                 finalizeCardInteraction(card, otherCard);
-            });
+            }, 30);
         }
 
+        private void sendActionToQueue(Action action, int waitTime)
+        {
+            Action newAction = () =>
+            {
+                action();
+                boardActions.nextAction();
+            };
+            actionConstructor.addWaitAction(newAction, waitTime, this);
+        }
         private void sendActionToQueue(Action action)
         {
             Action newAction = () =>
@@ -253,7 +270,7 @@ namespace CardGame
                 action();
                 boardActions.nextAction();
             };
-            actionConstructor.addWaitAction(newAction, 60, this);
+            actionConstructor.addWaitAction(newAction, 30, this);
         }
         private void setUpCard(Card card)
         {

@@ -44,7 +44,7 @@ namespace CardGame
         public BoardActions boardActions = new BoardActions();
         Player player1;
         Player player2;
-
+        public MoveHistory moveHistory = new MoveHistory();
         public override void initializeGameComponent(ContentManager content)
         {
             imageAndFunctionsSetup(content);
@@ -55,7 +55,7 @@ namespace CardGame
             Deck playerDeck = new Deck();
             Deck aiDeck = new Deck();
             playerDeck = deckBuilder.getDeck(deckConstructor, "TESTDECK");
-            aiDeck = deckBuilder.getDeck(deckConstructor, "TESTDECK2");
+            aiDeck = deckBuilder.getDeck(deckConstructor, "TESTDECK");
 
             /*********************/
 
@@ -73,8 +73,8 @@ namespace CardGame
             setSide(enemySide);
             setSide(friendlySide);
 
-            friendlySide.boardFunc.passDown(library, cardConstructor);
-            enemySide.boardFunc.passDown(library, cardConstructor);
+            friendlySide.boardFunc.passDown(library, deckConstructor.cardConstructor);
+            enemySide.boardFunc.passDown(library, deckConstructor.cardConstructor);
 
             friendlySide.boardFunc.initializeGameComponent(content);
             enemySide.boardFunc.initializeGameComponent(content);
@@ -97,8 +97,12 @@ namespace CardGame
         }
         private void loadLibraryAssets(ContentManager content)
         {
+
+
+
             library = new CardImageStorage();
             library = deckConstructor.cardConstructor.tempStorage;
+
             library.loadCardSupplementalTextures(content);
             library.loadAllDictionaryTextures(content);
         }
@@ -191,6 +195,7 @@ namespace CardGame
             }
             button.drawSprite(spriteBatch);
             friendlySide.boardFunc.drawSprite(spriteBatch);
+            moveHistory.drawSprite(spriteBatch);
         }
         bool pressed;
         bool handHidden;
@@ -264,6 +269,7 @@ namespace CardGame
             lifeTotal[enemy].updateLifeValue(enemySide.LifeTotal);
             lifeTotal[friendly].updateLifeValue(friendlySide.LifeTotal);
             boardActions.updateAnimations();
+            moveHistory.updateGameComponent();
         }
 
         public int enemy = 0;

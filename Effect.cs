@@ -15,7 +15,7 @@ namespace CardGame
         public string name;
         public string description;
         public int power;
-        protected int exchangeValue;
+        public int exchangeValue;
 
         public void displayGeneralIncrements(int exchangeValue)
         {
@@ -161,7 +161,7 @@ namespace CardGame
                 boardFunc.AbilityDrawCard(INITIALCARD, boardFunc.enemySide);
             }
 
-            base.useAbility(mouseState, boardFunc);
+            //base.useAbility(mouseState, boardFunc);
         }
 
     }

@@ -21,9 +21,9 @@ namespace CardGame
             if(identifier == "TESTDECK")
             {
                 constructor.addCardsToDeck(10, 6);
-                constructor.addCardsToDeck(10, 5);
-                constructor.addCardsToDeck(10, 2);
-                constructor.addCardsToDeck(10, 3);
+                constructor.addCardsToDeck(4, 5);
+                constructor.addCardsToDeck(16, 2);
+                constructor.addCardsToDeck(16, 3);
                 constructor.addCardsToDeck(10, 4);
 
             }
@@ -37,7 +37,7 @@ namespace CardGame
             }
             else
             {
-                throw new Exception("deck didn't load my guy");
+                throw new Exception("deck didn't load my guy, need to check and see if your identifier is correct");
             }
 
         }

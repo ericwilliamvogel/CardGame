@@ -108,30 +108,39 @@ namespace CardGame
 
     public class AIPlayer : Player
     {
-        bool endTurnOnce = false;
+        List<Card> knownEnemyGenerals = new List<Card>();
+        List<Card> knownEnemyArmies = new List<Card>();
+
+        bool endFirstDec = false;
+        bool endSecondDec = false; //so that the army container updates by the time we decide to play cards
         public override void ResetPlayer()
         {
-            endTurnOnce = false;
+            endFirstDec = false;
+            endSecondDec = false;
             base.ResetPlayer();
         }
         int currentArmyCount;
         public override void decide(MouseState mouseState, ContentManager content, BoardFunctionality boardFunc)
         {
-            if (!endTurnOnce && boardFunc.boardActions.actions.Count < 1)
+            if (!endFirstDec && boardFunc.boardActions.actions.Count < 1)
             {
                 playArmies(boardFunc);
-                playCardIfThereAreEnoughArmies(boardFunc);
-                //VERYBASICATTACKLOGIC(boardFunc);
+
+                generalAbiltiies(mouseState, boardFunc);
                 attackIfBeneficial(boardFunc);
                 //throw new
-                if (!endTurnOnce)
+                endFirstDec = true;
+            }
+            if(boardFunc.boardActions.actions.Count < 1)
+            {
+                if (!endSecondDec)
                 {
+                    playCardIfThereAreEnoughArmies(boardFunc);
                     boardFunc.PassTurn();
 
                 }
-                endTurnOnce = true;
+                endSecondDec = true;
             }
-
         }
 
         public void VERYBASICATTACKLOGIC(BoardFunctionality boardFunc)
@@ -176,7 +185,7 @@ namespace CardGame
         }
         private void playCardIfThereAreEnoughArmies(BoardFunctionality boardFunc)
         {
-            int counter = 0;
+            int counter = 0; //set to 1 because the army in hand won't register 
             foreach (Card newCard in boardFunc.friendlySide.Rows[Side.Armies].cardsInContainer)
             {
                 if (!newCard.cardProps.exhausted)
@@ -251,15 +260,16 @@ namespace CardGame
 
         private Dictionary<Card, CardPlayShell> playDictionary;
         public GroupPlayManager groupPlayManager= new GroupPlayManager();
-        private void attackIfBeneficial(BoardFunctionality boardFunc)
+
+        private void attackRow(FunctionalRow row, BoardFunctionality boardFunc)
         {
-            if (boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer.Count > 0)
+            playDictionary = new Dictionary<Card, CardPlayShell>();
+            foreach (Card friendlyCard in boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer)
             {
-                playDictionary = new Dictionary<Card, CardPlayShell>();
-                foreach (Card friendlyCard in boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer)
+                if (!friendlyCard.cardProps.exhausted)
                 {
                     CardPlayShell cardPlayShell = new CardPlayShell();
-                    foreach (Card enemyCard in boardFunc.enemySide.Rows[Side.FieldUnit].cardsInContainer)
+                    foreach (Card enemyCard in row.cardsInContainer)
                     {
                         cardPlayShell.AddEnemy(enemyCard);
                     }
@@ -267,18 +277,153 @@ namespace CardGame
                     cardPlayShell.SetPlays(boardFunc);
                     playDictionary.Add(friendlyCard, cardPlayShell);
                 }
+            }
 
-                List<Card> list = boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer;
-                int lastMember = list.Count - 1;
-                Iterate(lastMember, list); //biggish load of work for comp, maybe make this async?
-                groupPlayManager.executeBestPlay(boardFunc); //assign those sweet actions
+            List<Card> list = boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer;
+            int lastMember = boardFunc.friendlySide.Rows[Side.FieldUnit].unexhaustedCount() - 1;
+            Iterate(lastMember, list); //biggish load of work for comp, maybe make this async?
+            groupPlayManager.executeBestPlay(boardFunc); //assign those sweet actions
+        }
+        private void attackIfBeneficial(BoardFunctionality boardFunc)
+        {
+            if (rowCanBeAttacked(boardFunc.friendlySide.Rows[Side.FieldUnit]))
+            {
+                attackRow(boardFunc.enemySide.Rows[Side.FieldUnit], boardFunc);
+            }
+            else if(rowCanBeAttacked(boardFunc.friendlySide.Rows[Side.Armies]))
+            {
+                attackRow(boardFunc.enemySide.Rows[Side.Armies], boardFunc);
             }
             else
             {
-                boardFunc.BOARDMESSAGE.addMessage("AI has no attacks this round");
+                if(isRowRevealed(boardFunc.enemySide.Rows[Side.Armies]) && isRowRevealed(boardFunc.enemySide.Rows[Side.FieldUnit]))
+                {
+                    foreach(Card card in boardFunc.friendlySide.Rows[Side.FieldUnit].cardsInContainer)
+                    {
+                        if(!card.cardProps.exhausted)
+                        {
+                            boardFunc.LifeDamage(card);
+                        }
+                    }
+                }
             }
+
+            /*else
+            {
+                boardFunc.enemySide.boardFunc.BOARDMESSAGE.addMessage("AI has no attacks this round");
+            }*/
         }
 
+        private void revealBoardIfOptimal(BoardFunctionality boardFunc)
+        {
+            if(shouldRevealBoard(boardFunc))
+            {
+                //revealBoardWithBestCard(BoardFunctionality boardFunc);
+                //still need to see if the code in Card.containsReveal works@!~
+            }
+        }
+        private bool shouldRevealBoard(BoardFunctionality boardFunc)
+        {
+            if(getCumulativeAttack(boardFunc.friendlySide.Rows[Side.FieldUnit]) * 1.2 > getCumulativeDefense(boardFunc.friendlySide.Rows[Side.FieldUnit]))
+            {
+                if(haveARevealCard(boardFunc))
+                return true;
+            }
+            return false;
+        }
+        private bool haveARevealCard(BoardFunctionality boardFunc)
+        {
+            foreach(FunctionalRow row in boardFunc.friendlySide.Rows)
+            {
+                if(containsReveal(row))
+                {
+                    return true;
+                }
+            }
+            if(containsReveal(boardFunc.friendlySide.Hand))
+            {
+                //return true;
+            }
+            return false;
+        }
+        private bool containsReveal(HorizontalContainer container)
+        {
+            foreach(Card card in container.cardsInContainer)
+            {
+                if(card.containsReveal())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        private int getCumulativeDefense(FunctionalRow row)
+        {
+            int counter = 0;
+            foreach (Card card in row.cardsInContainer)
+            {
+                counter += card.cardProps.defense;
+            }
+            return counter;
+        }
+        private int getCumulativeAttack(FunctionalRow row)
+        {
+            int counter = 0;
+            foreach (Card card in row.cardsInContainer)
+            {
+                counter += card.cardProps.power;
+            }
+            return counter;
+        }
+        private int getCumulativeValue(FunctionalRow row)
+        {
+            int counter = getCumulativeAttack(row) + getCumulativeDefense(row);
+            foreach (Card card in row.cardsInContainer)
+            {
+                counter += card.cardProps.cost.totalCost;
+            }
+            return counter;
+        }
+        private bool isRowRevealed(FunctionalRow row)
+        {
+            if (row.revealed)
+            {
+                return true;
+            }
+            return false;
+        }
+        private bool rowCanBeAttacked(FunctionalRow row)
+        {
+            if(row.cardsInContainer.Count > 0 && row.revealed)
+            {
+                return true;
+            }
+            return false;
+        }
+        private void generalAbiltiies(MouseState mouseState, BoardFunctionality boardFunc)
+        {
+            foreach (Card friendlyCard in boardFunc.friendlySide.Rows[Side.General].cardsInContainer)
+            {
+                List<Ability> usableAbilities = new List<Ability>();
+                foreach (Ability ability in friendlyCard.cardProps.abilities)
+                {
+                    if(ability.exchangeValue < 0)
+                    {
+                        if(GameComponent.ToAbsolute(ability.exchangeValue) <= friendlyCard.cardProps.defense)
+                        {
+                            usableAbilities.Add(ability);
+                        }
+                    }
+                    else
+                    {
+                        usableAbilities.Add(ability);
+                    }
+                }
+                Random random = new Random();
+                int selector = random.Next(0, usableAbilities.Count);
+                usableAbilities[selector].useAbility(mouseState, boardFunc);
+            }
+        }
 
         private void Iterate(int selector, List<Card> list)
         {
@@ -312,6 +457,8 @@ namespace CardGame
         }
         public void executeBestPlay(BoardFunctionality boardFunc)
         {
+
+            int PLAYCOUNTER = 0;
             int highestValue = 0;
             GroupPlay selectedCombination = null;
             foreach(GroupPlay group in groupPlays)
@@ -326,7 +473,11 @@ namespace CardGame
                     highestValue = group.fullPlayValue;
                     selectedCombination = group;
                 }
+                PLAYCOUNTER++;
             }
+            boardFunc.enemySide.boardFunc.BOARDMESSAGE.addMessage("Current play value = " + highestValue.ToString());
+            boardFunc.enemySide.boardFunc.BOARDMESSAGE.addMessage("Amount of group combos parsed = " + PLAYCOUNTER.ToString());
+            //throw new Exception(highestValue.ToString());
 
             if(selectedCombination == null)
             {
@@ -339,7 +490,7 @@ namespace CardGame
                     play.realPlay();
                 }
             }
-
+            groupPlays = new List<GroupPlay>();
         }
     }
     public class GroupPlay
@@ -369,6 +520,10 @@ namespace CardGame
             foreach (Play play in plays)
             {
                 totalValue += play.testPlay();
+
+            }
+            foreach(Play play in plays)
+            {
                 play.resetValues();
             }
             return totalValue;
@@ -428,24 +583,34 @@ namespace CardGame
                 Play newPlay = new Play();
                 Func<int> testAction = () =>
                 {
-                    if(card.cardProps.aiCalcDefense > 0)
+                    int value = 0;
+                    if (card.cardProps.aiCalcDefense > 0)
                     {
                         card.cardProps.aiCalcDefense -= OPERATOR.cardProps.power;
                         OPERATOR.cardProps.aiCalcDefense -= card.cardProps.power;
 
+
+
                         if (card.cardProps.aiCalcDefense <= 0)
                         {
-                            int value = getValue(card);
-                            return value;
+                            value += getValue(card) + 1;
                         }
                         if (OPERATOR.cardProps.aiCalcDefense <= 0)
                         {
-                            int value = -getValue(OPERATOR);
-                            return value;
+                            value -= getValue(OPERATOR);
                         }
 
                     }
-                    return 0;
+                    else
+                    {
+                        card.cardProps.aiCalcDefense -= OPERATOR.cardProps.power;
+                        OPERATOR.cardProps.aiCalcDefense -= card.cardProps.power;
+                        if (OPERATOR.cardProps.aiCalcDefense <= 0)
+                        {
+                            value -= getValue(OPERATOR);
+                        }
+                    }
+                    return value;
 
                 };
                 Action realAction = () =>
