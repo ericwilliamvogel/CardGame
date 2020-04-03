@@ -31,6 +31,7 @@ namespace CardGame
         public CardConstructor cardConstructor = new CardConstructor();
         public BoardFunctionalityAssetUpdater assetUpdater = new BoardFunctionalityAssetUpdater();
         public MoveHistory moveHistory = new MoveHistory();
+        public Popup endGamePopup = new Popup(1);
         public enum State
         {
             Regular,
@@ -55,7 +56,7 @@ namespace CardGame
         {
             //cardBuilder = new CardBuilder();
             //cardConstructor = new CardConstructor();
-
+            endGamePopup.initializeGameComponent(content);
             rowFog.setSprite(content, "rowNotRevealed");
         }
         public override void drawSprite(SpriteBatch spriteBatch)
@@ -71,13 +72,13 @@ namespace CardGame
             cardDrawer.drawSprite(spriteBatch, this);
             cardViewer.drawSprite(spriteBatch);
             BOARDMESSAGE.drawSprite(spriteBatch);
-
-
+            moveHistory.drawSprite(spriteBatch);
+            endGamePopup.drawSprite(spriteBatch);
         }
         public void Update(Board board)
         {
             boardActions = board.boardActions;
-            moveHistory = board.moveHistory;
+            //moveHistory = board.moveHistory;
             sideSetter.updateSide(board);
             //boardActions.updateAnimations();
             assetUpdater.updateAllAssets(this);
@@ -85,6 +86,7 @@ namespace CardGame
             {
                 cardViewer.resetSelectedCard(this);
             }
+            moveHistory.updateGameComponent();
         }
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
@@ -97,6 +99,7 @@ namespace CardGame
             {
                 cardViewer.selection(mouseState);
             }
+            endGameIfOver();
         }
 
 
@@ -139,6 +142,8 @@ namespace CardGame
             boardActions.AddAction(() =>
            {
                moveHistory.storeTurnAndReset();
+               enemySide.boardFunc.moveHistory.storeTurnAndReset();
+
                if (controllingPlayer == friendlySide)
                {
                    controllingPlayer = enemySide;
@@ -180,18 +185,30 @@ namespace CardGame
             duplicate.suppTextures.supplements[duplicate.suppTextures.portrait].setTexture(library.cardTextureDictionary[duplicate.cardProps.identifier]);
             duplicate.setSupplementalTextures(library);
             duplicate.setColorForRace();
-
             duplicate.setScale(CardScale.Board);
             duplicate.initSupplements();
             return duplicate;
         }
+
         
 
-        public void AbilityDrawCard(Card fromCard, Side side)
+        public void AbilityDrawCard(Card fromCard, Ability ability, Side side)
         {
             setUpCard(fromCard);
             sendActionToQueue(() => {
+                hideMoveFromEnemyAndDisplay(fromCard, ability);
                 DrawCard(side);
+                finalizeCardInteraction(fromCard, fromCard);
+            });
+        }
+
+        public void AbilityBothDrawCard(Card fromCard, Ability ability, Side side)
+        {
+            setUpCard(fromCard);
+            sendActionToQueue(() => {
+                hideMoveFromEnemyAndDisplay(fromCard, ability);
+                DrawCard(side);
+                DrawCard(side.boardFunc.enemySide);
                 finalizeCardInteraction(fromCard, fromCard);
             });
         }
@@ -199,22 +216,34 @@ namespace CardGame
         {
             setUpCard(fromCard);
             sendActionToQueue(() => {
+                Card placeholder = duplicate(fromCard);
+                placeholder.playState = Card.PlayState.Hidden;
+                moveHistory.AddNewAttackMove(duplicate(fromCard), placeholder);
+                enemySide.boardFunc.moveHistory.AddNewAttackMove(duplicate(fromCard), placeholder);
                 boardDef.dealPlayerDamage(fromCard, this);
                 finalizeCardInteraction(fromCard, fromCard);
+                endGameIfOver();
             });
         }
         public void RevealBoard(Card fromCard, Ability ability)
         {
             setUpCard(fromCard);
             sendActionToQueue(() => {
+                hideMoveFromEnemyAndDisplay(fromCard, ability);
                 boardDef.revealBoardForRemainderOfTurn(fromCard, ability, this);
                 finalizeCardInteraction(fromCard, fromCard);
             });
         }
-        public void Exhaust(Card fromCard, Card targetCard)
+        private void hideMoveFromEnemyAndDisplay(Card fromCard, Ability ability)
+        {
+            moveHistory.AddSoloAbilityMove(duplicate(fromCard), ability);
+            enemySide.boardFunc.moveHistory.AddHiddenMove(duplicate(fromCard));
+        }
+        public void Exhaust(Card fromCard, Ability ability, Card targetCard)
         {
             setUpCard(fromCard, targetCard);
             sendActionToQueue(() => {
+                moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
                 targetCard.cardProps.doubleExhausted = true;
                 finalizeCardInteraction(fromCard, targetCard);
             });
@@ -223,6 +252,8 @@ namespace CardGame
         {
             setUpCard(fromCard);
             sendActionToQueue(() => {
+                moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
+                enemySide.boardFunc.moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
                 boardDef.dealBoardDamageAndDisposeOfDead(fromCard, ability, targetCard, this);
                 finalizeCardInteraction(fromCard, fromCard);
             });
@@ -231,15 +262,18 @@ namespace CardGame
         {
             setUpCard(fromCard, targetCard);
             sendActionToQueue(() => {
+                moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
+                enemySide.boardFunc.moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
                 boardDef.dealDirectDamageAndDisposeOfDead(fromCard, ability, targetCard);
                 finalizeCardInteraction(fromCard, targetCard);
             });
         }
-        public void SpawnCard(Card fromCard, SpawnCard ability)
+        public void SpawnCard(Card fromCard, SpawnCard spawn)
         {
             setUpCard(fromCard);
             sendActionToQueue(() => {
-                boardDef.spawnSpecifiedUnit(fromCard, ability, this);
+                hideMoveFromEnemyAndDisplay(fromCard, spawn);
+                boardDef.spawnSpecifiedUnit(fromCard, spawn, this);
                 finalizeCardInteraction(fromCard, fromCard);
             });
         }
@@ -249,6 +283,7 @@ namespace CardGame
             setUpCard(card, otherCard);
             sendActionToQueue(() => {
                 moveHistory.AddNewAttackMove(duplicate(card), duplicate(otherCard));
+                enemySide.boardFunc.moveHistory.AddNewAttackMove(duplicate(card), duplicate(otherCard));
                 boardDef.deductAttributesAndDecideWinner(card, otherCard);
                 finalizeCardInteraction(card, otherCard);
             }, 30);
@@ -304,6 +339,15 @@ namespace CardGame
 
             state = State.Regular;
             boardPosLogic.updateBoard(this);
+        }
+        private void endGameIfOver()
+        {
+            if(friendlySide.LifeTotal <= 0 || enemySide.LifeTotal <= 0)
+            {
+                endGamePopup.SetPopup();
+                enemySide.boardFunc.endGamePopup.SetPopup();
+                boardActions.AddAction(() => { /*this prevents any more moves*/ });
+            }
         }
         private void finalizeSingularCard(Card card)
         {

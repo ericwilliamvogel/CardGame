@@ -142,8 +142,8 @@ namespace CardGame
                 //THIS ACTUALLY WORKED PERFECTLY IM SO MAD
 
                 abilityButtons[i].setAction(() => {
+                    MouseTransformer.Set(MouseTransformer.State.Tgt);
                     boardFunc.state = State.Selection;
-
                     createButtonsOnView = false;
                     selection = action;
                     resetSelectedCard(boardFunc);

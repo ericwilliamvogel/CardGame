@@ -41,6 +41,7 @@ namespace CardGame
             componentManager.adjustSettingsOnStartup(graphics);
             this.IsMouseVisible = false;
             MoveHistory.AttackIcon.attackIcon = Content.Load<Texture2D>("fightIcon");
+            MoveHistory.TargetIcon.buttonIcon = Content.Load<Texture2D>("targetSymbol");
             //ClientTCP.instance.Start();
         }
 

@@ -51,9 +51,16 @@ namespace CardGame
         }
         public void drawCardLogic(CardContainer startingContainer, CardContainer endingContainer, BoardFunctionality boardFunc)
         {
-            Card card = startingContainer.cardsInContainer[0];
-            card.makingAction = true;
-            movementLogic(startingContainer, endingContainer, card, boardFunc);
+            if(startingContainer.cardsInContainer.Count > 0)
+            {
+                Card card = startingContainer.cardsInContainer[0];
+                card.makingAction = true;
+                movementLogic(startingContainer, endingContainer, card, boardFunc);
+            }
+            else
+            {
+                boardFunc.BOARDMESSAGE.addMessage("No more cards left in deck.");
+            }
         }
 
         public void movementLogic(CardContainer startingContainer, CardContainer endingContainer, Card card, BoardFunctionality boardFunc)
@@ -126,6 +133,7 @@ namespace CardGame
                 }
                 card.makingAction = false;
                 boardFunc.boardPosLogic.updateBoard(boardFunc);
+                MouseTransformer.Set(MouseTransformer.State.Reg);
                 boardFunc.boardActions.nextAction();
             }
 

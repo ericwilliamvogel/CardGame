@@ -157,8 +157,7 @@ namespace CardGame
         {
             for (int i = 0; i < power; i++)
             {
-                boardFunc.AbilityDrawCard(INITIALCARD, boardFunc.friendlySide);
-                boardFunc.AbilityDrawCard(INITIALCARD, boardFunc.enemySide);
+                boardFunc.AbilityBothDrawCard(INITIALCARD, this, boardFunc.friendlySide);
             }
 
             //base.useAbility(mouseState, boardFunc);
@@ -195,7 +194,7 @@ namespace CardGame
         {
             for(int i = 0; i < power; i++)
             {
-                boardFunc.AbilityDrawCard(INITIALCARD, boardFunc.friendlySide);
+                boardFunc.AbilityDrawCard(INITIALCARD, this, boardFunc.friendlySide);
             }
         }
     }
@@ -238,7 +237,7 @@ namespace CardGame
         }
         public override void abilityImplementation(MouseState mouseState, BoardFunctionality boardFunc)
         {
-            boardFunc.Exhaust(INITIALCARD, returnSelectedCard(mouseState, boardFunc));
+            boardFunc.Exhaust(INITIALCARD, this, returnSelectedCard(mouseState, boardFunc));
         }
 
         public override void useAIAbility(AIPlayer player, BoardFunctionality boardFunc, Card targetCard)
@@ -297,6 +296,7 @@ namespace CardGame
         }
         public override void abilityImplementation (MouseState mouseState, BoardFunctionality boardFunc)
         {
+            if(returnSelectedCard(mouseState, boardFunc) != null)
             boardFunc.BoardDamage(INITIALCARD, this, returnSelectedCard(mouseState, boardFunc));
         }
 

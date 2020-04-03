@@ -47,6 +47,7 @@ namespace CardGame
         public MoveHistory moveHistory = new MoveHistory();
         public override void initializeGameComponent(ContentManager content)
         {
+            //moveHistory = new MoveHistory();
             imageAndFunctionsSetup(content);
             loadBuildersAndConstructors();
 
@@ -195,7 +196,7 @@ namespace CardGame
             }
             button.drawSprite(spriteBatch);
             friendlySide.boardFunc.drawSprite(spriteBatch);
-            moveHistory.drawSprite(spriteBatch);
+            //moveHistory.drawSprite(spriteBatch);
         }
         bool pressed;
         bool handHidden;
@@ -269,7 +270,7 @@ namespace CardGame
             lifeTotal[enemy].updateLifeValue(enemySide.LifeTotal);
             lifeTotal[friendly].updateLifeValue(friendlySide.LifeTotal);
             boardActions.updateAnimations();
-            moveHistory.updateGameComponent();
+            //moveHistory.updateGameComponent();
         }
 
         public int enemy = 0;
