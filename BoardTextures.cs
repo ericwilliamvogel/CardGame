@@ -75,17 +75,18 @@ namespace CardGame
         private void setLifeTotalPositions()
         {
             int startingPosX = (int)board.rows[5].getPosition().X + board.rows[5].getWidth() + GraphicsSettings.toResolution(50);
-            int yPos = 0;
+            int yPos = (int)(board.rows[2].getPosition().Y + board.rows[2].getHeight() - board.lifeTotal[enemy].getHeight());
             board.lifeTotal[enemy].setPos(startingPosX, yPos);
             board.lifeTotal[enemy].properties.spriteEffects = SpriteEffects.FlipVertically;
 
+            int otherYPos = Game1.windowH - board.lifeTotal[friendly].getHeight() - yPos;
             yPos = Game1.windowH - board.lifeTotal[friendly].getHeight();
-            board.lifeTotal[friendly].setPos(startingPosX, yPos);
+            board.lifeTotal[friendly].setPos(startingPosX, otherYPos);
         }
         private void setTokens(ContentManager content)
         {
-            int startingPosX = (int)board.rows[5].getPosition().X + board.rows[5].getWidth() + GraphicsSettings.toResolution(50);
-            int yPos = (int)board.rows[5].getPosition().Y;
+            int startingPosX = GraphicsSettings.toResolution(200) + (int)board.rows[5].getPosition().X + board.rows[5].getWidth() + GraphicsSettings.toResolution(50);
+            int yPos = (int)board.rows[5].getPosition().Y - GraphicsSettings.toResolution(40);
             board.unanimousToken.setSprite(content, "unanimousToken");
             board.unanimousToken.setPos(startingPosX, yPos);
 
@@ -138,7 +139,7 @@ namespace CardGame
         private void setHolderPositions()
         {
             int borderOffset = GraphicsSettings.toResolution(60);
-            int yOffset = borderOffset * 4;
+            int yOffset = borderOffset;
             int xPos = borderOffset * 2 + board.rows[enemy].getWidth();
             board.deckHolder[enemy].setPos(xPos, yOffset);
             board.deckHolder[friendly].setPos(xPos, Game1.windowH - board.deckHolder[friendly].getHeight() - yOffset);

@@ -138,9 +138,7 @@ namespace CardGame
         {
             if (mouseState.RightButton == ButtonState.Pressed && row.isWithinModifiedPosition(mouseState, card) && !card.cardProps.exhausted)
             {
-                //card.setPos(mouseState.X - card.getWidth() / 2, mouseState.Y - card.getHeight() / 2);
                 rightClickedInBox = true;
-                //throw new Exception();
             }
             if (mouseState.RightButton == ButtonState.Released && rightClickedInBox && row.isWithinModifiedPosition(mouseState, card))
             {
@@ -150,8 +148,9 @@ namespace CardGame
                 boardFunc.friendlySide.Resources.Add(card.race);
                 boardFunc.cardViewer.resetSelectedCard(boardFunc);
                 card.setRegular();
-                //send animation?
             }
+
+            resetIfNoSelection(mouseState, row, card, boardFunc);
         }
         public override void setCardToView(MouseState mouseState, FunctionalRow row, BoardFunctionality boardFunc, bool friendly)
         {

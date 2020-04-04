@@ -133,11 +133,11 @@ namespace CardGame
         {
             if (power <= 1)
             {
-                description = "Draw a card";
+                description = "Both draw card";
             }
             else
             {
-                description = "Draw " + power.ToString() + " cards";
+                description = "Both draw " + power.ToString() + " cards";
             }
         }
         public BothSidesDrawCard(int amountOfCards)
@@ -278,7 +278,7 @@ namespace CardGame
     {
         public BoardDamage(int damage, int exchangeValue) : base(damage, exchangeValue)
         {
-            description = "Deal " + damage + "to all enemy units.";
+            description = "Deal " + damage + "to row";
         }
         public override void activateAbilityOnSelection(MouseState mouseState, BoardFunctionality boardFunc)
         {
@@ -318,7 +318,7 @@ namespace CardGame
         public Reveal()
         {
             name = "Exhaust:";
-            description = "Reveal board until turn end";
+            description = "Reveal board";
         }
         public Reveal(int exchangeValue) : this()
         {

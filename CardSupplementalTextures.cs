@@ -12,7 +12,7 @@ namespace CardGame
     {
         public readonly int cardBack = 0;
         public readonly int cardBorder = 1;
-        public readonly int cardImageBorder = 2;
+        public readonly int cardBody = 2;
         public readonly int cardFilling = 3;
         public readonly int portrait = 4;
         public readonly int selectionIndicator = 5;
@@ -26,8 +26,9 @@ namespace CardGame
         public readonly int generalSymbol = 13;
         public readonly int armySymbol = 14;
         public readonly int fieldUnitSymbol = 15;
+        public readonly int cardShading = 16;
 
-        public int TOTAL = 16;
+        public int TOTAL = 17;
         public List<CardSupplement> supplements;
         public CardSupplementalTextures()
         {
@@ -42,7 +43,7 @@ namespace CardGame
             supplements[selectionIndicator].setContentName("selectedSymbol");
             supplements[cardBack].setContentName("cardBack");
             supplements[cardBorder].setContentName("cardBorder");
-            supplements[cardImageBorder].setContentName("cardImageBorder");
+            supplements[cardBody].setContentName("cardBody");
             supplements[cardFilling].setContentName("cardFilling");
             supplements[orcToken].setContentName("orcToken");
             supplements[elfToken].setContentName("elfToken");
@@ -53,6 +54,7 @@ namespace CardGame
             supplements[generalSymbol].setContentName("generalSymbol");
             supplements[armySymbol].setContentName("armySymbol");
             supplements[fieldUnitSymbol].setContentName("fieldUnitSymbol");
+            supplements[cardShading].setContentName("cardShading");
         }
 
         public void setAllPositionsRelativeTo(GameComponent component)

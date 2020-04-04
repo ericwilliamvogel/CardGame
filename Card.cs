@@ -32,13 +32,14 @@ namespace CardGame
     public class Card : GameComponent
     {
         public bool makingAction;
-
         public Vector2 storedPosition;
-
-
-        //
-        //
+        public CardProperties cardProps;
+        public SelectState selectState;
+        public PlayState playState;
+        public Rarity rarity;
+        public Race race;
         public CardSupplementalTextures suppTextures;
+
         public class CardProperties
         {
             public int identifier;
@@ -56,29 +57,7 @@ namespace CardGame
             public bool doubleExhausted;
         }
 
-        public int returnValue()
-        {
-            int value = cardProps.power + cardProps.defense + cardProps.cost.totalCost;
-            return value;
-        }
-        //public List<Button> abilityButtons = new List<Button>();
-       // public bool showAbilities;
-        public HorizontalContainer getCurrentContainer(Side side)
-        {
-            foreach(FunctionalRow container in side.Rows)
-            {
-                if(container.type == cardProps.type)
-                {
-                    return container;
-                }
-            }
-            return null;
-        }
-        public CardProperties cardProps;
-        public SelectState selectState;
-        public PlayState playState;
-        public Rarity rarity;
-        public Race race;
+
         public enum Race
         {
             Orc,
@@ -104,6 +83,26 @@ namespace CardGame
             Hovered,
             Selected
         }
+
+        public int returnValue()
+        {
+            int value = cardProps.power + cardProps.defense + cardProps.cost.totalCost;
+            return value;
+        }
+
+        public HorizontalContainer getCurrentContainer(Side side)
+        {
+            foreach(FunctionalRow container in side.Rows)
+            {
+                if(container.type == cardProps.type)
+                {
+                    return container;
+                }
+            }
+            return null;
+        }
+
+
 
         public void setPower(int power)
         {
@@ -242,8 +241,11 @@ namespace CardGame
 
                     suppTextures.supplements[suppTextures.cardBorder].drawSprite(spriteBatch);
                     suppTextures.supplements[suppTextures.cardFilling].drawSprite(spriteBatch);
-                    suppTextures.supplements[suppTextures.cardImageBorder].drawSprite(spriteBatch);
+                    suppTextures.supplements[suppTextures.cardBody].drawSprite(spriteBatch);
+
+
                     suppTextures.supplements[suppTextures.portrait].drawSprite(spriteBatch);
+                    suppTextures.supplements[suppTextures.cardShading].drawSprite(spriteBatch);
                     if (selectState == SelectState.Hovered)
                     {
                         drawHighlight(spriteBatch);
@@ -255,7 +257,7 @@ namespace CardGame
                         drawHighlight(spriteBatch);
                     }
                     drawCardSelectionBorder(spriteBatch);
-                    spriteBatch.DrawString(Game1.spritefont, cardProps.name, new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + 40 * getScale().X), Color.Black, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
+                    spriteBatch.DrawString(Game1.spritefont, cardProps.name, new Vector2(getPosition().X + 55 * getScale().X, getPosition().Y + 30 * getScale().X), Color.Black, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
 
                     switch(cardProps.type)
                     {
@@ -283,14 +285,15 @@ namespace CardGame
 
                     for(int i = 0; i < cardProps.abilities.Count; i++)
                     {
-                        spriteBatch.DrawString(Game1.spritefont, cardProps.abilities[i].name.ToString() + " "+cardProps.abilities[i].description.ToString(), new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + getHeight() * 2/3 + (80 * getScale().X) * i), Color.Black, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
+                        spriteBatch.DrawString(Game1.spritefont, cardProps.abilities[i].name.ToString() + " "+cardProps.abilities[i].description.ToString(), new Vector2(getPosition().X + 50 * getScale().X, getPosition().Y + getHeight() * 2/3 + (65 * getScale().X) * i), Color.Black, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
                     }
 
 
                     int counter = 0;
                     int selector = 0;
                     int tokenWidth = (int) (suppTextures.supplements[suppTextures.elfToken].getWidth() - 20 * getScale().X);
-                    int borderOffset = (int)(10 * getScale().X);
+                    int borderOffset = (int)(15 * getScale().X);
+                    float iconScale = .72f;
 
                     if (cardProps.cost.raceCost != null)
                     {
@@ -311,39 +314,28 @@ namespace CardGame
                             }
 
 
-                            spriteBatch.Draw(suppTextures.supplements[selector].getTexture(), new Vector2(getPosition().X + getWidth() - borderOffset * 2 - tokenWidth - tokenWidth * counter, getPosition().Y + borderOffset), null, null, null, getRotation(), getScale(), getColor(), properties.spriteEffects, 0);
-                            //suppTextures.supplements[selector].setPos(new Vector2(getPosition().X + getWidth() - borderOffset - tokenWidth - tokenWidth * counter, getPosition().Y + borderOffset));
-                            //suppTextures.supplements[selector].drawSprite(spriteBatch);
+                            spriteBatch.Draw(suppTextures.supplements[selector].getTexture(), new Vector2(getPosition().X + getWidth() - borderOffset * 2 - tokenWidth - tokenWidth * counter * iconScale, getPosition().Y + borderOffset), null, null, null, getRotation(), iconScale * getScale(), getColor(), properties.spriteEffects, 0);
+
                             counter++;
                         }
                     }
 
-
-                    //
-                    //COST
-                    if (cardProps.cost.unanimousCost > 0)
+                    if (cardProps.cost.unanimousCost > 0 && cardProps.cost.raceCost != null)
                     {
 
                         selector = suppTextures.unanimousToken;
-                        spriteBatch.Draw(suppTextures.supplements[selector].getTexture(), new Vector2(getPosition().X + getWidth() - borderOffset * 2 - tokenWidth - tokenWidth * counter, getPosition().Y + borderOffset), null, null, null, getRotation(), getScale(), getColor(), properties.spriteEffects, 0);
-                        spriteBatch.DrawString(Game1.spritefont, cardProps.cost.unanimousCost.ToString(), new Vector2(getPosition().X + getWidth() - borderOffset * 2- tokenWidth - tokenWidth * counter + tokenWidth / 2 - borderOffset / 2, getPosition().Y + borderOffset * 3), Color.Black, 0, new Vector2(0, 0), 1.33f * getScale(), SpriteEffects.None, 0);
+                        spriteBatch.Draw(suppTextures.supplements[selector].getTexture(), new Vector2(getPosition().X + getWidth() - borderOffset * 2 - tokenWidth - tokenWidth * counter * iconScale, getPosition().Y + borderOffset), null, null, null, getRotation(), iconScale * getScale(), getColor(), properties.spriteEffects, 0);
+                        spriteBatch.DrawString(Game1.spritefont, cardProps.cost.unanimousCost.ToString(), new Vector2(getPosition().X + getWidth() - borderOffset * 2- tokenWidth - tokenWidth * counter * iconScale + tokenWidth / 2 - borderOffset * 4/5, getPosition().Y + borderOffset * 2), Color.Black, 0, new Vector2(0, 0), 1f * getScale(), SpriteEffects.None, 0);
                     }
 
+                    if (cardProps.cost.unanimousCost >= 0 && cardProps.cost.raceCost == null)
+                    {
 
-                    //
-                    //
-                    /*for(int i = 0; i < 3; i++)
-                    {
-                        suppTextures.supplements[suppTextures.abilityDisplay].drawSprite(spriteBatch);
-                        spriteBatch.Draw(suppTextures.supplements[suppTextures.abilityDisplay].getTexture(), new Vector2(suppTextures.supplements[suppTextures.abilityDisplay].getPosition().X, suppTextures.supplements[suppTextures.abilityDisplay].getPosition().Y + suppTextures.supplements[suppTextures.abilityDisplay].getHeight() * i), null, null, null, getRotation(), getScale(), getColor(), properties.spriteEffects, 0);
-                    }*/
-                    /*int i = 0;
-                    foreach(Ability ability in cardProps.abilities)
-                    {
-                        spriteBatch.Draw(suppTextures.supplements[suppTextures.abilityDisplay].getTexture(), new Vector2(suppTextures.supplements[suppTextures.abilityDisplay].getPosition().X, suppTextures.supplements[suppTextures.abilityDisplay].getPosition().Y + suppTextures.supplements[suppTextures.abilityDisplay].getHeight() * i), null, null, null, getRotation(), getScale(), getColor(), properties.spriteEffects, 0);
-                        //suppTextures.supplements[suppTextures.abilityDisplay].drawSprite(spriteBatch);
-                        i++;
-                    }*/
+                        selector = suppTextures.unanimousToken;
+                        spriteBatch.Draw(suppTextures.supplements[selector].getTexture(), new Vector2(getPosition().X + getWidth() - borderOffset * 2 - tokenWidth - tokenWidth * counter * iconScale, getPosition().Y + borderOffset), null, null, null, getRotation(), iconScale * getScale(), getColor(), properties.spriteEffects, 0);
+                        spriteBatch.DrawString(Game1.spritefont, cardProps.cost.unanimousCost.ToString(), new Vector2(getPosition().X + getWidth() - borderOffset * 2 - tokenWidth - tokenWidth * counter * iconScale + tokenWidth / 2 - borderOffset * 4 / 5, getPosition().Y + borderOffset * 2), Color.Black, 0, new Vector2(0, 0), 1f * getScale(), SpriteEffects.None, 0);
+                    }
+
                     break;
             }
 
@@ -352,8 +344,6 @@ namespace CardGame
         {
             ShadowComponent highlight = new ShadowComponent(suppTextures.supplements[suppTextures.cardFilling]);
             highlight.properties.color = Color.Black * .4f;
-            //highlight.updateScaleAndPosition(suppTextures.cardFilling);
-
             highlight.drawSprite(spriteBatch);
         }
         public override void updateGameComponent()
@@ -395,14 +385,15 @@ namespace CardGame
             float w = Properties.globalScale.X + properties.scale.X;
             //
 
-            suppTextures.supplements[suppTextures.portrait].setOffset(20 * w, 105 * w);
+            suppTextures.supplements[suppTextures.portrait].setOffset(20 * w, 100 * w);
             suppTextures.supplements[suppTextures.cardBorder].setOffset(0 * w, 0 * w);
-            suppTextures.supplements[suppTextures.cardFilling].setOffset(20 * w, 20 * w);
-            suppTextures.supplements[suppTextures.cardImageBorder].setOffset(0 * w, 95 * w);
+            suppTextures.supplements[suppTextures.cardShading].setOffset(0 * w, 0 * w);
+            suppTextures.supplements[suppTextures.cardBody].setOffset(0 * w, 0 * w);
             suppTextures.supplements[suppTextures.cardBack].setOffset(0 * w, 0 * w);
+            suppTextures.supplements[suppTextures.cardFilling].setOffset(0 * w, 0 * w);
             suppTextures.supplements[suppTextures.abilityDisplay].setOffset(properties.width * w, 0);
 
-            int afterCardImageBorder = (int)(584 * w);
+            int afterCardImageBorder = (int)(540 * w);
             suppTextures.supplements[suppTextures.generalSymbol].setOffset(0 * w, afterCardImageBorder);
             suppTextures.supplements[suppTextures.armySymbol].setOffset(0 * w, afterCardImageBorder);
             suppTextures.supplements[suppTextures.fieldUnitSymbol].setOffset(0 * w, afterCardImageBorder);
@@ -492,16 +483,6 @@ namespace CardGame
                 if(i != suppTextures.portrait)
                 suppTextures.supplements[i].setTexture(storage.suppTextures.supplements[i].getTexture());
             }
-            /*for(int i = 0; i < abilityButtons.Count; i++)
-            {
-                Vector2 nullablePosition = new Vector2(0, 0);
-                abilityButtons[i] = new Button(null, nullablePosition);
-                abilityButtons[i].setTexture(storage.suppTextures.supplements[suppTextures.abilityDisplay].getTexture());
-            }*/
-            //suppTextures.cardBorder.setTexture(storage.suppTextures.cardBorder.getTexture());
-            //suppTextures.cardImageBorder.setTexture(storage.suppTextures.cardImageBorder.getTexture());
-            //suppTextures.cardFilling.setTexture(storage.suppTextures.cardFilling.getTexture());
-            //suppTextures.cardBack.setTexture(storage.suppTextures.cardBack.getTexture());
             properties.width = suppTextures.supplements[suppTextures.cardBack].getWidth();
             properties.height = suppTextures.supplements[suppTextures.cardBack].getHeight();
         }
@@ -513,7 +494,7 @@ namespace CardGame
         {
             if(race == Race.Elf)
             {
-                return Color.Turquoise;
+                return Color.Green;
             }
             if(race == Race.Human)
             {
@@ -521,7 +502,7 @@ namespace CardGame
             }
             if (race == Race.Orc)
             {
-                return Color.Green;
+                return Color.SteelBlue;
             }
 
             return Color.White;
@@ -531,31 +512,6 @@ namespace CardGame
             suppTextures.setAllPositionsRelativeTo(this);
         }
 
-        public virtual void takeDamage()
-        {
-
-        }
-        public virtual void removeDamage()
-        {
-
-        }
-        /*public virtual void checkEffects(GameState state)
-        {
-            if(effects != null)
-            {
-                foreach(Effect effect in effects)
-                {
-                    //if (effect.Trigger(state)) { }
-                }
-            }
-            //ONABILITYACTIVATE
-        }*/
-        public virtual void activateAbility()
-        {
-
-        }
-        //card logio here
-        //generals / armies / soldiers have different capabilities
     }
     public class General : Card
     {
@@ -582,7 +538,8 @@ namespace CardGame
     {
         General,
         Army,
-        FieldUnit
+        FieldUnit,
+        Manuever
     }
 
 
