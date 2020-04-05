@@ -64,7 +64,7 @@ namespace CardGame
         {
             foreach (Card card in row.cardsInContainer)
             {
-                if (card.isSelected() && !card.cardProps.exhausted)
+                if (card.isSelected())
                 {
                     if (friendly)
                     {
@@ -80,17 +80,20 @@ namespace CardGame
 
                         }
                     }
-
-                    if (!friendly)
+                    if (!friendly && row.revealed)
                     {
+                        if (boardFunc.state == BoardFunctionality.State.Regular)
+                        {
                             boardFunc.ENEMYSELECTEDCARD = card;
                             viewLogic(mouseState, row, card, boardFunc);
+                        }
+                        else
+                        {
+                            boardFunc.cardViewer.viewFullSizeCard(mouseState, card, boardFunc);
+                        }
                     }
-                        
-
-
-
                 }
+
             }
         }
         public virtual void clickAndHold()
@@ -247,6 +250,10 @@ namespace CardGame
                         
                     
                     }
+                    else
+                    {
+                        resetIfNoSelection(mouseState, row, card, boardFunc);
+                    }
 
                 }
                 if(mouseState.LeftButton == ButtonState.Released && boardFunc.enemySide.Life.isWithinBox(mouseState) )
@@ -265,7 +272,7 @@ namespace CardGame
 
                     clickedInCardBox = false;
                 }
-                resetIfNoSelection(mouseState, row, card, boardFunc);
+
             }
         }
     }

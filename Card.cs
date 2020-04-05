@@ -270,18 +270,23 @@ namespace CardGame
                         case CardType.FieldUnit:
                             suppTextures.supplements[suppTextures.fieldUnitSymbol].drawSprite(spriteBatch);
                             break;
+                        case CardType.Manuever:
+                            suppTextures.supplements[suppTextures.manueverSymbol].drawSprite(spriteBatch);
+                            break;
                     }
 
-                    if (cardProps.type != CardType.General)
+                    if(cardProps.type != CardType.Manuever)
                     {
-                        suppTextures.supplements[suppTextures.attackIcon].drawSprite(spriteBatch);
+                        if (cardProps.type != CardType.General)
+                        {
+                            suppTextures.supplements[suppTextures.attackIcon].drawSprite(spriteBatch);
+                            spriteBatch.DrawString(Game1.spritefont, cardProps.power.ToString(), new Vector2(getPosition().X + 40 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 1.66f * getScale(), SpriteEffects.None, 0);
+                        }
+                        suppTextures.supplements[suppTextures.defenseIcon].drawSprite(spriteBatch);
+                        spriteBatch.DrawString(Game1.spritefont, cardProps.defense.ToString(), new Vector2(getPosition().X + getWidth() - 80 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 1.66f * getScale(), SpriteEffects.None, 0);
                     }
 
-                    suppTextures.supplements[suppTextures.defenseIcon].drawSprite(spriteBatch);
 
-                    spriteBatch.DrawString(Game1.spritefont, cardProps.defense.ToString(), new Vector2(getPosition().X + getWidth() - 80 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 1.66f * getScale(), SpriteEffects.None, 0);
-                    if(cardProps.type != CardType.General)
-                    spriteBatch.DrawString(Game1.spritefont, cardProps.power.ToString(), new Vector2(getPosition().X + 40 * getScale().X, getPosition().Y + getHeight() - 100 * getScale().X), Color.Black, 0, new Vector2(0, 0), 1.66f * getScale(), SpriteEffects.None, 0);
 
                     for(int i = 0; i < cardProps.abilities.Count; i++)
                     {
@@ -397,16 +402,19 @@ namespace CardGame
             suppTextures.supplements[suppTextures.generalSymbol].setOffset(0 * w, afterCardImageBorder);
             suppTextures.supplements[suppTextures.armySymbol].setOffset(0 * w, afterCardImageBorder);
             suppTextures.supplements[suppTextures.fieldUnitSymbol].setOffset(0 * w, afterCardImageBorder);
+            suppTextures.supplements[suppTextures.manueverSymbol].setOffset(0 * w, afterCardImageBorder);
 
             float symbolTransparency = .2f;
             suppTextures.supplements[suppTextures.generalSymbol].properties.transparency = symbolTransparency;
             suppTextures.supplements[suppTextures.armySymbol].properties.transparency = symbolTransparency;
             suppTextures.supplements[suppTextures.fieldUnitSymbol].properties.transparency = symbolTransparency;
+            suppTextures.supplements[suppTextures.manueverSymbol].properties.transparency = symbolTransparency;
 
             Color symbolColor = Color.Gray;
             suppTextures.supplements[suppTextures.generalSymbol].properties.color = symbolColor;
             suppTextures.supplements[suppTextures.armySymbol].properties.color = symbolColor;
             suppTextures.supplements[suppTextures.fieldUnitSymbol].properties.color = symbolColor;
+            suppTextures.supplements[suppTextures.manueverSymbol].properties.color = symbolColor;
 
 
             int attackPosY = (int)(properties.height * w - suppTextures.supplements[suppTextures.attackIcon].getHeight() * 7/8);
@@ -532,6 +540,13 @@ namespace CardGame
         public FieldUnit(int identifier) : base(identifier)
         {
             cardProps.type = CardType.FieldUnit;
+        }
+    }
+    public class Manuever : Card
+    {
+        public Manuever(int identifier) : base(identifier)
+        {
+            cardProps.type = CardType.Manuever;
         }
     }
     public enum CardType

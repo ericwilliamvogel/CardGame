@@ -17,6 +17,7 @@ namespace CardGame
             updateDeckPositions(boardFunc.friendlySide);
             updateDeckPositions(boardFunc.enemySide);
             boardFunc.assetUpdater.updateAllAssets(boardFunc);
+            updateCastingPosition(boardFunc);
             this.SELECTEDCARD = boardFunc.SELECTEDCARD;
             deselectCards(boardFunc);
         }
@@ -49,6 +50,15 @@ namespace CardGame
                 card.setPos(side.Deck.getPosition());
                 scaleToBoard(card);
                 card.playState = Card.PlayState.Hidden;
+            }
+        }
+        private void updateCastingPosition(BoardFunctionality boardFunc)
+        {
+            foreach (Card card in boardFunc.castManuever.cardsInContainer)
+            {
+                card.setPos(boardFunc.castManuever.getPosition());
+                scaleToCast(card);
+                card.playState = Card.PlayState.Revealed;
             }
         }
         private void setHandPositions(Side side)
@@ -120,6 +130,11 @@ namespace CardGame
         public void scaleToHand(Card card)
         {
             card.setScale(CardScale.Hand);
+            card.initSupplements();
+        }
+        public void scaleToCast(Card card)
+        {
+            card.setScale(CardScale.Cast);
             card.initSupplements();
         }
 

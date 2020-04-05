@@ -43,6 +43,7 @@ namespace CardGame
             Card card = cardBuilder.cardConstruct(cardConstructor, 10);
             card = cardBuilder.cardConstruct(cardConstructor, 11);
             card = cardBuilder.cardConstruct(cardConstructor, 6);
+            card = cardBuilder.cardConstruct(cardConstructor, 1003);
         }
         public Deck getDeck()
         {

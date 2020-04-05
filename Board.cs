@@ -103,7 +103,6 @@ namespace CardGame
 
             library = new CardImageStorage();
             library = deckConstructor.cardConstructor.tempStorage;
-
             library.loadCardSupplementalTextures(content);
             library.loadAllDictionaryTextures(content);
         }

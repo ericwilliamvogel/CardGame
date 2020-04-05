@@ -567,7 +567,7 @@ namespace CardGame
         }
         private int getValue(Card card)
         {
-            int value = card.cardProps.initialDefense + card.cardProps.initialPower + card.cardProps.cost.totalCost;
+            int value = card.cardProps.initialDefense + card.cardProps.initialPower + card.cardProps.cost.totalCost + card.cardProps.abilities.Count * 2;
             return value;
         }
         public void SetPlays(BoardFunctionality boardFunc)

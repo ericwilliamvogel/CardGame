@@ -16,7 +16,7 @@ namespace CardGame
     {
         public bool createButtonsOnView;
         public List<Button> abilityButtons = new List<Button>();
-        public Action<MouseState> selection;
+        public List<Action<MouseState>> selection;
 
         public void drawSprite(SpriteBatch spriteBatch)
         {
@@ -46,6 +46,7 @@ namespace CardGame
                 card.setPos(Game1.windowW / 2 - card.getWidth() / 2, Game1.windowH / 2 - card.getHeight() / 2);
                 boardFunc.SELECTEDCARD = null;
                 boardFunc.SELECTEDCARD = new Card(card);
+
                 if (boardFunc.SELECTEDCARD != null)
                 {
                     boardFunc.boardPosLogic.scaleToView(boardFunc.SELECTEDCARD);
@@ -106,7 +107,7 @@ namespace CardGame
                 if (i == 0)
                 {
                     action = (MouseState newMouseState) => {
-                        card.cardProps.abilities[0].setTarget(newMouseState, boardFunc);
+                        card.cardProps.abilities[0].setTarget();
                         card.cardProps.abilities[0].activateAbilityOnSelection(newMouseState, boardFunc);
                         resetCardSelectionOnRightClick(newMouseState, boardFunc);
                     };
@@ -114,7 +115,7 @@ namespace CardGame
                 if (i == 1)
                 {
                     action = (MouseState newMouseState) => {
-                        card.cardProps.abilities[1].setTarget(newMouseState, boardFunc);
+                        card.cardProps.abilities[1].setTarget();
                         card.cardProps.abilities[1].activateAbilityOnSelection(newMouseState, boardFunc);
                         resetCardSelectionOnRightClick(newMouseState, boardFunc);
                     };
@@ -122,7 +123,7 @@ namespace CardGame
                 if (i == 2)
                 {
                     action = (MouseState newMouseState) => {
-                        card.cardProps.abilities[2].setTarget(newMouseState, boardFunc);
+                        card.cardProps.abilities[2].setTarget();
                         card.cardProps.abilities[2].activateAbilityOnSelection(newMouseState, boardFunc);
                         resetCardSelectionOnRightClick(newMouseState, boardFunc);
                     };
@@ -130,7 +131,7 @@ namespace CardGame
                 if (i == 3)
                 {
                     action = (MouseState newMouseState) => {
-                        card.cardProps.abilities[3].setTarget(newMouseState, boardFunc);
+                        card.cardProps.abilities[3].setTarget();
                         card.cardProps.abilities[3].activateAbilityOnSelection(newMouseState, boardFunc);
                         resetCardSelectionOnRightClick(newMouseState, boardFunc);
                     };
@@ -142,20 +143,26 @@ namespace CardGame
                 //THIS ACTUALLY WORKED PERFECTLY IM SO MAD
 
                 abilityButtons[i].setAction(() => {
-                    MouseTransformer.Set(MouseTransformer.State.Tgt);
-                    boardFunc.state = State.Selection;
-                    createButtonsOnView = false;
-                    selection = action;
-                    resetSelectedCard(boardFunc);
-                    card.setRegular();
-                    boardFunc.boardPosLogic.updateBoard(boardFunc);
-                    abilityButtons = new List<Button>();
-
+                    setSelectionState(action, card, boardFunc);
                 });
                 counter = i;
             }
         }
-
+        public void setSelectionState(Action<MouseState> action, Card card, BoardFunctionality boardFunc)
+        {
+            if(selection==null)
+            {
+                selection = new List<Action<MouseState>>();
+            }
+            MouseTransformer.Set(MouseTransformer.State.Tgt);
+            boardFunc.state = State.Selection;
+            createButtonsOnView = false;
+            selection.Add(action);
+            resetSelectedCard(boardFunc);
+            card.setRegular();
+            boardFunc.boardPosLogic.updateBoard(boardFunc);
+            abilityButtons = new List<Button>();
+        }
         private void showCardFullSizeCenterScreen(Card card, BoardFunctionality boardFunc)
         {
             boardFunc.boardPosLogic.scaleToView(card);
@@ -169,7 +176,14 @@ namespace CardGame
                 boardFunc.SELECTEDCARD.updateGameComponent();
             }
         }
-
+        public bool SelectionStillActive()
+        {
+            if(selection != null && selection.Count > 0)
+            {
+                return true;
+            }
+            return false;
+        }
         public void resetCardSelectionOnRightClick(MouseState mouseState, BoardFunctionality boardFunc)
         {
             if (mouseState.RightButton == ButtonState.Pressed)
@@ -177,20 +191,20 @@ namespace CardGame
                 hardResetSelection(boardFunc);
                 abilityButtons = new List<Button>();
                 createButtonsOnView = false;
-                if (selection != null)
-                {
-                    throw new Exception("what is going on");
-
-                }
+                
             }
         }
         public void hardResetSelection(BoardFunctionality boardFunc)
         {
             boardFunc.state = State.Regular;
-            selection = null;
+            selection = new List<Action<MouseState>>();
             resetSelectedCard(boardFunc);
             boardFunc.boardPosLogic.updateBoard(boardFunc);
             MouseTransformer.Set(MouseTransformer.State.Reg);
+        }
+        public void NextSelection()
+        {
+            selection.Remove(selection[0]);
         }
         public void resetSelectedCard(BoardFunctionality boardFunc)
         {

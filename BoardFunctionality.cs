@@ -32,6 +32,7 @@ namespace CardGame
         public BoardFunctionalityAssetUpdater assetUpdater = new BoardFunctionalityAssetUpdater();
         public MoveHistory moveHistory = new MoveHistory();
         public Popup endGamePopup = new Popup(1);
+        public FunctionalRow castManuever = new FunctionalRow(CardType.Manuever);
         public enum State
         {
             Regular,
@@ -56,6 +57,7 @@ namespace CardGame
         {
             //cardBuilder = new CardBuilder();
             //cardConstructor = new CardConstructor();
+            castManuever.setPos(Game1.windowW - GraphicsSettings.toResolution(400), GraphicsSettings.toResolution(200));
             endGamePopup.initializeGameComponent(content);
             rowFog.setSprite(content, "rowNotRevealed");
         }
@@ -74,6 +76,8 @@ namespace CardGame
             BOARDMESSAGE.drawSprite(spriteBatch);
             moveHistory.drawSprite(spriteBatch);
             endGamePopup.drawSprite(spriteBatch);
+            if(cardViewer.selection != null)
+            spriteBatch.DrawString(Game1.spritefont, cardViewer.selection.Count.ToString(), new Vector2(0, 100), Color.Black);
         }
         public void Update(Board board)
         {
@@ -95,10 +99,12 @@ namespace CardGame
                 friendlySide.Player.decide(mouseState, content, this);
 
             }
-            if (state == State.Selection && cardViewer.selection != null)
+            if (cardViewer.SelectionStillActive())
             {
-                cardViewer.selection(mouseState);
+                cardViewer.selection[0](mouseState);
             }
+
+
             endGameIfOver();
         }
 
@@ -191,6 +197,15 @@ namespace CardGame
         }
 
         
+        public void CreateAndDrawSpell(Card fromCard, CreateSpell ability)
+        {
+            setUpCard(fromCard);
+            sendActionToQueue(() => {
+                hideMoveFromEnemyAndDisplay(fromCard, ability);
+                boardDef.drawSpecifiedSpell(fromCard, ability, this);
+                finalizeCardInteraction(fromCard, fromCard);
+            });
+        }
 
         public void AbilityDrawCard(Card fromCard, Ability ability, Side side)
         {
@@ -221,6 +236,19 @@ namespace CardGame
                 moveHistory.AddNewAttackMove(duplicate(fromCard), placeholder);
                 enemySide.boardFunc.moveHistory.AddNewAttackMove(duplicate(fromCard), placeholder);
                 boardDef.dealPlayerDamage(fromCard, this);
+                finalizeCardInteraction(fromCard, fromCard);
+                endGameIfOver();
+            });
+        }
+        public void LifeDamage(Card fromCard, Ability ability)
+        {
+            setUpCard(fromCard);
+            sendActionToQueue(() => {
+                Card placeholder = duplicate(fromCard);
+                placeholder.playState = Card.PlayState.Hidden;
+                moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, placeholder);
+                enemySide.boardFunc.moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, placeholder);
+                boardDef.dealPlayerDamage(fromCard, ability, this);
                 finalizeCardInteraction(fromCard, fromCard);
                 endGameIfOver();
             });
@@ -266,6 +294,13 @@ namespace CardGame
                 enemySide.boardFunc.moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
                 boardDef.dealDirectDamageAndDisposeOfDead(fromCard, ability, targetCard);
                 finalizeCardInteraction(fromCard, targetCard);
+            });
+        }
+        public void DirectDamage(Card fromCard, Ability ability)
+        {
+            setUpCard(fromCard);
+            sendActionToQueue(() => {
+                LifeDamage(fromCard);
             });
         }
         public void SpawnCard(Card fromCard, SpawnCard spawn)
@@ -335,8 +370,6 @@ namespace CardGame
             finalizeSingularCard(otherCard);
             checkBothSidesForDead();
             showEnemyCard = false;
-            cardViewer.selection = null;
-
             state = State.Regular;
             boardPosLogic.updateBoard(this);
         }

@@ -38,20 +38,33 @@ namespace CardGame
         }
         public void fillDictionary(int identifier)
         {
-            if(!cardTextureDictionary.ContainsKey(identifier))
-            cardTextureDictionary.Add(identifier, null);
+            if (!cardTextureDictionary.ContainsKey(identifier))
+                cardTextureDictionary.Add(identifier, null);
         }
         public void loadCardSupplementalTextures(ContentManager content)
         {
-            foreach(CardSupplement instance in suppTextures.supplements)
+            foreach (CardSupplement instance in suppTextures.supplements)
             {
-                if(instance != suppTextures.supplements[suppTextures.portrait])
-                instance.setTexture(content);
+                if (instance != suppTextures.supplements[suppTextures.portrait])
+                    instance.setTexture(content);
             }
             //suppTextures.cardBack.setTexture(content);
             //suppTextures.cardBorder.setTexture(content);
             //suppTextures.cardImageBorder.setTexture(content);
             //suppTextures.cardFilling.setTexture(content);
+        }
+        public Texture2D getTexture(int identifier)
+        {
+            Texture2D x = null;
+            if(cardTextureDictionary.ContainsKey(identifier))
+            {
+                x = cardTextureDictionary[identifier];
+            }
+            else
+            {
+                x = cardTextureDictionary[3];
+            }
+            return x;
         }
         public void loadAllDictionaryTextures(ContentManager content)
         {

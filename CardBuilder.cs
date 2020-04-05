@@ -50,7 +50,7 @@ namespace CardGame
                 constructor.setRace(Card.Race.Orc);
                 constructor.setDefense(4);
                 constructor.setRarity(Card.Rarity.Bronze);
-                constructor.setName("Thing");
+                constructor.setName("Batallion");
             }
             else if(identifier == 3)
             {
@@ -61,7 +61,7 @@ namespace CardGame
                 constructor.setRace(Card.Race.Orc);
                 constructor.setDefense(2);
                 constructor.setRarity(Card.Rarity.Bronze);
-                constructor.setName("NEWGUY");
+                constructor.setName("Orc Pawn");
             }
             else if(identifier == 4)
             {
@@ -72,7 +72,7 @@ namespace CardGame
                 constructor.setRace(Card.Race.Orc);
                 constructor.setDefense(2);
                 constructor.setRarity(Card.Rarity.Bronze);
-                constructor.setName("COOL GENERAL");
+                constructor.setName("Revealer");
                 constructor.addAbility(new Reveal(2));
                 constructor.addAbility(new BoardDamage(1, -1));
                 constructor.addAbility(new BoardDamage(12, -10));
@@ -87,9 +87,9 @@ namespace CardGame
                 constructor.setDefense(1);
                 constructor.setRarity(Card.Rarity.Bronze);
                 constructor.setName("Spawner General");
-                constructor.addAbility(new SpawnCard(10, +1));
-                constructor.addAbility(new SpawnCard(11, -1));
-                constructor.addAbility(new BoardDamage(12, -10));
+                constructor.addAbility(new SpawnCard(10, +2, "4/1 field unit."));
+                constructor.addAbility(new SpawnCard(11, -2, "1/1 army."));
+                constructor.addAbility(new SpawnCard(5, -5, "a copy of this."));
             }
             else if(identifier == 6)
             {
@@ -102,8 +102,41 @@ namespace CardGame
                 constructor.setRarity(Card.Rarity.Bronze);
                 constructor.setName("Jess's General");
                 constructor.addAbility(new BothSidesDrawCard(1, +2));
-                constructor.addAbility(new SpawnCard(6, -5));
+                constructor.addAbility(new SpawnCard(6, -5, "a copy of this."));
                 constructor.addAbility(new BoardDamage(12, -10));
+            }
+            else if(identifier == 7)
+            {
+                constructor.setManuever(identifier);
+                Card.Race[] cost = { };
+                constructor.setCost(new Cost(2, cost));
+                constructor.setRace(Card.Race.Orc);
+                constructor.setName("Heavy Research");
+                constructor.setRarity(Card.Rarity.Bronze);
+                constructor.addAbility(new CreateSpell(1003, "a multi-target spell."));
+            }
+            else if(identifier == 8)
+            {
+                constructor.setManuever(identifier);
+                Card.Race[] cost = { Card.Race.Orc, Card.Race.Orc };
+                constructor.setCost(new Cost(3, cost));
+                constructor.setRace(Card.Race.Orc);
+                constructor.setName("War Crime");
+                constructor.setRarity(Card.Rarity.Bronze);
+                constructor.addAbility(new LifeTargetDamage(8));
+            }
+            else if(identifier == 9)
+            {
+                constructor.setFieldUnit(identifier);
+                Card.Race[] cost = { Card.Race.Orc };
+                constructor.setCost(new Cost(1, cost));
+                constructor.setPower(3);
+                constructor.setRace(Card.Race.Orc);
+                constructor.setDefense(1);
+                constructor.setRarity(Card.Rarity.Bronze);
+                constructor.setName("Transmorpher");
+                constructor.addAbility(new SpawnCard(9, "a copy of this."));
+                constructor.addAbility(new SpawnCard(5, "a Spawner General."));
             }
             else if (identifier == 10)
             {
@@ -126,6 +159,17 @@ namespace CardGame
                 constructor.setRarity(Card.Rarity.Bronze);
                 constructor.setName("Spawn Army");
 
+            }
+            else if (identifier == 1003)
+            {
+                constructor.setManuever(identifier);
+                Card.Race[] cost = { };
+                constructor.setCost(new Cost(2, cost));
+                constructor.setRace(Card.Race.Orc);
+                constructor.setName("Outsourced Weapon");
+                constructor.setRarity(Card.Rarity.Bronze);
+                constructor.addAbility(new TargetDamage(4));
+                constructor.addAbility(new LifeTargetDamage(2));
             }
         }
     }

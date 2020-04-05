@@ -154,16 +154,52 @@ namespace CardGame
         
         public void resumeWithPlayingCard(Side side, Card card, BoardFunctionality boardFunc)
         {
-            boardFunc.actionConstructor.moveTo(side.Hand, card.correctRow(side), card, boardFunc);
+            if(card.cardProps.type != CardType.Manuever)
+            {
+                boardFunc.actionConstructor.moveTo(side.Hand, card.correctRow(side), card, boardFunc);
+            }
+
 
             if (card.cardProps.type == CardType.Army)
             {
                 side.canPlayArmy = false;
             }
+            else if (card.cardProps.type == CardType.Manuever)
+            {
+                ///<summary>
+                ///
+                /// make sure this works!~
+                /// 
+                /// 
+                /// </summary>
+                boardFunc.actionConstructor.moveTo(side.Hand, boardFunc.castManuever, card, boardFunc);
+                int counter = 0;
+                foreach(Ability ability in card.cardProps.abilities)
+                {
+                    assignAbilityToNextSelection(card, counter, boardFunc);
+                    counter++;
+                }
+
+            }
             else
             {
                 card.cardProps.exhausted = true;
             }
+        }
+
+        private void assignAbilityToNextSelection(Card card, int selector, BoardFunctionality boardFunc)
+        {
+            Action<MouseState> setSelection = (MouseState mouseState) => {
+                card.cardProps.abilities[selector].setTarget();
+                card.cardProps.abilities[selector].activateAbilityOnSelection(mouseState, boardFunc);
+                boardFunc.cardViewer.resetCardSelectionOnRightClick(mouseState, boardFunc);
+                if (mouseState.RightButton == ButtonState.Pressed)
+                {
+                    boardFunc.actionConstructor.moveTo(boardFunc.castManuever, boardFunc.friendlySide.Hand, card, boardFunc);
+                    boardFunc.cardViewer.hardResetSelection(boardFunc);
+                }
+            };
+            boardFunc.cardViewer.setSelectionState(setSelection, card, boardFunc);
         }
         public void returnToHand(Side side, Card card, BoardFunctionality boardFunc)
         {
@@ -185,11 +221,20 @@ namespace CardGame
             Card newCard = boardFunc.cardBuilder.cardConstruct(boardFunc.cardConstructor, ability.identifier);
             boardFunc.library = boardFunc.cardConstructor.tempStorage;
             newCard.setSupplementalTextures(boardFunc.library);
-
             newCard.correctRow(boardFunc.friendlySide).cardsInContainer.Add(newCard);
-            newCard.correctRow(boardFunc.friendlySide).loadCardImage(boardFunc.library.cardTextureDictionary, newCard);
+            newCard.correctRow(boardFunc.friendlySide).loadCardImage(boardFunc.library, newCard);
             newCard.cardProps.exhausted = true;
             //newCard.correctRow(friendlySide).loadCardImagesInContainer(library.cardTextureDictionary);
+        }
+        public void drawSpecifiedSpell(Card card, CreateSpell spell, BoardFunctionality boardFunc)
+        {
+
+            Card newCard = boardFunc.cardBuilder.cardConstruct(boardFunc.cardConstructor, spell.identifier);
+            boardFunc.library = boardFunc.cardConstructor.tempStorage;
+            newCard.setSupplementalTextures(boardFunc.library);
+            boardFunc.friendlySide.Deck.cardsInContainer.Insert(0, newCard);
+            boardFunc.friendlySide.Deck.loadCardImage(boardFunc.library, newCard);
+            boardFunc.DrawCard(boardFunc.friendlySide);
         }
         public void deductAttributesAndDecideWinner(Card card, Card otherCard)
         {

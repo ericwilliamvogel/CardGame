@@ -30,6 +30,7 @@ namespace CardGame
                 drawHand(boardFunc.friendlySide, spriteBatch);
             }
 
+            drawCasting(boardFunc, spriteBatch);
 
             if (boardFunc.SELECTEDCARD != null)
             {
@@ -43,6 +44,13 @@ namespace CardGame
         private void drawHand(Side side, SpriteBatch spriteBatch)
         {
             foreach (Card card in side.Hand.cardsInContainer)
+            {
+                card.drawSprite(spriteBatch);
+            }
+        }
+        private void drawCasting(BoardFunctionality boardFunc, SpriteBatch spriteBatch)
+        {
+            foreach (Card card in boardFunc.castManuever.cardsInContainer)
             {
                 card.drawSprite(spriteBatch);
             }

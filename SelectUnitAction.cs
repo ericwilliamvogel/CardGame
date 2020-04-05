@@ -108,13 +108,17 @@ namespace CardGame
         }
         public virtual void resetIfNoSelection(MouseState mouseState, HorizontalContainer container, Card card, BoardFunctionality boardFunc)
         {
-            if (!boardFunc.boardActions.isActive() && mouseState.LeftButton == ButtonState.Released && !container.isWithinModifiedPosition(mouseState, card))
+            if (card.cardProps.type != CardType.Manuever)
             {
-                card.setRegular();
-                card.resetCardSelector();
-                boardFunc.SELECTEDCARD = null;
-                boardFunc.boardPosLogic.updateBoard(boardFunc);
+                if (!boardFunc.boardActions.isActive() && mouseState.LeftButton == ButtonState.Released && !container.isWithinModifiedPosition(mouseState, card))
+                {
+                    card.setRegular();
+                    card.resetCardSelector();
+                    boardFunc.SELECTEDCARD = null;
+                    boardFunc.boardPosLogic.updateBoard(boardFunc);
+                }
             }
+
         }
     }
 }

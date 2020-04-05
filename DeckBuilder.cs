@@ -22,8 +22,11 @@ namespace CardGame
             {
                 constructor.addCardsToDeck(10, 6);
                 constructor.addCardsToDeck(4, 5);
+                constructor.addCardsToDeck(4, 7);
                 constructor.addCardsToDeck(16, 2);
-                constructor.addCardsToDeck(16, 3);
+                constructor.addCardsToDeck(4, 3);
+                constructor.addCardsToDeck(4, 8);
+                constructor.addCardsToDeck(4, 9);
                 constructor.addCardsToDeck(10, 4);
 
             }

@@ -54,6 +54,7 @@ namespace CardGame
         }
         public void addAbility(Ability ability)
         {
+            ability.setCard(card);
             card.cardProps.abilities.Add(ability);
         }
 
@@ -65,6 +66,11 @@ namespace CardGame
         public void setFieldUnit(int identifier)
         {
             card = new FieldUnit(identifier);
+            tempStorage.fillDictionary(identifier);
+        }
+        public void setManuever(int identifier)
+        {
+            card = new Manuever(identifier);
             tempStorage.fillDictionary(identifier);
         }
         public Card getCard()

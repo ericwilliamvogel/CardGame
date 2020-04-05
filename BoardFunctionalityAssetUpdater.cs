@@ -34,6 +34,10 @@ namespace CardGame
             {
                 card.updateGameComponent();
             }
+            foreach(Card card in boardFunc.castManuever.cardsInContainer)
+            {
+                card.updateGameComponent();
+            }
 
             foreach (FunctionalRow row in boardFunc.friendlySide.Rows)
             {

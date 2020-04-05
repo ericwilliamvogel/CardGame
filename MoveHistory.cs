@@ -77,7 +77,7 @@ namespace CardGame
                         attackIcon.drawSprite(spriteBatch);
                         break;
                     case State.SoloAbility:
-                        if (move.fromCard.playState != Card.PlayState.Hidden)
+                        if (move.fromCard.playState != Card.PlayState.Hidden && move.fromCard.cardProps.type != CardType.Manuever)
                         {
                             spriteBatch.DrawString(Game1.spritefont, move.ability.exchangeValue.ToString(), new Vector2(move.fromCard.getPosition().X + move.fromCard.getWidth() / 2 - adjustToCenter, move.fromCard.getPosition().Y + move.fromCard.getHeight() / 2 - adjustToCenter), Color.White, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
                         }
@@ -85,6 +85,7 @@ namespace CardGame
                     case State.TargetAbility:
 
                         move.toCard.drawSprite(spriteBatch);
+                        if(move.fromCard.cardProps.type != CardType.Manuever)
                         spriteBatch.DrawString(Game1.spritefont, move.ability.exchangeValue.ToString(), new Vector2(move.fromCard.getPosition().X + move.fromCard.getWidth() / 2 - adjustToCenter, move.fromCard.getPosition().Y + move.fromCard.getHeight() / 2 - adjustToCenter), Color.White, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
                         targetIcon.drawSprite(spriteBatch);
                         break;

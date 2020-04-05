@@ -27,6 +27,22 @@ namespace CardGame
             }
             return false;
         }
+        public void playManuever(MouseState mouseState, Card card, BoardFunctionality boardFunc)
+        {
+            if (!boardFunc.friendlySide.Hand.isWithinModifiedPosition(mouseState, card) && boardFunc.state != BoardFunctionality.State.CardView && card.cardProps.type == CardType.Manuever && mouseState.LeftButton == ButtonState.Released)
+            {
+                if (card == boardFunc.SELECTEDCARD)
+                {
+                    placingCard = false;
+                    card.setRegular();
+                    boardFunc.PlayCard(boardFunc.friendlySide,/* row,*/ card);
+
+                    boardFunc.SELECTEDCARD = null;
+
+                }
+
+            }
+        }
         public void playSelectedCard(MouseState mouseState, BoardFunctionality boardFunc)
         {
             if (isWithinProperRow(mouseState, boardFunc) && boardFunc.state != BoardFunctionality.State.CardView)
@@ -89,6 +105,7 @@ namespace CardGame
 
             if (mouseState.LeftButton == ButtonState.Released && !isWithinProperRow(mouseState, boardFunc) && !boardFunc.friendlySide.Hand.isWithinModifiedPosition(mouseState, card))
             {
+                playManuever(mouseState, card, boardFunc);
                 placingCard = false;
                 clickedInCardBox = false;
                 card.setRegular();

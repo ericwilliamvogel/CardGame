@@ -54,9 +54,10 @@ namespace CardGame
                 card.setColorForRace();
             }
         }
-        public void loadCardImage(Dictionary<int, Texture2D> imageDictionary, Card card)
+        public void loadCardImage(CardImageStorage library, Card card)
         {
-            card.suppTextures.supplements[card.suppTextures.portrait].setTexture(imageDictionary[card.cardProps.identifier]);
+            card.suppTextures.supplements[card.suppTextures.portrait].setTexture(library.cardTextureDictionary[card.cardProps.identifier]);
+            card.setSupplementalTextures(library);
             card.setColorForRace();
         }
         public void modifyCardInteractivity(MouseState mouseState, BoardFunctionality boardFunc)
@@ -150,14 +151,10 @@ namespace CardGame
                         if (mouseState.LeftButton == ButtonState.Pressed && noCardsOnBoardAreSelected(boardFunc))
                         {
                             card.setSelected();
-                            //resetAction(card);
+
                         }
                         break;
                     case Card.SelectState.Selected:
-                        if (mouseState.MiddleButton == ButtonState.Pressed)
-                        {
-                            card.setRegular();
-                        }
                         break;
                 }
             }
@@ -255,7 +252,8 @@ namespace CardGame
                 }
                 else
                 {
-                    xPos = (int)cardsInContainer[Count() - 2].getPosition().X + (int)trueContainerWidth(cardsInContainer[Count() - 2]);
+                    xPos = (int)(getPosition().X + getWidth() / 2);
+                    //xPos = (int)cardsInContainer[Count() - 2].getPosition().X + (int)trueContainerWidth(cardsInContainer[Count() - 2]);
                 }
                 
             }

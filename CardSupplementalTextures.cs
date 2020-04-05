@@ -26,9 +26,10 @@ namespace CardGame
         public readonly int generalSymbol = 13;
         public readonly int armySymbol = 14;
         public readonly int fieldUnitSymbol = 15;
-        public readonly int cardShading = 16;
+        public readonly int manueverSymbol = 16;
+        public readonly int cardShading = 17;
 
-        public int TOTAL = 17;
+        public int TOTAL = 18;
         public List<CardSupplement> supplements;
         public CardSupplementalTextures()
         {
@@ -37,7 +38,6 @@ namespace CardGame
             {
                 supplements.Add(new CardSupplement());
             }
-
 
             supplements[abilityDisplay].setContentName("abilityTexture");
             supplements[selectionIndicator].setContentName("selectedSymbol");
@@ -54,6 +54,7 @@ namespace CardGame
             supplements[generalSymbol].setContentName("generalSymbol");
             supplements[armySymbol].setContentName("armySymbol");
             supplements[fieldUnitSymbol].setContentName("fieldUnitSymbol");
+            supplements[manueverSymbol].setContentName("manueverSymbol");
             supplements[cardShading].setContentName("cardShading");
         }
 
