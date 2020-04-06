@@ -204,7 +204,11 @@ namespace CardGame
         }
         public void NextSelection()
         {
-            selection.Remove(selection[0]);
+            if(SelectionStillActive())
+            {
+                selection.Remove(selection[0]);
+            }
+
         }
         public void resetSelectedCard(BoardFunctionality boardFunc)
         {

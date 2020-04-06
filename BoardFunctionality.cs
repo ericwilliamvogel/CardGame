@@ -76,8 +76,6 @@ namespace CardGame
             BOARDMESSAGE.drawSprite(spriteBatch);
             moveHistory.drawSprite(spriteBatch);
             endGamePopup.drawSprite(spriteBatch);
-            if(cardViewer.selection != null)
-            spriteBatch.DrawString(Game1.spritefont, cardViewer.selection.Count.ToString(), new Vector2(0, 100), Color.Black);
         }
         public void Update(Board board)
         {
@@ -212,8 +210,11 @@ namespace CardGame
             setUpCard(fromCard);
             sendActionToQueue(() => {
                 hideMoveFromEnemyAndDisplay(fromCard, ability);
-                DrawCard(side);
-                finalizeCardInteraction(fromCard, fromCard);
+                for(int i = 0; i < ability.power; i++)
+                {
+                    DrawCard(side);
+                    finalizeCardInteraction(fromCard, fromCard);
+                }
             });
         }
 
@@ -222,9 +223,12 @@ namespace CardGame
             setUpCard(fromCard);
             sendActionToQueue(() => {
                 hideMoveFromEnemyAndDisplay(fromCard, ability);
-                DrawCard(side);
-                DrawCard(side.boardFunc.enemySide);
-                finalizeCardInteraction(fromCard, fromCard);
+                for (int i = 0; i < ability.power; i++)
+                {
+                    DrawCard(side);
+                    DrawCard(side.boardFunc.enemySide);
+                    finalizeCardInteraction(fromCard, fromCard);
+                }
             });
         }
         public void LifeDamage(Card fromCard)
@@ -301,6 +305,16 @@ namespace CardGame
             setUpCard(fromCard);
             sendActionToQueue(() => {
                 LifeDamage(fromCard);
+            });
+        }
+        public void KillTarget(Card fromCard, Ability ability, Card targetCard)
+        {
+            setUpCard(fromCard, targetCard);
+            sendActionToQueue(() => {
+                moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
+                enemySide.boardFunc.moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
+                Kill(enemySide, targetCard.correctRow(enemySide), targetCard);
+                finalizeCardInteraction(fromCard, targetCard);
             });
         }
         public void SpawnCard(Card fromCard, SpawnCard spawn)

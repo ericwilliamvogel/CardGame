@@ -232,27 +232,18 @@ namespace CardGame
                                     else
                                     {
                                         boardFunc.BOARDMESSAGE.addMessage("Cannot fight an Army if a FieldUnit is present on the board!");
+
                                     }
                                     break;
                                 case CardType.General:
-                                    if (boardFunc.enemySide.Rows[Side.FieldUnit].isEmpty() && boardFunc.enemySide.Rows[Side.Armies].isEmpty())
-                                    {
-                                        //i dont think i want soldiers to touch generals. needs to be a spell
-                                        //boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
-                                    }
-                                    else
-                                    {
                                         boardFunc.BOARDMESSAGE.addMessage("A FieldUnit cannot target a General!");
-                                    }
+
                                     break;
                             }
+                            resetIfNoSelection(mouseState, row, card, boardFunc);
                         }
                         
                     
-                    }
-                    else
-                    {
-                        resetIfNoSelection(mouseState, row, card, boardFunc);
                     }
 
                 }
@@ -270,7 +261,7 @@ namespace CardGame
                         boardFunc.BOARDMESSAGE.addMessage("Cannot deal damage to a player if there's:");
                     }
 
-                    clickedInCardBox = false;
+                    resetIfNoSelection(mouseState, row, card, boardFunc);
                 }
 
             }

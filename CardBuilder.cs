@@ -168,7 +168,7 @@ namespace CardGame
                 constructor.setRace(Card.Race.Orc);
                 constructor.setName("Outsourced Weapon");
                 constructor.setRarity(Card.Rarity.Bronze);
-                constructor.addAbility(new TargetDamage(4));
+                constructor.addAbility(new KillTarget());
                 constructor.addAbility(new LifeTargetDamage(2));
             }
         }

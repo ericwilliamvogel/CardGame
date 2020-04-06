@@ -165,6 +165,15 @@ namespace CardGame
             side.boardFunc.sideSetter.initSide(this, side, side.boardFunc);
         }
         
+        public enum Mode
+        {
+            Normal,
+            Developer
+        }
+        public void showDeveloperTools(SpriteBatch spriteBatch)
+        {
+            spriteBatch.DrawString(Game1.spritefont, "Selection count: "+ friendlySide.boardFunc.cardViewer.selection.Count.ToString(), new Vector2(0, 100), Color.Black);
+        }
         public override void drawSprite(SpriteBatch spriteBatch)
         {
             background.drawSprite(spriteBatch);

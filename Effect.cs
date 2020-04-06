@@ -107,6 +107,7 @@ namespace CardGame
                     {
                         INITIALCARD.cardProps.defense += exchangeValue;
                         abilityImplementation(mouseState, boardFunc);
+                        boardFunc.cardViewer.NextSelection();
                     }
                     else
                     {
@@ -120,7 +121,9 @@ namespace CardGame
                 else
                 {
                     INITIALCARD.cardProps.defense += exchangeValue;
+
                     abilityImplementation(mouseState, boardFunc);
+                    boardFunc.cardViewer.NextSelection();
                 }
             }
             else if(INITIALCARD.cardProps.type == CardType.Manuever)
@@ -130,19 +133,18 @@ namespace CardGame
             }
             else
             {
+
                 abilityImplementation(mouseState, boardFunc);
+                boardFunc.cardViewer.NextSelection();
             }
 
 
         }
         public virtual void manueverImplementation(BoardFunctionality boardFunc)
         {
-
                 boardFunc.cardViewer.NextSelection();
                 if (!boardFunc.cardViewer.SelectionStillActive())
                     boardFunc.actionConstructor.moveTo(boardFunc.castManuever, boardFunc.friendlySide.Oblivion, INITIALCARD, boardFunc);
- 
-                
         }
         public virtual void abilityImplementation(MouseState mouseState, BoardFunctionality boardFunc)
         {
@@ -241,12 +243,8 @@ namespace CardGame
 
         public override void abilityImplementation(MouseState mouseState, BoardFunctionality boardFunc)
         {
-            for (int i = 0; i < power; i++)
-            {
-                boardFunc.AbilityBothDrawCard(INITIALCARD, this, boardFunc.friendlySide);
-            }
 
-            //base.useAbility(mouseState, boardFunc);
+            boardFunc.AbilityBothDrawCard(INITIALCARD, this, boardFunc.friendlySide);
         }
 
     }
@@ -278,10 +276,7 @@ namespace CardGame
 
         public override void abilityImplementation(MouseState mouseState, BoardFunctionality boardFunc)
         {
-            for(int i = 0; i < power; i++)
-            {
-                boardFunc.AbilityDrawCard(INITIALCARD, this, boardFunc.friendlySide);
-            }
+            boardFunc.AbilityDrawCard(INITIALCARD, this, boardFunc.friendlySide);
         }
     }
     public class Exhaust : Ability
@@ -373,7 +368,7 @@ namespace CardGame
         }
         public override void abilityImplementation(MouseState mouseState, BoardFunctionality boardFunc)
         {
-            boardFunc.Kill(boardFunc.enemySide, returnSelectedCard(mouseState, boardFunc).correctRow(boardFunc.enemySide), returnSelectedCard(mouseState, boardFunc));
+            boardFunc.KillTarget(INITIALCARD, this, returnSelectedCard(mouseState, boardFunc)); //Kill(boardFunc.enemySide, returnSelectedCard(mouseState, boardFunc).correctRow(boardFunc.enemySide), returnSelectedCard(mouseState, boardFunc));
         }
     }
 

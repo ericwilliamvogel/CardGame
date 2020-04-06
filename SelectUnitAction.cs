@@ -42,7 +42,7 @@ namespace CardGame
                     }
                 }
             }
-            if(mouseState.LeftButton == ButtonState.Released)
+            /*if(mouseState.LeftButton == ButtonState.Released)
             {
                 foreach(FunctionalRow row in side.Rows)
                 {
@@ -54,7 +54,7 @@ namespace CardGame
                         }
                     }
                 }
-            }
+            }*/
         }
         public Card TargetAnyCard(MouseState mouseState, BoardFunctionality boardFunc, bool pressToTarget)
         {
