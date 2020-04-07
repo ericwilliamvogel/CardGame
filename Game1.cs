@@ -42,6 +42,12 @@ namespace CardGame
             this.IsMouseVisible = false;
             MoveHistory.AttackIcon.attackIcon = Content.Load<Texture2D>("fightIcon");
             MoveHistory.TargetIcon.buttonIcon = Content.Load<Texture2D>("targetSymbol");
+            WindowFilling.texture = Content.Load<Texture2D>("windowTile");
+            LeftButton.texture = Content.Load<Texture2D>("rightleftArrow");
+            RightButton.texture = Content.Load<Texture2D>("rightleftArrow");
+            UpButton.texture = Content.Load<Texture2D>("updownArrow");
+            DownButton.texture = Content.Load<Texture2D>("updownArrow");
+            //WindowMoveBar.texture = Content.Load<Texture2D>("moveBar");
             //ClientTCP.instance.Start();
         }
 

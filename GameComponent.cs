@@ -19,19 +19,28 @@ namespace CardGame
         {
             properties = new Properties();
             properties.color = Color.White;
+            offset = new Vector2();
         }
 
         private string contentName;
         public Properties properties;
-
+        public Vector2 offset;
+        public void setOffset(int x, int y)
+        {
+            offset = new Vector2(x, y);
+        }
+        public void setOffset(Vector2 offset)
+        {
+            this.offset = offset;
+        }
         public bool isWithinBox(int x, int y)
         {
             int width = getWidth();
             int height = getHeight();
 
-            if (x > getPosition().X && x < getPosition().X + width)
+            if (x > getPosition().X + offset.X && x < getPosition().X + width + offset.X)
             {
-                if (y > getPosition().Y && y < getPosition().Y + height)
+                if (y > getPosition().Y + offset.Y && y < getPosition().Y + height + offset.Y)
                 {
                     return true;
                 }
@@ -79,13 +88,14 @@ namespace CardGame
         {
             
             if(getTexture() != null)
-            spriteBatch.Draw(getTexture(), getPosition(), null, null, null, getRotation(), getScale() , getColor() * properties.transparency, properties.spriteEffects, 0);
+            spriteBatch.Draw(getTexture(), getPosition() + offset, null, null, null, getRotation(), getScale() , getColor() * properties.transparency, properties.spriteEffects, 0);
         }
 
         public virtual void setPos(int x, int y)
         {
             properties.POS = new Vector2(x, y);
         }
+        
         public virtual void setPos(Vector2 input)
         {
             properties.POS = input;
@@ -167,7 +177,7 @@ namespace CardGame
     {
         public virtual void updateGameComponent() { }
         public virtual void initializeGameComponent() { }
-
+        public virtual void initializeGameComponent(ContentManager content) { }
     }
 
     public class PrimaryComponent : ComponentSkeleton

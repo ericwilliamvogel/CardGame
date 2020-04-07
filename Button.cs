@@ -13,26 +13,57 @@ using Microsoft.Xna.Framework.Input;
 
 namespace CardGame
 {
-
     public class Button : GameComponent
     {
         protected ButtonProperties buttonProperties;
         protected Dictionary<ButtonProperties.State, Color> buttonColor;
         protected Action action;
 
+        int presetCentering = GraphicsSettings.toResolution(20);
+        public float wantedScale = 1f;
+        public Type type = Type.Standard;
 
-        public Button(ContentManager content, Vector2 position) //default
+        int textOffsetX = 0;
+        int textOffsetY = 0;
+
+        public enum Type
         {
-            setSprite(content, "regularButton");
-            buttonProperties = new ButtonProperties();
+            Standard,
+            Hold
+        }
+
+        public void setType(Type type)
+        {
+            this.type = type;
+        }
+        public Button() //only if loading a static image
+        {
             setButtonStateColors();
+            buttonProperties = new ButtonProperties();
+        }
+        public Button(ContentManager content) : this()
+        {
+
+            setSprite(content, "regularButton");
+        }
+        public Button(ContentManager content, Vector2 position) : this(content) //default
+        {
             setGeneralProperties(position);
+        }
+        public Button(ContentManager content,string imagesrc) : this(content)
+        {
+            setSprite(content, imagesrc);
         }
         public Button(ContentManager content, Vector2 position, string imagesrc) : this(content, position)//new image
         {
             setSprite(content, imagesrc);
         }
 
+        public void centerText(int x, int y)
+        {
+            textOffsetX = x;
+            textOffsetY = y;
+        }
         protected void setGeneralProperties(Vector2 position)
         {
 
@@ -57,7 +88,18 @@ namespace CardGame
             }
         }
 
-        public void setAction(Action action)
+        public virtual void addActionToCurrentAction(Action inputAction)
+        {
+            Action currentAction = action;
+            Action newAction = () =>
+            {
+                currentAction();
+                inputAction();
+            };
+            action = newAction;
+        }
+
+        public virtual void setAction(Action action)
         {
             this.action = action;
         }
@@ -65,7 +107,7 @@ namespace CardGame
         {
             action = () => { };
         }
-        public virtual void performAction()
+        public virtual void performAction(MouseState mouseState)
         {
             action();
         }
@@ -81,15 +123,19 @@ namespace CardGame
             
             base.drawSprite(spriteBatch);
             if(buttonProperties.message != null)
-            spriteBatch.DrawString(Game1.spritefont, buttonProperties.message, new Vector2(centerText(getPosition().X), centerText(getPosition().Y)), Color.Black, 0, new Vector2(0, 0), wantedScale * getScale(), SpriteEffects.None, 0);
+            spriteBatch.DrawString(Game1.spritefont, buttonProperties.message, new Vector2(centerText(getPosition().X) + textOffsetX, centerText(getPosition().Y) + textOffsetY), Color.Black, 0, new Vector2(0, 0), wantedScale * getScale(), SpriteEffects.None, 0);
         }
+
 
         protected float centerText(float value)
         {
-            return value + 20;
+            return value + presetCentering;
+        }
+        public void setPresetCentering(int val)
+        {
+            presetCentering = val;
         }
 
-        public float wantedScale = 1f;
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
             try
@@ -127,16 +173,26 @@ namespace CardGame
                     buttonProperties.state = sendActionWhenClicked(mouseState);
                     break;
                 case ButtonProperties.State.ReleaseAndSend:
-                    performAction();
-                    resetButton();
+                    performAction(mouseState);
+                    resetButton(mouseState);
                     break;
             }
 
         }
         
-        protected virtual void resetButton()
+        protected virtual void resetButton(MouseState mouseState)
         {
-            buttonProperties.state = ButtonProperties.State.Waiting;
+            if(type == Type.Standard)
+            {
+                buttonProperties.state = ButtonProperties.State.Waiting;
+            }
+            else
+            {
+                if(mouseState.LeftButton == ButtonState.Released)
+                {
+                    buttonProperties.state = ButtonProperties.State.Waiting;
+                }
+            }
         }
 
         protected virtual ButtonProperties.State waitToActivate()
@@ -157,17 +213,27 @@ namespace CardGame
             return ButtonProperties.State.Waiting;
         }
 
+
         protected virtual ButtonProperties.State sendActionWhenClicked(MouseState mouseState)
         {
-            if (mouseState.LeftButton == ButtonState.Released)
+            if(type == Type.Standard)
+            {
+                if (mouseState.LeftButton == ButtonState.Released)
+                {
+                    return ButtonProperties.State.ReleaseAndSend;
+                }
+                if (!isWithinBox(mouseState.X, mouseState.Y))
+                {
+                    return ButtonProperties.State.Waiting;
+                }
+                return ButtonProperties.State.Press;
+            }
+            else
             {
                 return ButtonProperties.State.ReleaseAndSend;
             }
-            if(!isWithinBox(mouseState.X, mouseState.Y))
-            {
-                return ButtonProperties.State.Waiting;
-            }
-            return ButtonProperties.State.Press;
+
+
         }
 
         protected virtual ButtonProperties.State changeStateIfClicking(MouseState mouseState)
@@ -186,61 +252,5 @@ namespace CardGame
 
     }
 
-    //work on this mayb
-    public class SwitcherButton : Button
-    {
-        private int controller { get; set; }
-        private Action<SwitcherButton> switcherAction;
-
-        public SwitcherButton(ContentManager content, Vector2 position, int desiredController) : base(content, position)
-        {
-            setControllerToSwitch(desiredController);
-            //settitle or something
-        }
-
-        public SwitcherButton(ContentManager content, Vector2 position, string imgSrc, int desiredController) : base(content, position, imgSrc)
-        {
-            setControllerToSwitch(desiredController);
-            //settitle or something
-        }
-
-        public void setSwitcherAction(Action<SwitcherButton> action)
-        {
-            setAction();
-            switcherAction = action;
-        }
-        public override void performAction()
-        {
-            switcherAction(this);
-        }
-        public void setControllerToSwitch(int desiredController)
-        {
-            controller = desiredController;
-        }
-        public int returnComponentToSwitchTo()
-        {
-            return controller;
-        }
-    }
-
-    public class ButtonProperties
-    {
-        public ButtonProperties()
-        {
-            state = State.Inactive;
-        }
-
-        public enum State
-        {
-            Inactive,
-            Waiting,
-            Hover,
-            Press,
-            ReleaseAndSend
-        }
-        public State state { get; set; }
-        public string message { get; set; }
-
-
-    }
+  
 }

@@ -46,17 +46,67 @@ namespace CardGame
         public Card ENEMYSELECTEDCARD;
         public State state = State.Regular;
         public bool showEnemyCard = false;
-
+        public UniqueButtonPopper<UniqueWindow<GameComponent>, GameComponent> historyButton;
+        public UniqueWindow<GameComponent> historyWindow;
+        public UniqueWindow<GameComponent> enemyHistoryWindow;
         public void passDown(CardImageStorage library, CardConstructor constructor)
         {
             cardConstructor = constructor;
             this.library = library;
         }
-
+        public T duplicate<T>(T input)
+        {
+            T item = input;
+            return item;
+        }
         public override void initializeGameComponent(ContentManager content)
         {
-            //cardBuilder = new CardBuilder();
-            //cardConstructor = new CardConstructor();
+            enemyHistoryWindow = new UniqueWindow<GameComponent>(content, 6);
+            //newHistory = duplicate(moveHistory);
+            //newHistory.type = MoveHistory.Type.Previous;
+            enemyHistoryWindow.updateObj(moveHistory);
+            enemyHistoryWindow.setPos(Game1.windowW / 2, Game1.windowH / 2);
+            historyWindow = new UniqueWindow<GameComponent>(content, 6);
+            //historyWindow.setPos(Game1.windowW - GraphicsSettings.toResolution(500), 100);
+            historyButton = new UniqueButtonPopper<UniqueWindow<GameComponent>, GameComponent>(content, historyWindow);
+            historyButton.setSprite(content, "pastMovesButton");
+            historyButton.setButtonText("Past Moves");
+            historyButton.wantedScale = .5f;
+            historyButton.centerText(historyButton.getWidth() / 2 - GraphicsSettings.toResolution(80), historyButton.getHeight() / 2 - GraphicsSettings.toResolution(40));
+            historyButton.updateObj(moveHistory);
+            historyButton.setPos(Game1.windowW - GraphicsSettings.toResolution(500), 0);
+
+            historyWindow.setPos(Game1.windowW - GraphicsSettings.toResolution(500), 100);
+            UpButton upButton = new UpButton();
+            upButton.setTexture(UpButton.texture);
+            upButton.setOffset(historyWindow.getWidth(), 0);
+
+            DownButton downButton = new DownButton();
+            downButton.setTexture(DownButton.texture);
+            downButton.setOffset(historyWindow.getWidth() , upButton.getHeight() * 2);
+
+            LeftButton leftButton = new LeftButton();
+            leftButton.setTexture(LeftButton.texture);
+            leftButton.setOffset(0, historyWindow.getHeight()/2);
+
+            RightButton rightButton = new RightButton();
+            rightButton.setTexture(RightButton.texture);
+            rightButton.setOffset(historyWindow.getWidth(), historyWindow.getHeight() / 2);
+
+            upButton.setAction(()=> {
+                moveHistory.ScrollUp();
+            });
+            downButton.setAction(() => {
+                moveHistory.ScrollDown();
+            });
+            rightButton.setAction();
+            leftButton.setAction();
+
+            historyWindow.addNewComponent(upButton);
+            historyWindow.addNewComponent(downButton);
+            historyWindow.addNewComponent(rightButton);
+            historyWindow.addNewComponent(leftButton);
+
             castManuever.setPos(Game1.windowW - GraphicsSettings.toResolution(400), GraphicsSettings.toResolution(200));
             endGamePopup.initializeGameComponent(content);
             rowFog.setSprite(content, "rowNotRevealed");
@@ -74,11 +124,19 @@ namespace CardGame
             cardDrawer.drawSprite(spriteBatch, this);
             cardViewer.drawSprite(spriteBatch);
             BOARDMESSAGE.drawSprite(spriteBatch);
-            moveHistory.drawSprite(spriteBatch);
+            //moveHistory.drawSprite(spriteBatch);
+            historyButton.drawSprite(spriteBatch);
+            enemyHistoryWindow.drawSprite(spriteBatch);
             endGamePopup.drawSprite(spriteBatch);
         }
+        MoveHistory newHistory;
         public void Update(Board board)
         {
+            //newHistory = duplicate(moveHistory);
+            //newHistory.type = MoveHistory.Type.Previous;
+            //enemyHistoryWindow.updateObj(newHistory);
+            historyButton.updateObj(moveHistory);
+
             boardActions = board.boardActions;
             //moveHistory = board.moveHistory;
             sideSetter.updateSide(board);
@@ -88,7 +146,7 @@ namespace CardGame
             {
                 cardViewer.resetSelectedCard(this);
             }
-            moveHistory.updateGameComponent();
+            //moveHistory.updateGameComponent();
         }
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
@@ -102,6 +160,8 @@ namespace CardGame
                 cardViewer.selection[0](mouseState);
             }
 
+            enemyHistoryWindow.mouseStateLogic(mouseState, content);
+            historyButton.mouseStateLogic(mouseState, content);
 
             endGameIfOver();
         }
@@ -145,6 +205,7 @@ namespace CardGame
         {
             boardActions.AddAction(() =>
            {
+               //enemySide.boardFunc.enemyHistoryWindow.Show();
                moveHistory.storeTurnAndReset();
                enemySide.boardFunc.moveHistory.storeTurnAndReset();
 

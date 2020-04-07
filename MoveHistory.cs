@@ -111,11 +111,9 @@ namespace CardGame
 
                         break;
                     case State.TargetAbility:
-                        //attackIcon.setPos((int)getPosition().X + move.toCard.getWidth() - attackIcon.getWidth() / 2, (int)getPosition().Y + move.fromCard.getHeight() / 2 - attackIcon.getHeight() / 2);
                         move.toCard.setPos((int)getPosition().X + move.toCard.getWidth(), (int)getPosition().Y);
                         move.toCard.updateGameComponent();
                         move.fromCard.setPos(getPosition());
-
                         targetIcon.setPos((int)getPosition().X + move.toCard.getWidth() - targetIcon.getWidth() / 2, (int)getPosition().Y + move.fromCard.getHeight() / 2 - targetIcon.getHeight() / 2);
                         break;
 
@@ -125,7 +123,12 @@ namespace CardGame
 
             }
         }
-
+        public enum Type
+        {
+            Current,
+            Previous
+        }
+        public Type type = Type.Current;
         public List<List<Section>> historicalTurns = new List<List<Section>>();
         public List<Section> turns = new List<Section>();
         public void AddHiddenMove(Card fromCard)
@@ -180,27 +183,133 @@ namespace CardGame
         }
         public void storeTurnAndReset()
         {
+            amountOfTurns++;
             historicalTurns.Add(turns);
             turns = new List<Section>();
         }
+        int amountOfTurns = 0;
+        int selector = 0;
+        int advancer = 0;
         public override void drawSprite(SpriteBatch spriteBatch)
         {
-            foreach(Section section in turns)
+            for (int i = advancer; i < advancer + correctIterationDown(upDownIterator); i++)
             {
-                section.drawSprite(spriteBatch);
+                getCurrentList()[i].drawSprite(spriteBatch);
             }
+        
+
+        }
+        private int IterateSectionsDown(int input, List<Section> list)
+        {
+            if (advancer + input > list.Count )
+            {
+                return correctIterationDown(input - 1);
+            }
+            else
+            {
+                return input;
+            }
+        }
+        private int IterateSectionsUp(int input, List<Section> list)
+        {
+            if (advancer - input < 0)
+            {
+                return correctIterationUp(input - 1);
+            }
+            else
+            {
+                return input;
+            }
+        }
+        private int correctIterationUp(int input)
+        {
+            return IterateSectionsUp(input, getCurrentList());
+        }
+        private int correctIterationDown(int input)
+        {
+            return IterateSectionsDown(input, getCurrentList());
+        }
+        private List<Section> getCurrentList()
+        {
+            if (type == Type.Previous)
+            {
+                return historicalTurns[selector];
+            }
+            else
+            {
+                return turns;
+            }
+        }
+        public int upDownIterator = 4;
+        public void NextTurn()
+        {
+            advancer = 0;
+        }
+        public void PreviousTurn()
+        {
+            advancer = 0;
+        }
+        public void ScrollDown()
+        {
+            if(advancer < getCurrentList().Count - upDownIterator)
+            {
+                advancer += correctIterationDown(upDownIterator);
+            }
+
+        }
+        public void ScrollUp()
+        {
+            if (advancer >= 0)
+            {
+                advancer -= correctIterationUp(upDownIterator);
+            }
+        }
+        public override void setPos(int x, int y)
+        {
+            base.setPos(x, y);
+            if(type == Type.Current)
+            {
+                adjustPositionsInCollection(turns);
+            }
+            else
+            {
+                if (historicalTurns.Count > 1)
+                {
+                    adjustPositionsInCollection(historicalTurns[selector]);
+                }
+            }
+
+
         }
         public override void updateGameComponent()
         {
-            
-            setPos(GraphicsSettings.toResolution(1700), 30);
+            if (type == Type.Current)
+            {
+                adjustPositionsInCollection(turns);
+            }
+            else
+            {
+                if (historicalTurns.Count > 1)
+                {
+                    adjustPositionsInCollection(historicalTurns[selector]);
+                }
+            }
+        }
+
+        public void adjustPositionsInCollection(List<Section> turns)
+        {
             int counter = 0;
             int spacing = GraphicsSettings.toResolution(150);
+            int xOffset = GraphicsSettings.toResolution(25);
             foreach (Section section in turns)
             {
+                section.setPos((int)getPosition().X + xOffset, (int)getPosition().Y + counter * spacing);
                 section.updateGameComponent();
-                section.setPos((int)getPosition().X, counter * spacing);
                 counter++;
+                if (counter > 3)
+                {
+                    counter = 0;
+                }
             }
         }
     }

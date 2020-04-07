@@ -125,10 +125,8 @@ namespace CardGame
             if (!endFirstDec && boardFunc.boardActions.actions.Count < 1)
             {
                 playArmies(boardFunc);
-
                 generalAbiltiies(mouseState, boardFunc);
                 attackIfBeneficial(boardFunc);
-                //throw new
                 endFirstDec = true;
             }
             if(boardFunc.boardActions.actions.Count < 1)
