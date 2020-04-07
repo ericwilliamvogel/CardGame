@@ -99,8 +99,12 @@ namespace CardGame
             downButton.setAction(() => {
                 moveHistory.ScrollDown();
             });
-            rightButton.setAction();
-            leftButton.setAction();
+            rightButton.setAction(() => {
+                moveHistory.NextTurn();
+            });
+            leftButton.setAction(() => {
+                moveHistory.PreviousTurn();
+            });
 
             historyWindow.addNewComponent(upButton);
             historyWindow.addNewComponent(downButton);

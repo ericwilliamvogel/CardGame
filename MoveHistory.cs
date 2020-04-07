@@ -16,7 +16,15 @@ namespace CardGame
         }
         public class TargetIcon : GameComponent
         {
-            public static Texture2D buttonIcon;
+            public static Texture2D targetIcon;
+        }
+        public class CastIcon : GameComponent
+        {
+            public static Texture2D castIcon;
+        }
+        public class PlayIcon : GameComponent
+        {
+            public static Texture2D playIcon;
         }
         public class Move : CardContainer
         {
@@ -26,8 +34,10 @@ namespace CardGame
         }
         public class Section : GameComponent
         {
-            Move move;
+            public Move move;
             AttackIcon attackIcon;
+            CastIcon castIcon;
+            PlayIcon playIcon;
             State state;
             TargetIcon targetIcon;
 
@@ -35,7 +45,8 @@ namespace CardGame
             {
                 Attack,
                 TargetAbility,
-                SoloAbility
+                SoloAbility,
+                PlayCard
             };
 
             public Section(Move move, State state)
@@ -48,16 +59,16 @@ namespace CardGame
                         attackIcon.setTexture(AttackIcon.attackIcon);
                         break;
                     case State.SoloAbility:
-                        if(move.fromCard.playState!=Card.PlayState.Hidden)
-                        {
-                            targetIcon = new TargetIcon();
-                            targetIcon.setTexture(TargetIcon.buttonIcon);
-                        }
-
+                        castIcon = new CastIcon();
+                        castIcon.setTexture(CastIcon.castIcon);
                         break;
                     case State.TargetAbility:
                         targetIcon = new TargetIcon();
-                        targetIcon.setTexture(TargetIcon.buttonIcon);
+                        targetIcon.setTexture(TargetIcon.targetIcon);
+                        break;
+                    case State.PlayCard:
+                        playIcon = new PlayIcon();
+                        playIcon.setTexture(PlayIcon.playIcon);
                         break;
                 }
 
@@ -81,6 +92,7 @@ namespace CardGame
                         {
                             spriteBatch.DrawString(Game1.spritefont, move.ability.exchangeValue.ToString(), new Vector2(move.fromCard.getPosition().X + move.fromCard.getWidth() / 2 - adjustToCenter, move.fromCard.getPosition().Y + move.fromCard.getHeight() / 2 - adjustToCenter), Color.White, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
                         }
+                        castIcon.drawSprite(spriteBatch);
                         break;
                     case State.TargetAbility:
 
@@ -88,6 +100,9 @@ namespace CardGame
                         if(move.fromCard.cardProps.type != CardType.Manuever)
                         spriteBatch.DrawString(Game1.spritefont, move.ability.exchangeValue.ToString(), new Vector2(move.fromCard.getPosition().X + move.fromCard.getWidth() / 2 - adjustToCenter, move.fromCard.getPosition().Y + move.fromCard.getHeight() / 2 - adjustToCenter), Color.White, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
                         targetIcon.drawSprite(spriteBatch);
+                        break;
+                    case State.PlayCard:
+                        playIcon.drawSprite(spriteBatch);
                         break;
                 }
             }
@@ -106,8 +121,8 @@ namespace CardGame
                         break;
                     case State.SoloAbility:
                         move.fromCard.setPos((int)(getPosition().X + move.fromCard.getWidth() / 2), (int)getPosition().Y);
-                        if(move.fromCard.playState != Card.PlayState.Hidden)
-                        targetIcon.setPos((int)getPosition().X + move.fromCard.getWidth() - targetIcon.getWidth() / 2, (int)getPosition().Y + move.fromCard.getHeight() / 2 - targetIcon.getHeight() / 2);
+                        //if(move.fromCard.playState != Card.PlayState.Hidden)
+                        castIcon.setPos((int)move.fromCard.getPosition().X + move.fromCard.getWidth() - castIcon.getWidth() / 2, (int)move.fromCard.getPosition().Y + move.fromCard.getHeight() / 2 - castIcon.getHeight() / 2);
 
                         break;
                     case State.TargetAbility:
@@ -116,7 +131,10 @@ namespace CardGame
                         move.fromCard.setPos(getPosition());
                         targetIcon.setPos((int)getPosition().X + move.toCard.getWidth() - targetIcon.getWidth() / 2, (int)getPosition().Y + move.fromCard.getHeight() / 2 - targetIcon.getHeight() / 2);
                         break;
-
+                    case State.PlayCard:
+                        move.fromCard.setPos((int)(getPosition().X + move.fromCard.getWidth() / 2), (int)getPosition().Y);
+                        playIcon.setPos((int)move.fromCard.getPosition().X + move.fromCard.getWidth() - playIcon.getWidth() / 2, (int)move.fromCard.getPosition().Y + move.fromCard.getHeight() / 2 - playIcon.getHeight() / 2);
+                        break;
                 }
 
                 move.fromCard.updateGameComponent();
@@ -192,11 +210,43 @@ namespace CardGame
         int advancer = 0;
         public override void drawSprite(SpriteBatch spriteBatch)
         {
+            int counter = 0;
             for (int i = advancer; i < advancer + correctIterationDown(upDownIterator); i++)
             {
                 getCurrentList()[i].drawSprite(spriteBatch);
+                counter++;
             }
-        
+            if(counter ==0 )
+            {
+                int offset = GraphicsSettings.toResolution(20);
+                spriteBatch.DrawString(Game1.spritefont, "0 moves", new Vector2(getPosition().X + offset, getPosition().Y + offset), Color.Black);
+            }
+
+            if(type == Type.Current)
+            {
+                int offset = GraphicsSettings.toResolution(20);
+                spriteBatch.DrawString(Game1.spritefont, "Current turn", new Vector2(getPosition().X, getPosition().Y - offset*5), Color.Black * .5f);
+            }
+            else
+            {
+
+                string whoseTurn = "Kappa";
+                if (selector == 0)
+                {
+                    whoseTurn = "My turn";
+                }
+                if (selector % 2 == 0)
+                {
+                    whoseTurn = "My turn";
+                }
+                else
+                {
+                    whoseTurn = "Enemy turn";
+                }
+                int offset = GraphicsSettings.toResolution(20);
+                spriteBatch.DrawString(Game1.spritefont, whoseTurn, new Vector2(getPosition().X, getPosition().Y - offset * 5), Color.Black* .5f);
+            }
+
 
         }
         private int IterateSectionsDown(int input, List<Section> list)
@@ -244,10 +294,35 @@ namespace CardGame
         public void NextTurn()
         {
             advancer = 0;
+
+            if(type == Type.Current)
+            {
+                //can't go into future
+            }
+            else if (selector + 1 <= historicalTurns.Count - 1)
+            {
+                selector += 1;
+            }
+            else
+                type = Type.Current;
+
+
         }
         public void PreviousTurn()
         {
             advancer = 0;
+            if(type == Type.Current && historicalTurns.Count > 0)
+            {
+                type = Type.Previous;
+                selector = historicalTurns.Count - 1;
+            }
+            else
+            {
+                if(selector - 1 >= 0)
+                {
+                    selector -= 1;
+                }
+            }
         }
         public void ScrollDown()
         {

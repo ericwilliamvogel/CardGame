@@ -41,7 +41,9 @@ namespace CardGame
             componentManager.adjustSettingsOnStartup(graphics);
             this.IsMouseVisible = false;
             MoveHistory.AttackIcon.attackIcon = Content.Load<Texture2D>("fightIcon");
-            MoveHistory.TargetIcon.buttonIcon = Content.Load<Texture2D>("targetSymbol");
+            MoveHistory.TargetIcon.targetIcon = Content.Load<Texture2D>("targetSymbol");
+            MoveHistory.CastIcon.castIcon = Content.Load<Texture2D>("castSymbol");
+            MoveHistory.PlayIcon.playIcon = Content.Load<Texture2D>("playSymbol");
             WindowFilling.texture = Content.Load<Texture2D>("windowTile");
             LeftButton.texture = Content.Load<Texture2D>("rightleftArrow");
             RightButton.texture = Content.Load<Texture2D>("rightleftArrow");
