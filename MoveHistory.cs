@@ -88,7 +88,7 @@ namespace CardGame
                         attackIcon.drawSprite(spriteBatch);
                         break;
                     case State.SoloAbility:
-                        if (move.fromCard.playState != Card.PlayState.Hidden && move.fromCard.cardProps.type != CardType.Manuever)
+                        if (move.fromCard.playState != PlayState.Hidden && move.fromCard.cardProps.type != CardType.Manuever)
                         {
                             spriteBatch.DrawString(Game1.spritefont, move.ability.exchangeValue.ToString(), new Vector2(move.fromCard.getPosition().X + move.fromCard.getWidth() / 2 - adjustToCenter, move.fromCard.getPosition().Y + move.fromCard.getHeight() / 2 - adjustToCenter), Color.White, 0, new Vector2(0, 0), getScale(), SpriteEffects.None, 0);
                         }
@@ -152,7 +152,7 @@ namespace CardGame
         public void AddHiddenMove(Card fromCard)
         {
             Move move = setMove(fromCard);
-            move.fromCard.playState = Card.PlayState.Hidden;
+            move.fromCard.playState = PlayState.Hidden;
             turns.Add(new Section(move, Section.State.SoloAbility));
         }
         public void AddNewAttackMove(Card fromCard, Card toCard)
@@ -230,7 +230,7 @@ namespace CardGame
             else
             {
 
-                string whoseTurn = "Kappa";
+                string whoseTurn = "not loaded";
                 if (selector == 0)
                 {
                     whoseTurn = "My turn";

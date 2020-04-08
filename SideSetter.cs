@@ -36,8 +36,8 @@ namespace CardGame
             resetAttributes(boardFunc.enemySide);
             resetFog(boardFunc.enemySide);
             resetFog(boardFunc.friendlySide);
-            boardFunc.enemySide.Resources = new List<Card.Race>();
-            boardFunc.friendlySide.Resources = new List<Card.Race>();
+            boardFunc.enemySide.Resources = new List<Race>();
+            boardFunc.friendlySide.Resources = new List<Race>();
             side.canPlayArmy = true;
         }
         public void resetAttributes(Side side)

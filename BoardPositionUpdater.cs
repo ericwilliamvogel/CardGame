@@ -39,7 +39,7 @@ namespace CardGame
         {
             foreach (Card card in container.cardsInContainer)
             {
-                if(card.selectState == Card.SelectState.Selected)
+                if(card.selectState == SelectState.Selected)
                 card.setRegular();
             }
         }
@@ -49,7 +49,7 @@ namespace CardGame
             {
                 card.setPos(side.Deck.getPosition());
                 scaleToBoard(card);
-                card.playState = Card.PlayState.Hidden;
+                card.playState = PlayState.Hidden;
             }
         }
         private void updateCastingPosition(BoardFunctionality boardFunc)
@@ -58,7 +58,7 @@ namespace CardGame
             {
                 card.setPos(boardFunc.castManuever.getPosition());
                 scaleToCast(card);
-                card.playState = Card.PlayState.Revealed;
+                card.playState = PlayState.Revealed;
             }
         }
         private void setHandPositions(Side side)

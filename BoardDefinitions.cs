@@ -54,7 +54,7 @@ namespace CardGame
                         if (!resource.cardProps.exhausted)
                             otherAvailableResources.Add(resource);
                     }
-                    foreach (Card.Race cardResource in card.cardProps.cost.raceCost)
+                    foreach (Race cardResource in card.cardProps.cost.raceCost)
                     {
                         bool check = false;
                         foreach (Card armyCard in side.Rows[Side.Armies].cardsInContainer)
@@ -108,12 +108,12 @@ namespace CardGame
         {
             if (card.cardProps.cost.raceCost != null)
             {
-                List<Card.Race> deductedResources = new List<Card.Race>();
+                List<Race> deductedResources = new List<Race>();
 
-                foreach (Card.Race cardResource in card.cardProps.cost.raceCost)
+                foreach (Race cardResource in card.cardProps.cost.raceCost)
                 {
                     bool check = false;
-                    foreach (Card.Race resource in side.Resources)
+                    foreach (Race resource in side.Resources)
                     {
                         if (cardResource == resource && check == false)
                         {
@@ -130,7 +130,7 @@ namespace CardGame
                 }
                 else
                 {
-                    foreach (Card.Race resource in deductedResources)
+                    foreach (Race resource in deductedResources)
                     {
                         side.Resources.Remove(resource);
 
@@ -157,6 +157,13 @@ namespace CardGame
             if(card.cardProps.type != CardType.Manuever)
             {
                 boardFunc.actionConstructor.moveTo(side.Hand, card.correctRow(side), card, boardFunc);
+                foreach (Effect effect in card.cardProps.effects)
+                {
+                    if (effect.trigger == Effect.Trigger.OnEnterPlay)
+                    {
+                        assignAbilityToNextSelection(card, effect.ability, boardFunc);
+                    }
+                }
             }
 
 
@@ -166,17 +173,11 @@ namespace CardGame
             }
             else if (card.cardProps.type == CardType.Manuever)
             {
-                ///<summary>
-                ///
-                /// make sure this works!~
-                /// 
-                /// 
-                /// </summary>
                 boardFunc.actionConstructor.moveTo(side.Hand, boardFunc.castManuever, card, boardFunc);
                 int counter = 0;
                 foreach(Ability ability in card.cardProps.abilities)
                 {
-                    assignAbilityToNextSelection(card, counter, boardFunc);
+                    assignAbilityToNextSelection(card, ability, boardFunc);
                     counter++;
                 }
 
@@ -187,16 +188,17 @@ namespace CardGame
             }
         }
 
-        private void assignAbilityToNextSelection(Card card, int selector, BoardFunctionality boardFunc)
+        //changed from int selector to ability, should work fine. If not can revert back this code to 4/7/2020 on github
+        public void assignAbilityToNextSelection(Card card, Ability ability, BoardFunctionality boardFunc)
         {
             Action<MouseState> setSelection = (MouseState mouseState) => {
-                card.cardProps.abilities[selector].setTarget();
-                card.cardProps.abilities[selector].activateAbilityOnSelection(mouseState, boardFunc);
-                boardFunc.cardViewer.resetCardSelectionOnRightClick(mouseState, boardFunc);
+                ability.setTarget();
+                ability.activateAbilityOnSelection(mouseState, boardFunc);
                 if (mouseState.RightButton == ButtonState.Pressed)
                 {
-                    boardFunc.actionConstructor.moveTo(boardFunc.castManuever, boardFunc.friendlySide.Hand, card, boardFunc);
-                    boardFunc.cardViewer.hardResetSelection(boardFunc);
+                    MouseTransformer.Set(MouseTransformer.State.Reg);
+                    boardFunc.cardViewer.NextSelection();
+                    
                 }
             };
             boardFunc.cardViewer.setSelectionState(setSelection, card, boardFunc);

@@ -27,6 +27,9 @@ namespace CardGame
                     button.drawSprite(spriteBatch);
                 }
             }
+
+            if(SelectionStillActive())
+            spriteBatch.DrawString(Game1.spritefont, selection.Count.ToString(), new Vector2(0, 200), Color.Black);
         }
         public void updateButtonsOnPopup(MouseState mouseState, ContentManager content)
         {
@@ -158,9 +161,9 @@ namespace CardGame
             boardFunc.state = State.Selection;
             createButtonsOnView = false;
             selection.Add(action);
-            resetSelectedCard(boardFunc);
-            card.setRegular();
-            boardFunc.boardPosLogic.updateBoard(boardFunc);
+            //resetSelectedCard(boardFunc);
+            //card.setRegular();
+            //boardFunc.boardPosLogic.updateBoard(boardFunc);
             abilityButtons = new List<Button>();
         }
         private void showCardFullSizeCenterScreen(Card card, BoardFunctionality boardFunc)

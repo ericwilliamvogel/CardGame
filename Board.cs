@@ -116,10 +116,10 @@ namespace CardGame
         }
         private void initAllComponents()
         {
-            unanimousToken = new Token(Card.Race.Unanimous);
-            elfToken = new Token(Card.Race.Elf);
-            orcToken = new Token(Card.Race.Orc);
-            humanToken = new Token(Card.Race.Human);
+            unanimousToken = new Token(Race.Unanimous);
+            elfToken = new Token(Race.Elf);
+            orcToken = new Token(Race.Orc);
+            humanToken = new Token(Race.Human);
             lifeTotal = new List<LifeTotal>();
             oblivionHolder = new List<StackPlaceholder>();
             deckHolder = new List<StackPlaceholder>();
@@ -210,8 +210,8 @@ namespace CardGame
         bool handHidden;
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
         {
-            setContainerPlayState(friendlySide.Hand, Card.PlayState.Revealed);
-            setContainerPlayState(enemySide.Hand, Card.PlayState.Hidden);
+            setContainerPlayState(friendlySide.Hand, PlayState.Revealed);
+            setContainerPlayState(enemySide.Hand, PlayState.Hidden);
             foreach (Row row in rows)
             {
                 row.mouseStateLogic(mouseState, content);
@@ -257,7 +257,7 @@ namespace CardGame
             button.mouseStateLogic(mouseState, content);
         }
 
-        private void setContainerPlayState(CardContainer container, Card.PlayState playState)
+        private void setContainerPlayState(CardContainer container, PlayState playState)
         {
             foreach (Card card in container.cardsInContainer)
             {

@@ -14,7 +14,7 @@ namespace CardGame
             Player = player;
             Deck = new Deck();
             Rows = new FunctionalRow[MaxRows];
-            Resources = new List<Card.Race>();
+            Resources = new List<Race>();
             Rows[General] = new FunctionalRow(CardType.General);
             Rows[General].setVisibility(false);
             Rows[Armies] = new ArmyRow(CardType.Army);
@@ -39,7 +39,7 @@ namespace CardGame
         public static int MaxRows = 3;
         public int LifeTotal = 0;
         private int SetLife = 25;
-        public List<Card.Race> Resources;
+        public List<Race> Resources;
         public Hand Hand;
         public CardContainer Oblivion;
     }

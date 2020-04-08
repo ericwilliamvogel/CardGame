@@ -159,10 +159,7 @@ namespace CardGame
                 friendlySide.Player.decide(mouseState, content, this);
 
             }
-            if (cardViewer.SelectionStillActive())
-            {
-                cardViewer.selection[0](mouseState);
-            }
+
 
             enemyHistoryWindow.mouseStateLogic(mouseState, content);
             historyButton.mouseStateLogic(mouseState, content);
@@ -301,7 +298,7 @@ namespace CardGame
             setUpCard(fromCard);
             sendActionToQueue(() => {
                 Card placeholder = duplicate(fromCard);
-                placeholder.playState = Card.PlayState.Hidden;
+                placeholder.playState = PlayState.Hidden;
                 moveHistory.AddNewAttackMove(duplicate(fromCard), placeholder);
                 enemySide.boardFunc.moveHistory.AddNewAttackMove(duplicate(fromCard), placeholder);
                 boardDef.dealPlayerDamage(fromCard, this);
@@ -314,7 +311,7 @@ namespace CardGame
             setUpCard(fromCard);
             sendActionToQueue(() => {
                 Card placeholder = duplicate(fromCard);
-                placeholder.playState = Card.PlayState.Hidden;
+                placeholder.playState = PlayState.Hidden;
                 moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, placeholder);
                 enemySide.boardFunc.moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, placeholder);
                 boardDef.dealPlayerDamage(fromCard, ability, this);
@@ -396,11 +393,20 @@ namespace CardGame
         {
             setUpCard(card, otherCard);
             sendActionToQueue(() => {
+
                 moveHistory.AddNewAttackMove(duplicate(card), duplicate(otherCard));
                 enemySide.boardFunc.moveHistory.AddNewAttackMove(duplicate(card), duplicate(otherCard));
                 boardDef.deductAttributesAndDecideWinner(card, otherCard);
                 finalizeCardInteraction(card, otherCard);
+
             }, 30);
+            foreach (Effect effect in card.cardProps.effects)
+            {
+                if (effect.trigger == Effect.Trigger.OnAttack)
+                {
+                    boardDef.assignAbilityToNextSelection(card, effect.ability, this);
+                }
+            }
         }
 
         private void sendActionToQueue(Action action, int waitTime)
@@ -493,6 +499,7 @@ namespace CardGame
         public void Kill(Side side, FunctionalRow row, Card card)
         {
             actionConstructor.moveTo(row, side.Oblivion, card, this);
+
         }
     }
     

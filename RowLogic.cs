@@ -42,12 +42,6 @@ namespace CardGame
                 }
             }
         }
-        public void fieldLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc)
-        {
-
-
-
-        }
     }
     public abstract class RowLogic
     {
@@ -94,13 +88,17 @@ namespace CardGame
                     }
                 }
 
+                /*if (boardFunc.state == BoardFunctionality.State.Regular)
+                {
+                    viewLogic(mouseState, row, card, boardFunc);
+                }*/
             }
         }
         public virtual void clickAndHold()
         {
 
         }
-        public virtual void viewLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc)
+        public void viewLogic(MouseState mouseState, FunctionalRow row, Card card, BoardFunctionality boardFunc)
         {
             if (mouseState.LeftButton == ButtonState.Pressed && row.isWithinModifiedPosition(mouseState, card))
             {
@@ -157,31 +155,9 @@ namespace CardGame
         }
         public override void setCardToView(MouseState mouseState, FunctionalRow row, BoardFunctionality boardFunc, bool friendly)
         {
+            base.setCardToView(mouseState, row, boardFunc, friendly);
             foreach (Card card in row.cardsInContainer)
             {
-                if (card.isSelected() && !card.cardProps.exhausted)
-                {
-                    if (friendly)
-                    {
-                        boardFunc.SELECTEDCARD = card;
-                    }
-
-                    if (!friendly)
-                    {
-                        boardFunc.ENEMYSELECTEDCARD = card;
-                    }
-
-
-                    if (boardFunc.state == BoardFunctionality.State.Regular)
-                    {
-                        viewLogic(mouseState, row, card, boardFunc);
-                    }
-                    else
-                    {
-                        boardFunc.cardViewer.viewCardWithAbilities(mouseState, card, boardFunc);
-                    }
-                }
-
                 if(friendly)
                 fieldLogic(mouseState, row, card, boardFunc);
             }
@@ -263,7 +239,7 @@ namespace CardGame
 
                     resetIfNoSelection(mouseState, row, card, boardFunc);
                 }
-
+                resetIfNoSelection(mouseState, row, card, boardFunc);
             }
         }
     }

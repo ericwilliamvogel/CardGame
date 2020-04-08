@@ -32,7 +32,7 @@ namespace CardGame
             card.setPower(power);
             card.cardProps.initialPower = power;
         }
-        public void setRarity(Card.Rarity rarity)
+        public void setRarity(Rarity rarity)
         {
             card.rarity = rarity;
         }
@@ -44,12 +44,13 @@ namespace CardGame
             card.cardProps.aiCalcDefense = defense;
 
         }
-        public void setRace(Card.Race race)
+        public void setRace(Race race)
         {
             card.race = race;
         }
         public void addEffect(Effect effect)
         {
+            effect.ability.setCard(card);
             card.cardProps.effects.Add(effect);
         }
         public void addAbility(Ability ability)

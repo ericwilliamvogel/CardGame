@@ -56,7 +56,7 @@ namespace CardGame
 
             foreach (FunctionalRow row in boardFunc.enemySide.Rows)
             {
-                if (row.playState != Card.PlayState.Hidden)
+                if (row.playState != PlayState.Hidden)
                 {
                     row.revealCardInContainer();
                 }
