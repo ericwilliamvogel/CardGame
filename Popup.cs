@@ -15,44 +15,39 @@ namespace CardGame
     public class Popup : PrimaryComponent
     {
         Sprite popupSprite;
-        public bool end = false;
         string buttonTitle;
         int mapToSelect;
-        public Popup(string buttonText, int switchToThisMap)
+        bool reveal;
+        public Popup(int switchToThisMap)
         {
             mapToSelect = switchToThisMap;
-            buttonTitle = buttonText;
-
         }
 
         public override void drawSprite(SpriteBatch spriteBatch)
         {
-            if (end == true)
+            if(reveal)
             {
-                spriteBatch.Draw(popupSprite.getLoadedTexture(), new Vector2(Game1.windowW / 2 - popupSprite.getTextureParamaters().X / 2, Game1.windowH / 2 - popupSprite.getTextureParamaters().Y / 2), Color.Green);
+                spriteBatch.Draw(popupSprite.getLoadedTexture(), new Vector2(Game1.windowW / 2 - popupSprite.getTextureParamaters().X / 2, Game1.windowH / 2 - popupSprite.getTextureParamaters().Y / 2), Color.White);
             }
+            
         }
 
         public override void initializeGameComponent(ContentManager content)
         {
             popupSprite = new Sprite(content, "popup");
             switcherButtons = new List<SwitcherButton>();
-            switcherButtons.Add(new SwitcherButton(content, new Vector2(Game1.windowW / 2 - 100, Game1.windowH / 2 - 100), mapToSelect));
+            switcherButtons.Add(new SwitcherButton(content, new Vector2(-300, -300), "secondButtonTexture",mapToSelect));
+            if(switcherButtons[0].getTexture() == null)
+            {
+                throw new Exception("switcher didn't load");
+            }
+            switcherButtons[0].setButtonText("Continue");
         }
 
-        public override void mouseStateLogic(MouseState mouseState, ContentManager content)
+        public void SetPopup()
         {
-
-        }
-
-        public override void unloadGameComponent()
-        {
-
-        }
-
-        public override void updateGameComponent(ContentManager content)
-        {
-
+            switcherButtons[0].setPos(Game1.windowW / 2 - switcherButtons[0].getWidth() / 2, Game1.windowH / 2 - switcherButtons[0].getHeight() / 2);
+            reveal = true;
         }
     }
 }
