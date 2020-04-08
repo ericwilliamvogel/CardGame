@@ -133,7 +133,7 @@ namespace CardGame
             {
                 switch (card.selectState)
                 {
-                    case Card.SelectState.Regular:
+                    case SelectState.Regular:
                         if (isWithinModifiedPosition(mouseState, card))
                         {
                             card.setHovered();
@@ -141,7 +141,7 @@ namespace CardGame
                         }
 
                         break;
-                    case Card.SelectState.Hovered:
+                    case SelectState.Hovered:
                         if (!isWithinModifiedPosition(mouseState, card))
                         {
                             card.setRegular();
@@ -154,7 +154,7 @@ namespace CardGame
 
                         }
                         break;
-                    case Card.SelectState.Selected:
+                    case SelectState.Selected:
                         break;
                 }
             }
@@ -216,14 +216,14 @@ namespace CardGame
             return cardsInContainer.Count;
         }
 
-        public Card.PlayState playState = Card.PlayState.Revealed;
+        public PlayState playState = PlayState.Revealed;
         public void revealCardInContainer()
         {
             if(Count()>0)
             {
                 foreach(Card card in cardsInContainer)
                 {
-                    card.playState = Card.PlayState.Revealed;
+                    card.playState = PlayState.Revealed;
                 }
             }
         }

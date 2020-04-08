@@ -10,8 +10,6 @@ namespace CardGame
     public class Deck : CardContainer
     {
 
-
-
         public void KidsShuffle()
         {
             int numberOfPiles = 10;

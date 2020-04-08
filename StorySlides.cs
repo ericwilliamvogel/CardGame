@@ -60,7 +60,7 @@ namespace CardGame
         {
             setBackground("blueBackground");
 
-            popup = new Popup("To Battle", 1);
+            //popup = new Popup("To Battle", 1);
             background = new Sprite(content, backgroundSelector);
             textBox = new Sprite(content, "textBackground");
             foreach (Slide slide in slides)
@@ -110,14 +110,14 @@ namespace CardGame
 
         private void throwPopup()
         {
-            if (popup.end == false)
+            /*if (popup.end == false)
             {
                 if (slideController == slides.Count - 1)
                 {
                     switcherButtons = popup.switcherButtons;
                     popup.end = true;
                 }
-            }
+            }*/
 
         }
     }

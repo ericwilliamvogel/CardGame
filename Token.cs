@@ -12,8 +12,8 @@ namespace CardGame
     public class Token : GameComponent
     {
         public int resources;
-        public Card.Race race;
-        public Token(Card.Race race)
+        public Race race;
+        public Token(Race race)
         {
             this.race = race;
         }
@@ -26,7 +26,7 @@ namespace CardGame
         public void adjustResourceValue(Side side)
         {
             int x = 0;
-            foreach (Card.Race resource in side.Resources)
+            foreach (Race resource in side.Resources)
             {
                 if (resource == race)
                 {
