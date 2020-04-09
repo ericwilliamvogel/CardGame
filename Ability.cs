@@ -60,17 +60,32 @@ namespace CardGame
             if (name == null || name == "")
                 name = getTrueName();
         }
+
+
+        public enum Req
+        {
+            ExhaustRequired,
+            ExhaustExempt
+        }
+        public Req PreReq = Req.ExhaustRequired;
+        public Req PostReq = Req.ExhaustRequired;
         public virtual void activateAbilityOnSelection(MouseState mouseState, BoardFunctionality boardFunc)
         {
-            if (INITIALCARD.cardProps.exhausted == false && clickedInAbilityBox == false)
+            if (INITIALCARD.cardProps.exhausted == false && clickedInAbilityBox == false && PreReq == Req.ExhaustRequired)
             {
-
                 boardFunc.cardViewer.resetCardSelectionOnRightClick(mouseState, boardFunc);
                 useAbility(mouseState, boardFunc);
                 clickedInAbilityBox = true;
                 resetAllCards(boardFunc);
             }
             else if (INITIALCARD.cardProps.type == CardType.Manuever)
+            {
+                boardFunc.cardViewer.resetCardSelectionOnRightClick(mouseState, boardFunc);
+                useAbility(mouseState, boardFunc);
+                clickedInAbilityBox = true;
+                resetAllCards(boardFunc);
+            }
+            else if(PreReq == Req.ExhaustExempt)
             {
                 boardFunc.cardViewer.resetCardSelectionOnRightClick(mouseState, boardFunc);
                 useAbility(mouseState, boardFunc);

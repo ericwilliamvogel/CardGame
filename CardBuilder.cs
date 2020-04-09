@@ -148,7 +148,7 @@ namespace CardGame
                 constructor.setRarity(Rarity.Bronze);
                 constructor.setName("Spawned");
                 constructor.addAbility(new TargetDamage(1));
-                constructor.addEffect(new Effect(new Reveal(), Effect.Trigger.OnEnterPlay));
+                constructor.addEffect(new Effect(new Reveal(), Effect.Trigger.OnTurnStart));
                 constructor.addEffect(new Effect(new CreateSpell(10, "a copy of this."), Effect.Trigger.OnAttack));
             }
             else if (identifier == 11)

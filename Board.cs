@@ -45,6 +45,7 @@ namespace CardGame
         Player player1;
         Player player2;
         public MoveHistory moveHistory = new MoveHistory();
+
         public override void initializeGameComponent(ContentManager content)
         {
             //moveHistory = new MoveHistory();

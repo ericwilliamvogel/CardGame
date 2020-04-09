@@ -155,6 +155,12 @@ namespace CardGame
             move.fromCard.playState = PlayState.Hidden;
             turns.Add(new Section(move, Section.State.SoloAbility));
         }
+        public void AddHiddenPlayCardMove(Card fromCard)
+        {
+            Move move = setMove(fromCard);
+            move.fromCard.playState = PlayState.Hidden;
+            turns.Add(new Section(move, Section.State.PlayCard));
+        }
         public void AddNewAttackMove(Card fromCard, Card toCard)
         {
             //add an attack symbol
@@ -170,6 +176,11 @@ namespace CardGame
         {
             Move move = setMove(fromCard, ability);
             turns.Add(new Section(move, Section.State.SoloAbility));
+        }
+        public void AddPlayCardMove(Card fromCard)
+        {
+            Move move = setMove(fromCard);
+            turns.Add(new Section(move, Section.State.PlayCard));
         }
         private Move setMove(Card fromCard, Ability ability, Card toCard)
         {

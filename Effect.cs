@@ -25,7 +25,8 @@ namespace CardGame
         {
             this.trigger = trigger;
             this.ability = ability;
-            
+            ability.PreReq = Ability.Req.ExhaustExempt;
+            ability.PostReq = Ability.Req.ExhaustExempt;
         }
         public string getName()
         {
@@ -51,7 +52,7 @@ namespace CardGame
         {
             //need to fix the turn overlap w/ AI. maybe async?
             //OnTurnStart,
-            //OnYourTurnStart,
+            OnTurnStart,
             OnAttack,
             //OnDefense, //must be nontargeted / passive ability
             //OnBaseHit,

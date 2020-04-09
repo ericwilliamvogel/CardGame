@@ -196,9 +196,24 @@ namespace CardGame
         }
         public void StartTurn(Side side)
         {
+
             side.Player.ResetPlayer();
             DrawCard(side);
             sideSetter.resetSide(side, this);
+            foreach(FunctionalRow row in friendlySide.Rows)
+            {
+                foreach(Card card in row.cardsInContainer)
+                {
+                    foreach (Effect effect in card.cardProps.effects)
+                    {
+                        if (effect.trigger == Effect.Trigger.OnTurnStart)
+                        {
+                            boardDef.assignAbilityToNextSelection(card, effect.ability, this);
+                        }
+                    }
+                }
+            }
+
         }
         
         
@@ -263,7 +278,7 @@ namespace CardGame
             sendActionToQueue(() => {
                 hideMoveFromEnemyAndDisplay(fromCard, ability);
                 boardDef.drawSpecifiedSpell(fromCard, ability, this);
-                finalizeCardInteraction(fromCard, fromCard);
+                finalizeCardInteraction(fromCard, ability, fromCard);
             });
         }
 
@@ -275,7 +290,7 @@ namespace CardGame
                 for(int i = 0; i < ability.power; i++)
                 {
                     DrawCard(side);
-                    finalizeCardInteraction(fromCard, fromCard);
+                    finalizeCardInteraction(fromCard, ability, fromCard);
                 }
             });
         }
@@ -289,7 +304,7 @@ namespace CardGame
                 {
                     DrawCard(side);
                     DrawCard(side.boardFunc.enemySide);
-                    finalizeCardInteraction(fromCard, fromCard);
+                    finalizeCardInteraction(fromCard, ability, fromCard);
                 }
             });
         }
@@ -315,7 +330,7 @@ namespace CardGame
                 moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, placeholder);
                 enemySide.boardFunc.moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, placeholder);
                 boardDef.dealPlayerDamage(fromCard, ability, this);
-                finalizeCardInteraction(fromCard, fromCard);
+                finalizeCardInteraction(fromCard, ability, fromCard);
                 endGameIfOver();
             });
         }
@@ -325,7 +340,7 @@ namespace CardGame
             sendActionToQueue(() => {
                 hideMoveFromEnemyAndDisplay(fromCard, ability);
                 boardDef.revealBoardForRemainderOfTurn(fromCard, ability, this);
-                finalizeCardInteraction(fromCard, fromCard);
+                finalizeCardInteraction(fromCard, ability, fromCard);
             });
         }
         private void hideMoveFromEnemyAndDisplay(Card fromCard, Ability ability)
@@ -333,13 +348,25 @@ namespace CardGame
             moveHistory.AddSoloAbilityMove(duplicate(fromCard), ability);
             enemySide.boardFunc.moveHistory.AddHiddenMove(duplicate(fromCard));
         }
+        public void hidePlayCardFromEnemyAndDisplay(Card fromCard)
+        {
+            moveHistory.AddPlayCardMove(duplicate(fromCard));
+            if (fromCard.correctRow(friendlySide).revealed)
+            {
+                enemySide.boardFunc.moveHistory.AddPlayCardMove(duplicate(fromCard));
+            }
+            else
+            {
+                enemySide.boardFunc.moveHistory.AddHiddenPlayCardMove(duplicate(fromCard));
+            }
+        }
         public void Exhaust(Card fromCard, Ability ability, Card targetCard)
         {
             setUpCard(fromCard, targetCard);
             sendActionToQueue(() => {
                 moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
                 targetCard.cardProps.doubleExhausted = true;
-                finalizeCardInteraction(fromCard, targetCard);
+                finalizeCardInteraction(fromCard, ability, targetCard);
             });
         }
         public void BoardDamage(Card fromCard, Ability ability, Card targetCard)
@@ -349,7 +376,7 @@ namespace CardGame
                 moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
                 enemySide.boardFunc.moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
                 boardDef.dealBoardDamageAndDisposeOfDead(fromCard, ability, targetCard, this);
-                finalizeCardInteraction(fromCard, fromCard);
+                finalizeCardInteraction(fromCard, ability, fromCard);
             });
         }
         public void DirectDamage(Card fromCard, Ability ability, Card targetCard)
@@ -359,7 +386,7 @@ namespace CardGame
                 moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
                 enemySide.boardFunc.moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
                 boardDef.dealDirectDamageAndDisposeOfDead(fromCard, ability, targetCard);
-                finalizeCardInteraction(fromCard, targetCard);
+                finalizeCardInteraction(fromCard, ability, targetCard);
             });
         }
         public void DirectDamage(Card fromCard, Ability ability)
@@ -376,7 +403,7 @@ namespace CardGame
                 moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
                 enemySide.boardFunc.moveHistory.AddTargetAbilityMove(duplicate(fromCard), ability, duplicate(targetCard));
                 Kill(enemySide, targetCard.correctRow(enemySide), targetCard);
-                finalizeCardInteraction(fromCard, targetCard);
+                finalizeCardInteraction(fromCard, ability, targetCard);
             });
         }
         public void SpawnCard(Card fromCard, SpawnCard spawn)
@@ -385,7 +412,7 @@ namespace CardGame
             sendActionToQueue(() => {
                 hideMoveFromEnemyAndDisplay(fromCard, spawn);
                 boardDef.spawnSpecifiedUnit(fromCard, spawn, this);
-                finalizeCardInteraction(fromCard, fromCard);
+                finalizeCardInteraction(fromCard, spawn, fromCard);
             });
         }
 
@@ -458,6 +485,15 @@ namespace CardGame
             state = State.Regular;
             boardPosLogic.updateBoard(this);
         }
+        public void finalizeCardInteraction(Card card, Ability ability, Card otherCard)
+        {
+            finalizeSingularCard(card, ability);
+            finalizeSingularCard(otherCard, ability);
+            checkBothSidesForDead();
+            showEnemyCard = false;
+            state = State.Regular;
+            boardPosLogic.updateBoard(this);
+        }
         private void endGameIfOver()
         {
             if(friendlySide.LifeTotal <= 0 || enemySide.LifeTotal <= 0)
@@ -472,6 +508,19 @@ namespace CardGame
             card.setRegular();
             card.cardProps.exhausted = true;
             boardPosLogic.scaleToBoard(card);
+        }
+        private void finalizeSingularCard(Card card, Ability ability)
+        {
+            card.setRegular();
+            boardPosLogic.scaleToBoard(card);
+            if (ability.PostReq == Ability.Req.ExhaustRequired)
+            {
+                card.cardProps.exhausted = true;
+            }
+            else
+            {
+
+            }
         }
 
         private void checkBothSidesForDead()

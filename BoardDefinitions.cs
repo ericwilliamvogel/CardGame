@@ -157,6 +157,7 @@ namespace CardGame
             if(card.cardProps.type != CardType.Manuever)
             {
                 boardFunc.actionConstructor.moveTo(side.Hand, card.correctRow(side), card, boardFunc);
+                boardFunc.hidePlayCardFromEnemyAndDisplay(card);
                 foreach (Effect effect in card.cardProps.effects)
                 {
                     if (effect.trigger == Effect.Trigger.OnEnterPlay)

@@ -148,9 +148,14 @@ namespace CardGame
                 if (!endSecondDec)
                 {
                     AI.playCardIfThereAreEnoughArmies(boardFunc);
-                    boardFunc.PassTurn();
+
                 }
                 endSecondDec = true;
+            }
+
+            if (boardFunc.boardActions.actions.Count < 1)
+            {
+                boardFunc.PassTurn();
             }
 
         }
