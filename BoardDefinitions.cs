@@ -27,6 +27,7 @@ namespace CardGame
                     }
                     else
                     {
+                        boardFunc.BOARDMESSAGE.addMessage("Already played an army this turn!");
                         returnToHand(side, card, boardFunc);
                     }
                     break;

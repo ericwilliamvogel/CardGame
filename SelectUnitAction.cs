@@ -28,7 +28,7 @@ namespace CardGame
             {
                 foreach (FunctionalRow row in side.Rows)
                 {
-                    if (row.playState == PlayState.Revealed)
+                    if (row.revealed)
                     {
                         foreach (Card newCard in row.cardsInContainer)
                         {
@@ -87,11 +87,12 @@ namespace CardGame
             {
                 state = ButtonState.Released;
             }
+
             if (mouseState.LeftButton == state)
             {
                 foreach (FunctionalRow row in side.Rows)
                 {
-                    if (row.playState == PlayState.Revealed)
+                    if (row.revealed)
                     {
                         foreach (Card newCard in row.cardsInContainer)
                         {

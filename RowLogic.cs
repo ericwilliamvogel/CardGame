@@ -63,10 +63,11 @@ namespace CardGame
                     if (friendly)
                     {
                         boardFunc.SELECTEDCARD = card;
-                        if (boardFunc.state == BoardFunctionality.State.Regular)
+                        if (boardFunc.state != BoardFunctionality.State.CardView)
                         {
-                            viewLogic(mouseState, row, card, boardFunc);
+                            
                             fieldLogic(mouseState, row, card, boardFunc);
+                            viewLogic(mouseState, row, card, boardFunc);
                         }
                         else
                         {
@@ -76,9 +77,10 @@ namespace CardGame
                     }
                     if (!friendly && row.revealed)
                     {
-                        if (boardFunc.state == BoardFunctionality.State.Regular)
+                        if (boardFunc.state != BoardFunctionality.State.CardView)
                         {
                             boardFunc.ENEMYSELECTEDCARD = card;
+                            //boardFunc.SELECTEDCARD = card;
                             viewLogic(mouseState, row, card, boardFunc);
                         }
                         else
@@ -105,6 +107,7 @@ namespace CardGame
                 //card.setPos(mouseState.X - card.getWidth() / 2, mouseState.Y - card.getHeight() / 2);
                 clickedInCardBox = true;
             }
+
             if (mouseState.LeftButton == ButtonState.Released && clickedInCardBox)
             {
                 if(row.isWithinModifiedPosition(mouseState, card))
@@ -112,7 +115,7 @@ namespace CardGame
                     clickedInCardBox = false;
                     boardFunc.state = BoardFunctionality.State.CardView;
                 }
- 
+                clickedInCardBox = false;
                 MouseTransformer.Set(MouseTransformer.State.Reg);
             }
 
@@ -126,6 +129,7 @@ namespace CardGame
                 card.setRegular();
                 card.resetCardSelector();
                 boardFunc.SELECTEDCARD = null;
+                boardFunc.ENEMYSELECTEDCARD = null;
                 boardFunc.boardPosLogic.updateBoard(boardFunc);
                 MouseTransformer.Set(MouseTransformer.State.Reg);
             }
@@ -186,12 +190,11 @@ namespace CardGame
         {
             if (clickedInCardBox)
             {
-                selectAction.SetTargetCard(mouseState, row, card, boardFunc.enemySide);
                 if (!row.isWithinModifiedPosition(mouseState, card))
                 {
-                    MouseTransformer.Set(MouseTransformer.State.Atk);
-                    if(selectAction.TargetEnemyCard(mouseState, boardFunc, false) != null)
+                        if (selectAction.TargetEnemyCard(mouseState, boardFunc, false) != null)
                     {
+
                         MouseTransformer.Set(MouseTransformer.State.Reg);
                         if (selectAction.TargetEnemyCard(mouseState, boardFunc, false).correctRow(boardFunc.enemySide).revealed)
                         {
@@ -205,23 +208,29 @@ namespace CardGame
                                     {
                                         boardFunc.Fight(card, selectAction.TargetEnemyCard(mouseState, boardFunc, false));
                                     }
-                                    else
+                                    else if (!boardFunc.enemySide.Rows[Side.FieldUnit].isEmpty())
                                     {
                                         boardFunc.BOARDMESSAGE.addMessage("Cannot fight an Army if a FieldUnit is present on the board!");
 
                                     }
                                     break;
                                 case CardType.General:
-                                        boardFunc.BOARDMESSAGE.addMessage("A FieldUnit cannot target a General!");
-
+                                    boardFunc.BOARDMESSAGE.addMessage("A FieldUnit cannot target a General!");
                                     break;
                             }
-                            resetIfNoSelection(mouseState, row, card, boardFunc);
-                        }
-                        
-                    
-                    }
 
+
+
+
+                        }
+
+                    }
+                    else
+                    {
+                        MouseTransformer.Set(MouseTransformer.State.Atk);
+                        resetIfNoSelection(mouseState, row, card, boardFunc);
+
+                    }
                 }
                 if(mouseState.LeftButton == ButtonState.Released && boardFunc.enemySide.Life.isWithinBox(mouseState) )
                 {
@@ -236,10 +245,10 @@ namespace CardGame
                         boardFunc.BOARDMESSAGE.addMessage("---> an Enemy FieldUnit");
                         boardFunc.BOARDMESSAGE.addMessage("Cannot deal damage to a player if there's:");
                     }
-
                     resetIfNoSelection(mouseState, row, card, boardFunc);
                 }
                 resetIfNoSelection(mouseState, row, card, boardFunc);
+
             }
         }
     }

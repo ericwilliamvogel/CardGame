@@ -45,6 +45,9 @@ namespace CardGame
                 case Trigger.OnEnterPlay:
                     name = "On Entry: ";
                     break;
+                case Trigger.OnTurnStart:
+                    name = "On Turn Start: ";
+                    break;
             }
             return name;
         }

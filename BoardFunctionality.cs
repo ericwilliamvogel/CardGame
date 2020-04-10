@@ -11,10 +11,43 @@ using MonoGame.Utilities;
 
 namespace CardGame
 {
-
+    public class CardFightDrawer : GameComponent
+    {
+        private List<Card> duplicates = new List<Card>();
+        public void Add(Card card)
+        {
+            duplicates.Add(card);
+        }
+        public bool IsReady()
+        {
+            if(duplicates != null && duplicates.Count > 0)
+            {
+                return true;
+            }
+            return false;
+        }
+        public override void updateGameComponent()
+        {
+            foreach (Card card in duplicates)
+            {
+                card.updateGameComponent();
+            }
+        }
+        public override void drawSprite(SpriteBatch spriteBatch)
+        {
+            foreach(Card card in duplicates)
+            {
+                card.drawSprite(spriteBatch);
+            }
+        }
+        public void Reset()
+        {
+            duplicates = new List<Card>();
+        }
+    }
     public class BoardFunctionality : PrimaryComponent
     {
-
+        public CardFightDrawer cardFightDrawer = new CardFightDrawer();
         public MessageBox BOARDMESSAGE = new MessageBox();
         public BoardCardDrawer cardDrawer = new BoardCardDrawer();
         public BoardPositionUpdater boardPosLogic = new BoardPositionUpdater();
@@ -33,6 +66,7 @@ namespace CardGame
         public MoveHistory moveHistory = new MoveHistory();
         public Popup endGamePopup = new Popup(1);
         public FunctionalRow castManuever = new FunctionalRow(CardType.Manuever);
+
         public enum State
         {
             Regular,
@@ -128,9 +162,9 @@ namespace CardGame
             cardDrawer.drawSprite(spriteBatch, this);
             cardViewer.drawSprite(spriteBatch);
             BOARDMESSAGE.drawSprite(spriteBatch);
-            //moveHistory.drawSprite(spriteBatch);
             historyButton.drawSprite(spriteBatch);
             enemyHistoryWindow.drawSprite(spriteBatch);
+            cardFightDrawer.drawSprite(spriteBatch);
             endGamePopup.drawSprite(spriteBatch);
         }
         MoveHistory newHistory;
@@ -150,6 +184,7 @@ namespace CardGame
             {
                 cardViewer.resetSelectedCard(this);
             }
+            cardFightDrawer.updateGameComponent();
             //moveHistory.updateGameComponent();
         }
         public override void mouseStateLogic(MouseState mouseState, ContentManager content)
@@ -270,8 +305,19 @@ namespace CardGame
             duplicate.initSupplements();
             return duplicate;
         }
+        private Card duplicate(Card card, Vector2 pos)
+        {
+            Card duplicate = cardBuilder.cardConstruct(cardConstructor, card.cardProps.identifier);
+            duplicate.setPos(pos);
+            duplicate.suppTextures.supplements[duplicate.suppTextures.portrait].setTexture(library.cardTextureDictionary[duplicate.cardProps.identifier]);
+            duplicate.setSupplementalTextures(library);
+            duplicate.setColorForRace();
+            duplicate.setScale(CardScale.Board);
+            duplicate.initSupplements();
+            return duplicate;
+        }
 
-        
+
         public void CreateAndDrawSpell(Card fromCard, CreateSpell ability)
         {
             setUpCard(fromCard);
@@ -427,13 +473,16 @@ namespace CardGame
                 finalizeCardInteraction(card, otherCard);
 
             }, 30);
-            foreach (Effect effect in card.cardProps.effects)
-            {
-                if (effect.trigger == Effect.Trigger.OnAttack)
+            sendActionToQueue(() => {
+                foreach (Effect effect in card.cardProps.effects)
                 {
-                    boardDef.assignAbilityToNextSelection(card, effect.ability, this);
+                    if (effect.trigger == Effect.Trigger.OnAttack)
+                    {
+                        boardDef.assignAbilityToNextSelection(card, effect.ability, this);
+                    }
                 }
-            }
+            }, 0);
+
         }
 
         private void sendActionToQueue(Action action, int waitTime)
@@ -454,17 +503,27 @@ namespace CardGame
             };
             actionConstructor.addWaitAction(newAction, 30, this);
         }
+
+
         private void setUpCard(Card card)
         {
-            boardPosLogic.scaleToHand(card);
-            card.setRegular();
+            boardPosLogic.updateBoard(this);
+            Card fromCard = duplicate(card);
             int xpos = 50 + GraphicsSettings.toResolution(600);
-            int ypos = Game1.windowH / 2 - card.getWidth() * 2;
-            card.setPos(xpos - card.getWidth(), ypos);
+            int ypos = Game1.windowH / 2 - fromCard.getWidth() * 2;
+            fromCard.setPos(xpos - fromCard.getWidth(), ypos);
+            boardPosLogic.scaleToHand(fromCard);
+            fromCard.setRegular();
+
             showEnemyCard = true;
+            returnCardToRegular(card);
+            cardFightDrawer.Add(fromCard);
+
         }
-        private void setUpCard(Card fromCard, Card targetCard)
+        private void setUpCard(Card card, Card otherCard)
         {
+            Card fromCard = duplicate(card);
+            Card targetCard = duplicate(otherCard);
             boardPosLogic.scaleToHand(fromCard);
             boardPosLogic.scaleToHand(targetCard);
             fromCard.setRegular();
@@ -474,6 +533,10 @@ namespace CardGame
             fromCard.setPos(xpos - fromCard.getWidth(), ypos);
             targetCard.setPos(xpos, ypos);
             showEnemyCard = true;
+            returnCardToRegular(card);
+            returnCardToRegular(otherCard);
+            cardFightDrawer.Add(fromCard);
+            cardFightDrawer.Add(targetCard);
         }
 
         public void finalizeCardInteraction(Card card, Card otherCard)
@@ -483,6 +546,7 @@ namespace CardGame
             checkBothSidesForDead();
             showEnemyCard = false;
             state = State.Regular;
+            cardFightDrawer = new CardFightDrawer();
             boardPosLogic.updateBoard(this);
         }
         public void finalizeCardInteraction(Card card, Ability ability, Card otherCard)
@@ -492,6 +556,7 @@ namespace CardGame
             checkBothSidesForDead();
             showEnemyCard = false;
             state = State.Regular;
+            cardFightDrawer = new CardFightDrawer();
             boardPosLogic.updateBoard(this);
         }
         private void endGameIfOver()
@@ -502,6 +567,12 @@ namespace CardGame
                 enemySide.boardFunc.endGamePopup.SetPopup();
                 boardActions.AddAction(() => { /*this prevents any more moves*/ });
             }
+        }
+
+        private void returnCardToRegular(Card card)
+        {
+            card.setRegular();
+            boardPosLogic.scaleToBoard(card);
         }
         private void finalizeSingularCard(Card card)
         {
